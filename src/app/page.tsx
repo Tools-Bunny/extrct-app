@@ -1,263 +1,199 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { analyzeEcomFees, EcomCsvRow, LeakageReport } from '../modules/ecom/processor';
-import { analyzeMarketingSpend, AdSetRow, MarketingLeakageReport } from '../modules/marketing/marketingProcessor';
-import { analyzeInfluencerLeaks, CouponRow, InfluencerLeakageReport } from '../modules/influencer/influencerProcessor';
-import { processImageBatch, ImageBatchRow, CompressionReport } from '../modules/ecom/imageProcessor';
+import React, { useState } from 'react';
+import { processMatrixTool, MatrixReport } from '../modules/matrixProcessor';
 
-export default function NotionWorkspace() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'ecom' | 'img_comp' | 'marketing' | 'influencer'>('dashboard');
-  const [report, setReport] = useState<LeakageReport | null>(null);
-  const [marketingReport, setMarketingReport] = useState<MarketingLeakageReport | null>(null);
-  const [influencerReport, setInfluencerReport] = useState<InfluencerLeakageReport | null>(null);
-  const [imageReport, setImageReport] = useState<CompressionReport | null>(null);
-  
-  const [imageCount, setImageCount] = useState<number>(3); // Free tier sim
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+type ToolType = 
+  | 'dashboard' | 'ecom_fee' | 'ecom_img' | 'ecom_radar'
+  | 'marketing_burn' | 'marketing_portal' | 'marketing_utm'
+  | 'mfg_yield' | 'mfg_maintenance' | 'mfg_costing'
+  | 'real_estate_whatsapp';
 
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    if (query.get('payment') === 'success') {
-      setPaymentSuccess(true);
-    }
-  }, []);
+export default function SolopreneurWorkspace() {
+  const [activeTab, setActiveTab] = useState<ToolType>('dashboard');
+  const [currentOutput, setCurrentOutput] = useState<MatrixReport | null>(null);
+  const [imageCount, setImageCount] = useState<number>(6); // For Tool 2 limits testing
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSimulateCsvDrop = async () => {
-    setIsCloudSyncing(true);
-    const mockCsvRows: EcomCsvRow[] = [{ orderId: "ORD-9921", sku: "NEXL-CABLE-01", chargedFee: 45.0, expectedFee: 32.0 }];
-    const output = analyzeEcomFees(mockCsvRows);
-    if (paymentSuccess) output.isLocked = false;
-    setTimeout(() => { setReport(output); setIsCloudSyncing(false); }, 350);
-  };
-
-  const handleSimulateImageDrop = async (count: number) => {
-    setIsCloudSyncing(true);
-    const mockImages: ImageBatchRow[] = [
-      { id: "1", originalName: "product_front.png", originalSizeKb: 1200, compressedSizeKb: 180 },
-      { id: "2", originalName: "product_back.png", originalSizeKb: 950, compressedSizeKb: 140 },
-    ];
-    const output = processImageBatch(mockImages, count);
-    if (paymentSuccess) output.isBulkLocked = false;
-    setTimeout(() => { setImageReport(output); setIsCloudSyncing(false); }, 350);
-  };
-
-  const handleSimulateMarketingDrop = async () => {
-    setIsCloudSyncing(true);
-    const mockAdRows: AdSetRow[] = [{ adSetName: "US_Lookalike_PerfMax", spend: 450.0, clicks: 120, conversions: 0, targetCpa: 25.0 }];
-    const output = analyzeMarketingSpend(mockAdRows);
-    if (paymentSuccess) output.isLocked = false;
-    setTimeout(() => { setMarketingReport(output); setIsCloudSyncing(false); }, 350);
-  };
-
-  const handleSimulateInfluencerDrop = async () => {
-    setIsCloudSyncing(true);
-    const mockCouponRows: CouponRow[] = [{ code: "SARAH20", influencerName: "Sarah Jenkins", totalUsage: 500, totalDiscountGiven: 2500.0, organicTrafficRatio: 0.65 }];
-    const output = analyzeInfluencerLeaks(mockCouponRows);
-    if (paymentSuccess) output.isLocked = false;
-    setTimeout(() => { setInfluencerReport(output); setIsCloudSyncing(false); }, 350);
+  const triggerToolSimulation = (toolId: ToolType, customInput?: any) => {
+    setIsProcessing(true);
+    const result = processMatrixTool(toolId, customInput);
+    setTimeout(() => {
+      setCurrentOutput(result);
+      setIsProcessing(false);
+    }, 300);
   };
 
   const handleCheckout = () => {
-    window.location.href = `${window.location.origin}?payment=success`;
+    alert("Redirecting to $10 Tier Premium Secure Stripe Unlock Node Gateway...");
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-[#37352f] font-sans antialiased text-[15px]">
+    <div className="flex min-h-screen bg-white text-[#37352f] font-sans antialiased text-[14px]">
       
-      {/* Notion Sidebar */}
-      <aside className="w-[240px] bg-[#fbfbfa] border-r border-[#edece9] flex flex-col justify-between select-none shrink-0">
-        <div className="py-2.5 px-3">
+      {/* Pixel-Perfect Notion Sidebar */}
+      <aside className="w-[260px] bg-[#fbfbfa] border-r border-[#edece9] flex flex-col justify-between select-none shrink-0 overflow-y-auto">
+        <div className="py-3 px-3">
           
-          {/* Workspace Title */}
-          <div onClick={() => setActiveTab('dashboard')} className="flex items-center space-x-2 p-1.5 hover:bg-[rgba(55,53,47,0.04)] rounded-md cursor-pointer transition-colors duration-150">
-            <div className="w-[18px] h-[18px] bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-[10px]">E</div>
-            <span className="font-semibold text-sm tracking-tight text-[#37352f]">extrct.app Workspace</span>
+          {/* Workspace Switcher Component */}
+          <div onClick={() => { setActiveTab('dashboard'); setCurrentOutput(null); }} className="flex items-center space-x-2 p-1.5 hover:bg-[rgba(55,53,47,0.04)] rounded-md cursor-pointer transition-colors">
+            <div className="w-[20px] h-[20px] bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-[11px]">M</div>
+            <span className="font-semibold text-sm tracking-tight text-[#37352f]">Master Matrix Workspace</span>
           </div>
 
-          {/* Section: E-Commerce */}
+          {/* INDUSTRY CATEGORY 1 */}
           <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">📦 E-Commerce</div>
-          <div className="mt-0.5 space-y-[2px]">
-            <div onClick={() => setActiveTab('ecom')} className={`flex items-center space-x-2 px-2 py-1.5 rounded-md cursor-pointer text-sm ${activeTab === 'ecom' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              <span className="text-xs">📑</span><span>Marketplace Fee Auditor</span>
+          <div className="space-y-[1px]">
+            <div onClick={() => { setActiveTab('ecom_fee'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'ecom_fee' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              📑 Fee & Overcharge Auditor
             </div>
-            <div onClick={() => setActiveTab('img_comp')} className={`flex items-center space-x-2 px-2 py-1.5 rounded-md cursor-pointer text-sm ${activeTab === 'img_comp' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              <span className="text-xs">🖼️</span><span>Image Variant Converter</span>
+            <div onClick={() => { setActiveTab('ecom_img'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'ecom_img' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              Im🗜️ Image WebP Compressor
             </div>
-          </div>
-
-          {/* Section: Digital Marketing */}
-          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">📈 Digital Marketing</div>
-          <div className="mt-0.5 space-y-[2px]">
-            <div onClick={() => setActiveTab('marketing')} className={`flex items-center space-x-2 px-2 py-1.5 rounded-md cursor-pointer text-sm ${activeTab === 'marketing' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              <span className="text-xs">🚨</span><span>Ad-Spend Burn Alert</span>
-            </div>
-            <div onClick={() => setActiveTab('influencer')} className={`flex items-center space-x-2 px-2 py-1.5 rounded-md cursor-pointer text-sm ${activeTab === 'influencer' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              <span className="text-xs">🔗</span><span>Coupon Leakage Tracker</span>
+            <div onClick={() => { setActiveTab('ecom_radar'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'ecom_radar' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              📡 Competitor Price Radar
             </div>
           </div>
 
-        </div>
-        <div className="p-3 border-t border-[#edece9] text-[11px] text-[#7c7b77] flex items-center justify-between">
-          <span>Status: Live Production</span>
-          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+          {/* INDUSTRY CATEGORY 2 */}
+          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">📈 Marketing Agencies</div>
+          <div className="space-y-[1px]">
+            <div onClick={() => { setActiveTab('marketing_burn'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'marketing_burn' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              🚨 Ad-Spend Budget Burn Alert
+            </div>
+            <div onClick={() => { setActiveTab('marketing_portal'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'marketing_portal' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              🌐 Whitelabel Notion Client Portal
+            </div>
+            <div onClick={() => { setActiveTab('marketing_utm'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'marketing_utm' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              🔗 UTM Campaign Link Generator
+            </div>
+          </div>
+
+          {/* INDUSTRY CATEGORY 3 */}
+          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">🏗️ Manufacturing & MSMEs</div>
+          <div className="space-y-[1px]">
+            <div onClick={() => { setActiveTab('mfg_yield'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'mfg_yield' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              📉 Raw Material Yield Detector
+            </div>
+            <div onClick={() => { setActiveTab('mfg_maintenance'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'mfg_maintenance' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              🔧 Maintenance Scheduler Alert
+            </div>
+            <div onClick={() => { setActiveTab('mfg_costing'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'mfg_costing' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              🧮 Production Batch Costing Tool
+            </div>
+          </div>
+
+          {/* INDUSTRY CATEGORY 4 */}
+          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">🏡 Real Estate</div>
+          <div className="space-y-[1px]">
+            <div onClick={() => { setActiveTab('real_estate_whatsapp'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'real_estate_whatsapp' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
+              💬 WhatsApp Bulk Alert Match Engine
+            </div>
+          </div>
+
         </div>
       </aside>
 
-      {/* Notion Main Body */}
+      {/* Main Container Content */}
       <main className="flex-1 bg-white overflow-y-auto">
-        {/* Notion Breadcrumbs Bar */}
         <div className="h-11 px-12 border-b border-[#edece9] flex items-center text-[13px] text-[#7c7b77]">
-          <span className="hover:text-[#37352f] cursor-pointer" onClick={() => setActiveTab('dashboard')}>Workspace</span>
-          <span className="mx-2 text-[#edece9]">/</span>
-          <span className="text-[#37352f] font-normal capitalize">
-            {activeTab === 'dashboard' ? 'Overview' : activeTab.replace('_', ' ')}
-          </span>
+          <span>Index</span><span className="mx-2 text-[#edece9]">/</span>
+          <span className="text-[#37352f] uppercase text-xs font-mono tracking-wider">{activeTab.replace('_', ' ')}</span>
         </div>
 
-        {/* Notion Document Layout Container */}
-        <div className="max-w-[700px] mx-auto px-12 pt-14 pb-28">
+        <div className="max-w-[720px] mx-auto px-12 pt-14 pb-28">
           
-          {/* DASHBOARD OVERVIEW */}
+          {/* DASHBOARD HOMEPAGE INTERFACE */}
           {activeTab === 'dashboard' && (
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-2 flex items-center space-x-3">
-                <span>🛑</span> <span>Solopreneur Platform Matrix</span>
-              </h1>
-              <p className="text-[#7c7b77] text-[15px] mb-8">Select a dedicated leakage utility tracking engine from your active master deployment lists below.</p>
+              <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-2">Platform Matrix Terminal</h1>
+              <p className="text-[#7c7b77] text-[15px] mb-8">All 10 elite solopreneur utilities compiled dynamically from deployment index profiles.</p>
               
-              <div className="space-y-2">
-                <div onClick={() => setActiveTab('ecom')} className="flex items-center justify-between p-3 border border-[#edece9] rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer transition-colors">
-                  <div className="flex items-center space-x-3"><span>📑</span><span className="font-medium text-[#37352f]">Marketplace Fee Auditor</span></div>
-                  <span className="text-xs text-[#7c7b77]">Open page →</span>
-                </div>
-                <div onClick={() => setActiveTab('img_comp')} className="flex items-center justify-between p-3 border border-[#edece9] rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer transition-colors">
-                  <div className="flex items-center space-x-3"><span>🖼️</span><span className="font-medium text-[#37352f]">Batch Dynamic Image Compressor</span></div>
-                  <span className="text-xs text-[#7c7b77]">Open page →</span>
-                </div>
-                <div onClick={() => setActiveTab('marketing')} className="flex items-center justify-between p-3 border border-[#edece9] rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer transition-colors">
-                  <div className="flex items-center space-x-3"><span>🚨</span><span className="font-medium text-[#37352f]">Multi-Platform Ad-Spend Budget Burn Alert</span></div>
-                  <span className="text-xs text-[#7c7b77]">Open page →</span>
-                </div>
-                <div onClick={() => setActiveTab('influencer')} className="flex items-center justify-between p-3 border border-[#edece9] rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer transition-colors">
-                  <div className="flex items-center space-x-3"><span>🔗</span><span className="font-medium text-[#37352f]">Influencer Coupon Leakage Tracker</span></div>
-                  <span className="text-xs text-[#7c7b77]">Open page →</span>
-                </div>
+              <div className="grid grid-cols-1 gap-2">
+                <div onClick={() => setActiveTab('ecom_fee')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📦 <b>E-Com:</b> Automated Marketplace Overcharge & Fee Auditor</div>
+                <div onClick={() => setActiveTab('ecom_img')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📦 <b>E-Com:</b> Batch Dynamic Image Compressor & WebP Variant Converter</div>
+                <div onClick={() => setActiveTab('ecom_radar')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📦 <b>E-Com:</b> Competitor Price-Drop & Stock-Out Radar</div>
+                
+                <div onClick={() => setActiveTab('marketing_burn')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📈 <b>Marketing:</b> Multi-Platform Ad-Spend Budget Burn Alert System</div>
+                <div onClick={() => setActiveTab('marketing_portal')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📈 <b>Marketing:</b> Whitelabel Client Notion/Portal Generator</div>
+                <div onClick={() => setActiveTab('marketing_utm')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📈 <b>Marketing:</b> UTM Campaign Link Generator Tool</div>
+                
+                <div onClick={() => setActiveTab('mfg_yield')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏗️ <b>Manufacturing:</b> Raw Material Yield & Dead-Stock Leak Detector</div>
+                <div onClick={() => setActiveTab('mfg_maintenance')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏗️ <b>Manufacturing:</b> Machine Breakdown & Preventative Maintenance Scheduler</div>
+                <div onClick={() => setActiveTab('mfg_costing')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏗️ <b>Manufacturing:</b> Production Batch Costing & Dynamic Margin Calculator</div>
+                
+                <div onClick={() => setActiveTab('real_estate_whatsapp')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏡 <b>Real Estate:</b> WhatsApp Bulk Property Alert & Match Engine</div>
               </div>
             </div>
           )}
 
-          {/* TOOL 1: MARKETPLACE FEE AUDITOR */}
-          {activeTab === 'ecom' && (
+          {/* DYNAMIC UTILITY VIEWS RENDERING TARGETS */}
+          {activeTab !== 'dashboard' && (
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-[#37352f] mb-6 flex items-center space-x-2">
-                <span>📑</span> <span>Marketplace Fee Auditor</span>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 capitalize text-[#37352f]">
+                {activeTab.split('_').join(' ')}
               </h1>
-              <p className="text-sm text-[#7c7b77] mb-4">Paste weekly transaction CSV. Code matches individual orders against standard category weight/fee rules highlighting discrepancies.</p>
               
-              <div onClick={handleSimulateCsvDrop} className="border border-dashed border-[#edece9] hover:bg-[rgba(55,53,47,0.02)] rounded-md p-10 text-center cursor-pointer mb-6 transition-all">
-                {isCloudSyncing ? <span className="text-sm text-[#7c7b77]">Processing database records...</span> : <span className="text-sm text-[#37352f]">📄 Drop settlement transaction CSV report dump</span>}
+              {/* Context Pain-Point Details Rendering Injection */}
+              <div className="text-sm text-[#7c7b77] mb-6">
+                {activeTab === 'ecom_fee' && "Marketplaces miscalculate weight dimensions or referral fee tiers leading to leaked revenue."}
+                {activeTab === 'ecom_img' && "Large product images slow down page load speeds dropping conversion rates and increasing cart abandonment."}
+                {activeTab === 'ecom_radar' && "Checking competing product listings manually to adjust daily pricing models takes hours every morning."}
+                {activeTab === 'marketing_burn' && "Overspending client budgets due to platform notification lags results in agencies paying out of pocket."}
+                {activeTab === 'marketing_portal' && "Building custom dashboards to present links assets and project statuses professionally to clients takes hours."}
+                {activeTab === 'marketing_utm' && "Broken or unorganized UTM parameters ruin analytics tracking wasting thousands in ad spend attribution mistakes."}
+                {activeTab === 'mfg_yield' && "Unexpected waste during production or items expiring in the warehouse burns through factory margins silently."}
+                {activeTab === 'mfg_maintenance' && "Unexpected machinery breakdowns stall production floors costing thousands in idle labor and delayed orders."}
+                {activeTab === 'mfg_costing' && "Wholesale material costs and electricity rates shift constantly causing factory owners to price bulk orders at a loss."}
+                {activeTab === 'real_estate_whatsapp' && "Matching newly listed properties with prospective buyer criteria manually via spreadsheets takes hours leading to missed deals."}
               </div>
 
-              {report && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Flagged Claims</span><b className="text-lg text-red-500">{report.flaggedOrdersCount}</b></div>
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Leaked Capital</span><b className="text-lg text-red-600">${report.totalRevenueLeaked}</b></div>
-                  </div>
-                  {report.isLocked && (
-                    <div className="bg-[#fdebec] border border-[#f5c2c2] rounded-md p-4 text-center">
-                      <p className="text-xs text-[#601a1a] mb-3 font-medium">Pay $10 to unlock the pre-filled dispute sheet export to claim refunds.</p>
-                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs font-medium py-1.5 px-4 rounded hover:bg-[#2c2a27]">Unlock full export tier</button>
-                    </div>
-                  )}
+              {/* Specific Custom UI Controls Extension for Image Tool Hooks */}
+              {activeTab === 'ecom_img' && (
+                <div className="mb-4 flex items-center space-x-3 bg-[#fbfbfa] border p-3 rounded-md">
+                  <label className="text-xs font-medium text-[#7c7b77]">Test Batch Upload Counter:</label>
+                  <input type="number" value={imageCount} onChange={(e) => setImageCount(Number(e.target.value))} className="w-16 border rounded p-1 text-xs text-center outline-none" />
                 </div>
               )}
-            </div>
-          )}
 
-          {/* TOOL 2: BATCH IMAGE COMPRESSOR */}
-          {activeTab === 'img_comp' && (
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-[#37352f] mb-6 flex items-center space-x-2">
-                <span>🖼️</span> <span>Batch Dynamic Image Compressor</span>
-              </h1>
-              <p className="text-sm text-[#7c7b77] mb-4">Drag-and-drop batch UI utilizing production processing to compress product images into web-optimized WebP variants.</p>
-              
-              <div className="mb-4 flex items-center space-x-3 bg-[#fbfbfa] border border-[#edece9] p-3 rounded-md">
-                <label className="text-xs font-medium text-[#7c7b77]">Simulate Upload Count:</label>
-                <input type="number" value={imageCount} onChange={(e) => setImageCount(Number(e.target.value))} className="w-16 border rounded p-1 text-xs text-center outline-none" />
+              {/* Centralized Standard Drag & Drop File Container Simulation Node */}
+              <div 
+                onClick={() => triggerToolSimulation(activeTab, activeTab === 'ecom_img' ? imageCount : null)} 
+                className="border border-dashed border-[#edece9] hover:bg-[rgba(55,53,47,0.01)] rounded-md p-12 text-center cursor-pointer mb-6 transition-all"
+              >
+                {isProcessing ? (
+                  <span className="text-sm text-[#7c7b77] animate-pulse">Running matrix functional logic checks...</span>
+                ) : (
+                  <span className="text-sm text-[#37352f]">📄 Drop industry raw data tracking file logs / database dump here</span>
+                )}
               </div>
 
-              <div onClick={() => handleSimulateImageDrop(imageCount)} className="border border-dashed border-[#edece9] hover:bg-[rgba(55,53,47,0.02)] rounded-md p-10 text-center cursor-pointer mb-6 transition-all">
-                {isCloudSyncing ? <span className="text-sm text-[#7c7b77]">Compressing binary assets...</span> : <span className="text-sm text-[#37352f]">📁 Drop high-res product visual variants folder</span>}
-              </div>
-
-              {imageReport && (
+              {/* Metric Outputs UI Terminal Panel */}
+              {currentOutput && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Processed Count</span><b className="text-lg text-[#37352f]">{imageReport.totalImagesProcessed} files</b></div>
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Total Kilobytes Optimization Saved</span><b className="text-lg text-green-600">{imageReport.totalSpaceSavedKb} KB</b></div>
+                    <div className="p-3 bg-[#fbfbfa] border rounded-md"><span className="text-xs text-[#7c7b77] block">Telemetry Module A</span><b className="text-md text-[#37352f]">{currentOutput.metricA}</b></div>
+                    <div className="p-3 bg-[#fbfbfa] border rounded-md"><span className="text-xs text-[#7c7b77] block">Telemetry Module B</span><b className="text-md text-red-600">{currentOutput.metricB}</b></div>
                   </div>
-                  {imageReport.isBulkLocked && (
+
+                  {currentOutput.isLocked && (
                     <div className="bg-[#fdebec] border border-[#f5c2c2] rounded-md p-4 text-center">
-                      <p className="text-xs text-[#601a1a] mb-3 font-medium">Free tier limits processing to 5 images per batch. Premium unlocks bulk processing of up to 1000 variants instantly.</p>
-                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs font-medium py-1.5 px-4 rounded hover:bg-[#2c2a27]">Unlock 1000 bulk variants for $10</button>
+                      <p className="text-xs text-[#601a1a] mb-3 font-medium">
+                        {activeTab === 'ecom_fee' && "Highlights exact lines where you overpaid. Pay $10 to unlock pre-filled dispute sheet export."}
+                        {activeTab === 'ecom_img' && "Free tier limits processing to 5 images per batch. Premium unlocks bulk processing of up to 1000 variants instantly."}
+                        {activeTab === 'ecom_radar' && "Free accounts track 1 URL. Paid accounts unlock real-time tracking and automated alerts."}
+                        {activeTab === 'marketing_burn' && "Free tier tracks 1 client account; paid tier scales to support unlimited ad accounts."}
+                        {activeTab === 'marketing_portal' && "Free pages carry your platform's watermark. The $10 tier removes it and unlocks custom subdomains."}
+                        {activeTab === 'mfg_yield' && "Flags exact department leaks. Pay $10 to unlock historical waste trends analytics and export deep logs."}
+                        {activeTab === 'mfg_maintenance' && "Free tier tracks 2 primary machines. Premium unlocks unlimited machine logging and sends automated alerts."}
+                        {activeTab === 'mfg_costing' && "Free tier allows calculation but doesn't save configurations. Premium stores custom templates for up to 50 product categories."}
+                        {activeTab === 'real_estate_whatsapp' && "Paid tier allows automated bulk matching and message broadcasting nodes."}
+                      </p>
+                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs font-medium py-1.5 px-4 rounded hover:bg-[#2c2a27]">
+                        Trigger $10 Gateway Tier Unlock
+                      </button>
                     </div>
                   )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TOOL 3: AD-SPEND BURN ALERT */}
-          {activeTab === 'marketing' && (
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-[#37352f] mb-6 flex items-center space-x-2">
-                <span>🚨</span> <span>Ad-Spend Budget Burn Alert</span>
-              </h1>
-              <p className="text-sm text-[#7c7b77] mb-4">Calculates daily burn rates and tracks pacing metrics to isolate non-performing client bleeding ad budgets.</p>
-              
-              <div onClick={handleSimulateMarketingDrop} className="border border-dashed border-[#edece9] hover:bg-[rgba(55,53,47,0.02)] rounded-md p-10 text-center cursor-pointer mb-6 transition-all">
-                {isCloudSyncing ? <span className="text-sm text-[#7c7b77]">Parsing active network graphs...</span> : <span className="text-sm text-[#37352f]">📊 Drop ad performance delivery matrix logs</span>}
-              </div>
-
-              {marketingReport && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Bleeding Ad-Sets</span><b className="text-lg text-red-500">{marketingReport.bleedingAdSetsCount}</b></div>
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Estimated Budget Wasted</span><b className="text-lg text-red-600">${marketingReport.estimatedWastedBudget}</b></div>
-                  </div>
-                  {marketingReport.isLocked && (
-                    <div className="bg-[#fdebec] border border-[#f5c2c2] rounded-md p-4 text-center">
-                      <p className="text-xs text-[#601a1a] mb-3 font-medium">Free tier tracks 1 client account. The $10 tier unlocks automated alerts and scales to support unlimited ad accounts.</p>
-                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs font-medium py-1.5 px-4 rounded hover:bg-[#2c2a27]">Unlock Unlimited Accounts</button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TOOL 4: COUPON LEAKAGE TRACKER */}
-          {activeTab === 'influencer' && (
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-[#37352f] mb-6 flex items-center space-x-2">
-                <span>🔗</span> <span>Influencer Coupon Leakage Tracker</span>
-              </h1>
-              <p className="text-sm text-[#7c7b77] mb-4">Tracks affiliate discount coupon codes leaking to coupon aggregator websites hijacking margins.</p>
-              
-              <div onClick={handleSimulateInfluencerDrop} className="border border-dashed border-[#edece9] hover:bg-[rgba(55,53,47,0.02)] rounded-md p-10 text-center cursor-pointer mb-6 transition-all">
-                {isCloudSyncing ? <span className="text-sm text-[#7c7b77]">Auditing affiliate logs...</span> : <span className="text-sm text-[#37352f]">📄 Drop platform discount usage logs</span>}
-              </div>
-
-              {influencerReport && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Leaked Affiliate Codes</span><b className="text-lg text-red-500">{influencerReport.leakedCouponsCount}</b></div>
-                    <div className="p-3 bg-[#fbfbfa] border border-[#edece9] rounded-md"><span className="text-xs text-[#7c7b77] block">Estimated Margin Loss</span><b className="text-lg text-red-600">${influencerReport.estimatedMarginLoss}</b></div>
-                  </div>
                 </div>
               )}
             </div>
