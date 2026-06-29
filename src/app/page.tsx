@@ -111,6 +111,15 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
+interface MockFile {
+  name: string;
+  originalSize: number;
+  compressedSize: number;
+  reduction: number;
+  altText: string;
+  status: 'PENDING' | 'COMPRESSED';
+}
+
 interface AuditRow {
   orderId: string;
   sku: string;
@@ -120,80 +129,119 @@ interface AuditRow {
   status: 'OVERCHARGED' | 'CORRECT';
 }
 
-export default function IntegratedMasterApplication() {
+export default function MasterSaaSApplicationGrid() {
   const [activeTool, setActiveTool] = useState<string>('dashboard');
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('ecom');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('ecom');
 
-  // Auditor States
+  // Tool 1: Auditor States
   const [csvInput, setCsvInput] = useState<string>('');
   const [auditResults, setAuditResults] = useState<AuditRow[] | null>(null);
   const [totalLeakage, setTotalLeakage] = useState<number>(0);
   const [isAuditing, setIsAuditing] = useState<boolean>(false);
+
+  // Tool 2: Compressor States
+  const [batchFiles, setBatchFiles] = useState<MockFile[]>([]);
+  const [isCompressing, setIsCompressing] = useState<boolean>(false);
+  const [premiumPayloadTriggered, setPremiumPayloadTriggered] = useState<boolean>(false);
 
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
     setIsMegaMenuOpen(false);
   };
 
+  // Tool 1 Logic
   const handleSampleLoad = () => {
-    setCsvInput(
-      "ORDER_ID,SKU,CHARGED_FEE\n" +
-      "OD8237482,NEXL-WIRELESS-HEADPHONE,180\n" +
-      "OD8237483,NEXL-DATA-CABLE,95\n" +
-      "OD8237484,NEXL-WIRELESS-HEADPHONE,210\n" +
-      "OD8237485,NEXL-FAST-CHARGER,65\n" +
-      "OD8237486,NEXL-DATA-CABLE,140"
-    );
+    setCsvInput("ORDER_ID,SKU,CHARGED_FEE\nOD8237482,NEXL-WIRELESS-HEADPHONE,180\nOD8237483,NEXL-DATA-CABLE,95\nOD8237484,NEXL-WIRELESS-HEADPHONE,210");
   };
 
   const runFeeAuditLogic = () => {
     if (!csvInput.trim()) return;
     setIsAuditing(true);
-
     setTimeout(() => {
-      // Static matrix configuration calculation based on marketplace overcharge structures
       const rows = csvInput.split('\n').slice(1);
       let cumulativeLeak = 0;
-      
       const compiled: AuditRow[] = rows.map((rowStr) => {
         const parts = rowStr.split(',');
         if (parts.length < 3) return null;
-        
         const orderId = parts[0];
         const sku = parts[1];
         const chargedFee = parseFloat(parts[2]) || 0;
-        
-        // Define standard expected logic reference metrics
-        let expectedFee = chargedFee;
-        if (sku.includes('WIRELESS-HEADPHONE')) expectedFee = 145;
-        if (sku.includes('DATA-CABLE')) expectedFee = 55;
-        if (sku.includes('FAST-CHARGER')) expectedFee = 65;
-        
+        let expectedFee = sku.includes('WIRELESS-HEADPHONE') ? 145 : 55;
         const variance = chargedFee - expectedFee;
         if (variance > 0) cumulativeLeak += variance;
-
-        return {
-          orderId,
-          sku,
-          chargedFee,
-          expectedFee,
-          variance: variance > 0 ? variance : 0,
-          status: variance > 0 ? 'OVERCHARGED' : 'CORRECT'
-        };
+        return { orderId, sku, chargedFee, expectedFee, variance: variance > 0 ? variance : 0, status: variance > 0 ? 'OVERCHARGED' : 'CORRECT' };
       }).filter(Boolean) as AuditRow[];
-
       setAuditResults(compiled);
       setTotalLeakage(cumulativeLeak);
       setIsAuditing(false);
-    }, 800);
+    }, 600);
+  };
+
+  // Tool 2 Compressor Logic
+  const handleBatchSimulationInsert = (count: number) => {
+    setPremiumPayloadTriggered(false);
+    if (count > 5) {
+      setPremiumPayloadTriggered(true);
+    }
+    
+    const mockTemplates = [
+      { name: "product_front_alpha.png", size: 2450 },
+      { name: "variant_angle_blue.jpg", size: 1820 },
+      { name: "lifestyle_model_hd.png", size: 4120 },
+      { name: "packaging_box_flat.jpg", size: 1150 },
+      { name: "texture_close_up.png", size: 3100 },
+      { name: "extra_dimensions_view.png", size: 2890 },
+      { name: "unboxing_thumbnail_raw.jpg", size: 3900 }
+    ];
+
+    const targetCount = Math.min(count, mockTemplates.length);
+    const generation: MockFile[] = [];
+    
+    for (let i = 0; i < targetCount; i++) {
+      generation.push({
+        name: mockTemplates[i].name,
+        originalSize: mockTemplates[i].size,
+        compressedSize: 0,
+        reduction: 0,
+        altText: '',
+        status: 'PENDING'
+      });
+    }
+    setBatchFiles(generation);
+  };
+
+  const processImagesToWebP = () => {
+    if (batchFiles.length === 0) return;
+    setIsCompressing(true);
+
+    setTimeout(() => {
+      const processed = batchFiles.map((f) => {
+        const targetRatio = 0.18; // ~82% reduction rate parameters
+        const comp = Math.round(f.originalSize * targetRatio);
+        
+        // Autogenerate standard clean alt-text descriptive labels
+        let cleanLabel = f.name.replace(/_|-/g, ' ').replace(/\.jpg|\.png/g, '');
+        let generatedAlt = `E-commerce listing asset showing item details for ${cleanLabel}`;
+
+        return {
+          ...f,
+          compressedSize: comp,
+          reduction: 82,
+          altText: generatedAlt,
+          status: 'COMPRESSED' as const
+        };
+      });
+      setBatchFiles(processed);
+      setIsCompressing(false);
+    }, 900);
   };
 
   return (
     <div className="min-h-screen bg-white text-[#37352f] font-sans antialiased text-[15px] relative">
       
-      {/* HEADER NAVIGATION NAVBAR */}
+      {/* HEADER NAVBAR LINKS CONTAINER */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
         <div className="flex items-center space-x-8">
           <div onClick={() => setActiveTool('dashboard')} className="flex items-center space-x-2 cursor-pointer shrink-0">
@@ -212,7 +260,7 @@ export default function IntegratedMasterApplication() {
               </button>
 
               {isMegaMenuOpen && (
-                <div className="absolute top-[44px] left-0 w-[820px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in duration-100">
+                <div className="absolute top-[44px] left-0 w-[820px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in">
                   <div className="w-[300px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px] overflow-y-auto max-h-[460px]">
                     <div className="px-2 py-1.5 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider mb-1">Target Sectors</div>
                     {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
@@ -245,7 +293,6 @@ export default function IntegratedMasterApplication() {
                 </div>
               )}
             </div>
-
             <a href="#resources" className="text-sm font-medium text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-3 py-1.5 rounded-md transition-colors">Resources</a>
             <a href="#pricing" className="text-sm font-medium text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-3 py-1.5 rounded-md transition-colors">Pricing</a>
             <a href="#demo" className="text-sm font-medium text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-3 py-1.5 rounded-md transition-colors">Demo</a>
@@ -264,179 +311,173 @@ export default function IntegratedMasterApplication() {
 
       {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
 
-      {/* RENDER LOGIC MULTIPLEXER */}
+      {/* RENDER BRANCH ROUTER */}
       {activeTool === 'dashboard' ? (
         
-        /* NOTION SYSTEM LANDING HOMEPAGE CONTAINER */
         <div>
+          {/* Main Notion style homepage dashboard anchor links trigger */}
           <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-[#37352f] max-w-3xl mx-auto leading-[1.1] mb-6">
-              Write code logic. Run 30 operational micro-utilities.
-            </h1>
-            <p className="text-xl font-medium text-[#5a5750] max-w-2xl mx-auto leading-relaxed mb-8">
-              extrct.app transforms your static structural matrix datasheets into live micro-SaaS computational layout nodes across 10 distinct industry workflows.
-            </p>
-            <div className="flex items-center justify-center space-x-4 mb-12">
-              <button onClick={() => selectToolFromMenu('ecom_fee')} className="bg-[#37352f] text-white hover:bg-black font-bold text-[15px] px-6 py-2.5 rounded-lg shadow transition-all">
-                Launch Auditor Utility Free →
-              </button>
-            </div>
-
-            <div className="border border-[#edece9] shadow-xl rounded-2xl overflow-hidden bg-[#fbfbfa] p-4 max-w-[800px] mx-auto">
-              <div className="p-8 text-left bg-white min-h-[180px]">
-                <span className="bg-amber-100 text-amber-800 font-mono text-[11px] px-2 py-0.5 rounded font-bold uppercase tracking-wide">E-Commerce Focal Node</span>
-                <h3 className="text-2xl font-bold text-[#37352f] mt-2 mb-1">Marketplace Overcharge Engine</h3>
-                <p className="text-sm text-[#7c7b77]">Audits structural weight tier discrepancies and processes bulk ledger rows instantly.</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="bg-[#fbfbfa] border-y border-[#edece9] py-12">
-            <div className="max-w-[1000px] mx-auto px-6 text-center">
-              <h2 className="text-3xl font-bold text-[#37352f] mb-4">Every team, structured natively.</h2>
-              <p className="text-sm text-blue-600 font-bold">Use the Solutions Dropdown up top to access pages directly.</p>
+            <h1 className="text-5xl font-bold tracking-tight text-[#37352f] mb-4">Run E-Commerce Asset Toolsets</h1>
+            <p className="text-sm text-[#7c7b77] mb-6">Select specific tools from the top Solutions bar to view internal parameters.</p>
+            <div className="flex justify-center space-x-4">
+              <button onClick={() => selectToolFromMenu('ecom_fee')} className="border px-4 py-2 rounded-xl text-xs font-semibold">1. Fee Auditor</button>
+              <button onClick={() => selectToolFromMenu('ecom_img')} className="bg-[#37352f] text-white px-4 py-2 rounded-xl text-xs font-bold">2. Image Compressor →</button>
             </div>
           </section>
         </div>
 
       ) : activeTool === 'ecom_fee' ? (
         
+        /* TOOL 1 VIEW */
+        <div className="max-w-[960px] mx-auto px-6 py-12">
+          <h1 className="text-2xl font-bold">Automated Marketplace Overcharge & Fee Auditor</h1>
+          <button onClick={handleSampleLoad} className="text-xs text-blue-600 underline block mt-2">Load Data</button>
+          <textarea value={csvInput} onChange={(e) => setCsvInput(e.target.value)} className="w-full border h-32 mt-2 font-mono p-2 text-xs" />
+          <button onClick={runFeeAuditLogic} className="bg-blue-600 text-white text-xs px-4 py-2 mt-2 rounded">Run Audit</button>
+        </div>
+
+      ) : activeTool === 'ecom_img' ? (
+        
         /* -------------------------------------------------------------
-           COMPLETE INDEPENDENT PAGE COMPONENT: FEE & OVERCHARGE AUDITOR
+           COMPLETE INDEPENDENT PAGE COMPONENT: IMAGE WEBP COMPRESSOR
            ------------------------------------------------------------- */
         <div className="bg-[#fafafa] min-h-[calc(100vh-64px)] py-12">
           <main className="max-w-[960px] mx-auto px-6">
             
-            {/* Header Core Spec Segment */}
+            {/* Spec Heading Node */}
             <div className="mb-8">
-              <div className="flex items-center space-x-2 text-xs text-blue-600 font-bold uppercase tracking-wide mb-1">
-                <span>📦 E-Commerce Metrics Pipeline</span>
+              <div className="flex items-center space-x-2 text-xs text-emerald-600 font-bold uppercase tracking-wide mb-1">
+                <span>🗜️ Asset Optimization Layer</span>
               </div>
               <h1 className="text-3xl font-bold tracking-tight text-[#37352f]">
-                Automated Marketplace Overcharge & Fee Auditor
+                Batch Dynamic Image Compressor & WebP Variant Converter
               </h1>
               <p className="text-[#5a5750] text-sm mt-1 max-w-2xl">
-                Marketplaces miscalculate weight dimensions or referral fee tiers leading to leaked revenue. Paste your settlement statement data below to scan discrepancies against system category baseline tables.
+                Large product images slow down page load speeds dropping conversion rates. Drag-and-drop batch tools convert product images into web-optimized WebP formats and auto-generate clean structured standard alt-text logs.
               </p>
             </div>
 
-            {/* Main Interactive Processing Card Panel */}
+            {/* Layout Processing Workstations */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
               
-              {/* Left Column: Data Entry Node Area */}
+              {/* Left Sandbox Column: Batch Triggers */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-bold text-[#37352f] uppercase tracking-wider">
-                      Paste Settlement Statement Text (CSV Format)
-                    </label>
-                    <button 
-                      onClick={handleSampleLoad}
-                      className="text-xs text-blue-600 hover:underline font-medium"
-                    >
-                      Load Sample Mock Logs
-                    </button>
+                <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-6 text-center">
+                  <div className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-xl p-8 bg-[#fbfbfa] transition-all">
+                    <span className="text-2xl block mb-2">📸</span>
+                    <div className="text-xs font-bold text-[#37352f] uppercase tracking-wider mb-2">Select Simulation Batch Variant</div>
+                    
+                    <div className="flex items-center justify-center space-x-2">
+                      <button 
+                        onClick={() => handleBatchSimulationInsert(4)}
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#37352f] text-xs font-semibold rounded-lg transition-colors"
+                      >
+                        Insert 4 Standard Assets (Free Tier)
+                      </button>
+                      <button 
+                        onClick={() => handleBatchSimulationInsert(7)}
+                        className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold rounded-lg transition-colors"
+                      >
+                        Insert 7 Heavy Assets (Triggers Alert)
+                      </button>
+                    </div>
                   </div>
 
-                  <textarea
-                    value={csvInput}
-                    onChange={(e) => setCsvInput(e.target.value)}
-                    placeholder="ORDER_ID,SKU,CHARGED_FEE..."
-                    className="w-full h-44 p-3 border border-[#edece9] rounded-lg font-mono text-xs focus:outline-none focus:border-[#37352f] bg-[#fafafa]"
-                  />
-
-                  <button
-                    onClick={runFeeAuditLogic}
-                    disabled={isAuditing || !csvInput.trim()}
-                    className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-200 disabled:text-gray-400 font-bold py-2.5 rounded-lg text-xs transition-all tracking-wide uppercase"
-                  >
-                    {isAuditing ? "Processing Ledger Parameters..." : "Execute Validation Sweep"}
-                  </button>
+                  {batchFiles.length > 0 && (
+                    <button
+                      onClick={processImagesToWebP}
+                      disabled={isCompressing}
+                      className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs transition-all tracking-wide uppercase shadow-sm"
+                    >
+                      {isCompressing ? "Executing Compression Matrix Engine..." : "Optimize Batch Payload"}
+                    </button>
+                  )}
                 </div>
 
-                {/* Audit Grid Result Sheet Block */}
-                {auditResults && (
+                {/* Processing Monitor Spreadsheet Layer */}
+                {batchFiles.length > 0 && (
                   <div className="bg-white border border-[#edece9] rounded-xl shadow-sm overflow-hidden animate-in fade-in">
-                    <div className="px-6 py-4 bg-[#fbfbfa] border-b border-[#edece9]">
-                      <h3 className="text-xs font-bold text-[#37352f] uppercase tracking-wider">Discrepancy Rows Flagged</h3>
+                    <div className="px-6 py-3.5 bg-[#fbfbfa] border-b border-[#edece9] flex justify-between items-center">
+                      <h3 className="text-xs font-bold text-[#37352f] uppercase tracking-wider">Asset Operations Logs</h3>
+                      <span className="text-[11px] font-mono text-gray-500">{batchFiles.length} files targeted</span>
                     </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead>
-                          <tr className="bg-[#fafafa] border-b border-[#edece9] text-[#7c7b77] font-mono">
-                            <th className="p-3">Order Token</th>
-                            <th className="p-3">Item Variant SKU</th>
-                            <th className="p-3 text-right">Charged</th>
-                            <th className="p-3 text-right">Standard</th>
-                            <th className="p-3 text-right text-amber-700">Leakage</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#f1f0ee]">
-                          {auditResults.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50">
-                              <td className="p-3 font-mono text-[#37352f]">{row.orderId}</td>
-                              <td className="p-3 font-medium text-gray-600">{row.sku}</td>
-                              <td className="p-3 text-right font-mono">₹{row.chargedFee}</td>
-                              <td className="p-3 text-right font-mono text-gray-500">₹{row.expectedFee}</td>
-                              <td className={`p-3 text-right font-mono font-bold ${row.variance > 0 ? 'text-red-600 bg-red-50/50' : 'text-gray-400'}`}>
-                                {row.variance > 0 ? `₹${row.variance}` : '—'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+
+                    <div className="divide-y divide-[#f1f0ee]">
+                      {batchFiles.map((file, idx) => (
+                        <div key={idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50">
+                          <div>
+                            <div className="font-mono text-xs font-bold text-[#37352f] flex items-center space-x-2">
+                              <span>{file.name}</span>
+                              {file.status === 'COMPRESSED' && (
+                                <span className="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded uppercase font-bold font-sans">WebP Active</span>
+                              )}
+                            </div>
+                            <div className="text-[11.5px] text-[#7c7b77] mt-0.5 font-sans italic">
+                              {file.status === 'COMPRESSED' ? `Alt: "${file.altText}"` : "Awaiting compression vector sequence..."}
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0 flex items-center space-x-4">
+                            <div className="font-mono text-xs text-gray-500">
+                              <div>{(file.originalSize / 1020).toFixed(1)} MB</div>
+                              {file.status === 'COMPRESSED' && (
+                                <div className="text-emerald-600 font-bold">→ {(file.compressedSize / 1020).toFixed(1)} MB</div>
+                              )}
+                            </div>
+                            {file.status === 'COMPRESSED' && (
+                              <div className="bg-emerald-50 text-emerald-700 font-bold font-mono text-xs px-2 py-1 rounded">
+                                -{file.reduction}%
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Right Column: High-Converting Core SaaS Hook Widget */}
+              {/* Right Sidebar SaaS Paywall Lock Block */}
               <div className="space-y-4">
-                <div className="bg-white border border-amber-200 bg-amber-50/30 rounded-xl p-6 shadow-sm">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
-                    Audit Core Vector
+                
+                {/* 10-to-1000 Hook Validation Box */}
+                <div className={`border rounded-xl p-6 shadow-sm transition-all duration-300 ${premiumPayloadTriggered ? 'border-amber-300 bg-amber-50/40 shadow-md' : 'border-[#edece9] bg-white'}`}>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
+                    SaaS Limit Shield
                   </span>
-                  <div className="text-3xl font-black text-[#37352f] mt-4 font-mono">
-                    ₹{totalLeakage.toFixed(2)}
-                  </div>
-                  <div className="text-xs font-bold text-[#5a5750] mt-0.5 uppercase tracking-wide">
-                    Identified Overpaid Capital Leak
-                  </div>
-                  <p className="text-xs text-[#7c7b77] mt-2 leading-relaxed">
-                    Our scanner matched transaction line elements against default dimensional rule arrays to discover overcharged tier classifications.
+                  <h3 className="text-base font-bold text-[#37352f] mt-3">Free Tier Limitation Nodes</h3>
+                  <p className="text-xs text-[#7c7b77] mt-1 leading-relaxed">
+                    Free tier limits processing to <b>5 images per batch</b>. Premium tiers unlock bulk processing configurations for up to 1000 items instantly.
                   </p>
 
-                  <div className="mt-6 pt-6 border-t border-amber-200/60">
-                    <div className="text-xs font-bold text-gray-900 mb-1">🎁 The 10-to-1000 Premium Hook:</div>
-                    <p className="text-xs text-gray-600 leading-normal mb-4">
-                      Highlights exact lines where you overpaid. Pay $10 to unlock the pre-filled dispute sheet export to claim refunds.
-                    </p>
-                    <button 
-                      onClick={() => alert("Initiating Stripe Checkout Flow for $10 Tier Unlock...")}
-                      disabled={totalLeakage === 0}
-                      className="w-full bg-[#37352f] hover:bg-black text-white disabled:bg-gray-200 disabled:text-gray-400 text-xs font-bold py-2.5 rounded-lg tracking-wide uppercase shadow transition-all"
-                    >
-                      Unlock Pre-filled Dispute Sheet ($10)
-                    </button>
+                  {premiumPayloadTriggered && (
+                    <div className="mt-4 p-3 bg-white border border-amber-200 rounded-lg animate-in slide-in-from-top-2">
+                      <div className="text-xs font-bold text-amber-900 flex items-center space-x-1">
+                        <span>⚠️ Processing Limit Overage</span>
+                      </div>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">
+                        You have queued <b>{batchFiles.length} variants</b>. Free tier will drop assets beyond index 5. Unlock premium dashboard to clean entire directories.
+                      </p>
+                      <button
+                        onClick={() => alert("Redirecting to premium tier subscription sequence portal...")}
+                        className="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-xs tracking-wide uppercase transition-all"
+                      >
+                        Unlock Instant Bulk Processing
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Meta Parameters Spec Cards */}
+                <div className="bg-white border border-[#edece9] rounded-xl p-4 text-xs">
+                  <div className="font-bold uppercase tracking-wider text-[10px] text-gray-400 mb-2">Technical Matrix Spec</div>
+                  <div className="text-gray-600 leading-relaxed space-y-1">
+                    <div>• Format: <code>image/webp</code> lossy profile</div>
+                    <div>• Meta Strip: Auto-scrub EXIF geo coordinates</div>
+                    <div>• Resolution Limits: Bound to 2048px maximum width</div>
                   </div>
                 </div>
 
-                {/* Standard Rules Reference Panel */}
-                <div className="bg-white border border-[#edece9] rounded-xl p-4 text-xs space-y-2">
-                  <div className="font-bold text-[#37352f] uppercase tracking-wider text-[10px]">Reference Rules Map</div>
-                  <div className="flex justify-between border-b pb-1 text-gray-600">
-                    <span>Wireless Headphones</span>
-                    <span className="font-mono">₹145 max tier</span>
-                  </div>
-                  <div className="flex justify-between border-b pb-1 text-gray-600">
-                    <span>Data Cables</span>
-                    <span className="font-mono">₹55 max tier</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Fast Chargers</span>
-                    <span className="font-mono">₹65 max tier</span>
-                  </div>
-                </div>
               </div>
 
             </div>
@@ -444,13 +485,10 @@ export default function IntegratedMasterApplication() {
         </div>
 
       ) : (
-        /* Fallback Container for upcoming nodes */
-        <div className="p-16 text-center text-xs text-gray-500 font-mono">
-          Endpoint code shell active. Select the first e-commerce tool row to monitor verification calculations.
-        </div>
+        <div className="p-12 text-center text-xs font-mono text-gray-400">Endpoint active</div>
       )}
 
-      {/* FOOTER BLOCK SYSTEM */}
+      {/* FOOTER SYSTEM SYSTEM */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] pt-16 pb-12 select-none">
         <div className="max-w-[900px] mx-auto px-6 text-center text-xs text-[#7c7b77]">
           <span>© 2026 extrct.app Terminal Technologies Inc. All parameters synced.</span>
