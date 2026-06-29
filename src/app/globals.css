@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-notion-text: #37352f;
+  --color-notion-textLight: #7c7b77;
+  --color-notion-bg: #ffffff;
+  --color-notion-sidebar: #fbfbfa;
+  --color-notion-border: #edece9;
+  --color-notion-hover: rgba(55, 53, 47, 0.04);
+  --color-notion-hoverDarker: rgba(55, 53, 47, 0.08);
+  --color-notion-redBg: #fdebec;
+  --color-notion-redText: #eb5757;
+
+  --font-notion: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+body {
+  color: var(--color-notion-text);
+  background: var(--color-notion-bg);
+  font-family: var(--font-notion);
+}
