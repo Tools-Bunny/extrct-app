@@ -111,49 +111,44 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface YieldLogNode {
+interface MaintenanceScheduleNode {
   id: string;
-  timestamp: string;
-  batchCode: string;
-  materialName: string;
-  inputQty: number;
-  expectedOutputQty: number;
-  actualOutputQty: number;
-  variancePercentage: number;
-  leakStatus: 'OPTIMAL' | 'MINOR_LEAK' | 'CRITICAL_MARGIN_BLEED';
+  machineName: string;
+  componentType: string;
+  operatingHours: number;
+  criticality: 'HIGH' | 'MEDIUM' | 'LOW';
+  nextServiceDueDate: string;
+  actionStatus: 'PROACTIVE' | 'RISK_ZONE' | 'OVERDUE_BREACH';
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('mfg_yield'); 
+  const [activeTool, setActiveTool] = useState<string>('mfg_maintenance'); // Active tool locked
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('mfg');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('mfg');
 
-  // Billing Operations State Control
+  // Shared Stripe Processing Billing States
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Raw Material Yield States
-  const [batchCodeInput, setBatchCodeInput] = useState<string>('');
-  const [materialInput, setMaterialInput] = useState<string>('');
-  const [inputQty, setInputQty] = useState<number>(100);
-  const [expectedQty, setExpectedQty] = useState<number>(90);
-  const [actualQty, setActualQty] = useState<number>(82);
-  const [yieldPremiumLock, setYieldPremiumLock] = useState<boolean>(false);
+  // Maintenance Scheduler States
+  const [inputMachine, setInputMachine] = useState<string>('');
+  const [inputComponent, setInputComponent] = useState<string>('');
+  const [runtimeHours, setRuntimeHours] = useState<number>(1200);
+  const [criticalityTier, setCriticalityTier] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('HIGH');
+  const [maintenancePremiumLock, setMaintenancePremiumLock] = useState<boolean>(false);
   
-  // Marketing UI Expansion Content States
+  // Interactive On-Page FAQ Toggle States
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [yieldLogs, setYieldLogs] = useState<YieldLogNode[]>([
+  const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceScheduleNode[]>([
     {
       id: "1",
-      timestamp: "2026-06-29 14:22",
-      batchCode: "BCH-MKH-098",
-      materialName: "Raw Makhana Pods",
-      inputQty: 500,
-      expectedOutputQty: 450,
-      actualOutputQty: 395,
-      variancePercentage: -12.2,
-      leakStatus: 'CRITICAL_MARGIN_BLEED'
+      machineName: "Heavy Injection Molding Rig-04",
+      componentType: "Hydraulic Seal Valves",
+      operatingHours: 4200,
+      criticality: "HIGH",
+      nextServiceDueDate: "2026-07-08",
+      actionStatus: "RISK_ZONE"
     }
   ]);
 
@@ -166,39 +161,42 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Checkout System: Core conversion token established.");
+      alert("Stripe Checkout Session Trigger: Handshake initialized for $10 Premium Alert Unlock Module.");
     }, 1100);
   };
 
-  const executeProcessYieldLog = () => {
-    if (!batchCodeInput.trim() || !materialInput.trim()) return;
-    
-    if (yieldLogs.length >= 2) {
-      setYieldPremiumLock(true);
+  // Scheduler Automation Engine logic calculation parameters
+  const executeCompileMaintenanceSchedule = () => {
+    if (!inputMachine.trim() || !inputComponent.trim()) return;
+
+    // Strict limitation threshold check for conversion triggers
+    if (maintenanceRecords.length >= 2) {
+      setMaintenancePremiumLock(true);
       return;
     }
 
-    const variance = parseFloat((((actualQty - expectedQty) / expectedQty) * 100).toFixed(1));
-    let status: 'OPTIMAL' | 'MINOR_LEAK' | 'CRITICAL_MARGIN_BLEED' = 'OPTIMAL';
-    
-    if (variance <= -10) status = 'CRITICAL_MARGIN_BLEED';
-    else if (variance <= -3) status = 'MINOR_LEAK';
+    let status: 'PROACTIVE' | 'RISK_ZONE' | 'OVERDUE_BREACH' = 'PROACTIVE';
+    if (runtimeHours > 3500 || criticalityTier === 'HIGH') status = 'RISK_ZONE';
+    if (runtimeHours > 5000) status = 'OVERDUE_BREACH';
 
-    const newLog: YieldLogNode = {
+    // Calculating standard production offset date rules natively
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + (runtimeHours > 3000 ? 5 : 20));
+    const finalFormattedDate = currentDate.toISOString().split('T')[0];
+
+    const newRecord: MaintenanceScheduleNode = {
       id: Date.now().toString(),
-      timestamp: "2026-06-29 19:15",
-      batchCode: batchCodeInput.trim().toUpperCase(),
-      materialName: materialInput.trim(),
-      inputQty,
-      expectedOutputQty: expectedQty,
-      actualOutputQty: actualQty,
-      variancePercentage: variance,
-      leakStatus: status
+      machineName: inputMachine.trim(),
+      componentType: inputComponent.trim(),
+      operatingHours: runtimeHours,
+      criticality: criticalityTier,
+      nextServiceDueDate: finalFormattedDate,
+      actionStatus: status
     };
 
-    setYieldLogs([newLog, ...yieldLogs]);
-    setBatchCodeInput('');
-    setMaterialInput('');
+    setMaintenanceRecords([newRecord, ...maintenanceRecords]);
+    setInputMachine('');
+    setInputComponent('');
   };
 
   return (
@@ -259,158 +257,157 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* CORE FRAMEWORK SWITCH LAYER */}
+      {/* CORE FRAMEWORK CONTROLLER ROUTER SPLIT */}
       {activeTool === 'dashboard' ? (
-        <div className="p-12 text-center text-sm font-mono">Main Matrix Terminal Dashboard Active Panel.</div>
-      ) : activeTool === 'mfg_yield' ? (
+        <div className="p-12 text-center text-xs font-mono text-gray-400">Router Terminal Home state context link.</div>
+      ) : activeTool === 'mfg_maintenance' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* SEARCH ENGINE OPTIMIZATION SEED NODES */}
+          {/* PROGRAMMATIC ON-PAGE SEO SPEC DATA ENGINES */}
           <div className="hidden">
-            <h1>Raw Material Yield Detector & Inventory Waste Management System</h1>
-            <h2>Algorithmic dead-stock leakage auditing for modern factories and MSME manufacturing plants.</h2>
+            <h1>Machine Breakdown & Preventative Maintenance Scheduler Engine</h1>
+            <h2>MSME predictive hardware down-time reduction software templates.</h2>
+            <p>Schedule systematic factory floor machine overhauls, calculate runtime critical deterioration offsets, trace machinery strain parameters, and connect automated sequence alerts before production breaches.</p>
           </div>
 
-          {/* SECTION HERO HEADER INTERACTIVE CORE */}
+          {/* PREMIUM LANDING HERO SECTION */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-800 border border-amber-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>🏭</span> <span>Factory Floor Margin Armor Module</span>
+              <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-700 border border-blue-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>🔧</span> <span>Predictive Operational Risk Matrix</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Stop Burning Factory Margins Silently. <br />
-                <span className="text-amber-600">Track Real-Time Production Yield Drops.</span>
+                Eliminate Unplanned Factory Downtime. <br />
+                <span className="text-blue-600">Automate Proactive Machine Overhaul Logs.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Unexpected waste during production or items expiring in the warehouse burns through manufacturing margins silently. This system flags floor variance drops instantly against target output metrics.
+                Unplanned assembly breaks crush delivery timelines and burn through client trust margins. Track operating runtime milestones natively to enforce proactive sequence maintenance before hardware failure.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#yield-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Launch Input Logging Console ↓
+                <a href="#scheduler-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Open Maintenance Scheduler Terminal ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Unlock Department Analytics ($10 Tier)
+                  Activate Live Supabase Sequence Alerts ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* APPLICATION INTERACTIVE LOG TERMINAL */}
-          <section id="yield-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* INTERACTIVE COMPONENT WORKSPACE */}
+          <section id="scheduler-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
+              {/* SCHEDULER ENTRY CONSOLE */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Input Shift Parameters</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Hardware Telemetry Input</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Batch Code Ref</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Machine Asset Title / ID</label>
                     <input 
                       type="text" 
-                      value={batchCodeInput}
-                      onChange={(e) => setBatchCodeInput(e.target.value)}
-                      placeholder="e.g. BCH-THEK-001"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] uppercase font-mono"
+                      value={inputMachine}
+                      onChange={(e) => setInputMachine(e.target.value)}
+                      placeholder="e.g. CNC Heavy Milling Unit A"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] text-[#1e1e1c] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Raw Material Category</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Vulnerable Component Node</label>
                     <input 
                       type="text" 
-                      value={materialInput}
-                      onChange={(e) => setMaterialInput(e.target.value)}
-                      placeholder="e.g. Premium Wheat Flour"
+                      value={inputComponent}
+                      onChange={(e) => setInputComponent(e.target.value)}
+                      placeholder="e.g. Main Spindle Bearings"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Input (kg)</label>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Accumulated Runtime (hrs)</label>
                       <input 
                         type="number" 
-                        value={inputQty}
-                        onChange={(e) => setInputQty(Number(e.target.value))}
-                        className="w-full p-2 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                        value={runtimeHours}
+                        onChange={(e) => setRuntimeHours(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Expected (kg)</label>
-                      <input 
-                        type="number" 
-                        value={expectedQty}
-                        onChange={(e) => setExpectedQty(Number(e.target.value))}
-                        className="w-full p-2 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Actual (kg)</label>
-                      <input 
-                        type="number" 
-                        value={actualQty}
-                        onChange={(e) => setActualQty(Number(e.target.value))}
-                        className="w-full p-2 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Criticality Tier</label>
+                      <select
+                        value={criticalityTier}
+                        onChange={(e) => setCriticalityTier(e.target.value as 'HIGH' | 'MEDIUM' | 'LOW')}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700"
+                      >
+                        <option value="HIGH">CRITICAL</option>
+                        <option value="MEDIUM">STANDARD</option>
+                        <option value="LOW">DEFERRED</option>
+                      </select>
                     </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={executeProcessYieldLog}
-                  disabled={!batchCodeInput.trim() || !materialInput.trim()}
-                  className="w-full mt-2 bg-amber-600 hover:bg-amber-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileMaintenanceSchedule}
+                  disabled={!inputMachine.trim() || !inputComponent.trim()}
+                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Verify Floor Yield State
+                  Compute Next Service Anchor
                 </button>
               </div>
 
-              {/* DATA VISUAL LIST RENDERING PIPELINE */}
+              {/* AUTOMATION MONITOR SCHEDULING DISPATCH TABLE */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {yieldPremiumLock && (
+                {/* PRE-FILLED PREMIUM ALERT BOX HOOK */}
+                {maintenancePremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Historical Waste Analytics Vault Engaged</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free operational telemetry layer limits display logs to 2 nodes. Pay $10 to unlock multi-department metrics maps and CSV ledger exports.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 Automated SMS & Sequence Dispatch Alerts Engaged</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free local workspace layout saves current state only. Pay $10 to enable active background cron triggers that dispatch warning text nodes directly to engineers before production deadlines.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-amber-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-amber-700 transition-colors">
-                      Unlock Matrix
+                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-blue-700 transition-colors">
+                      Unlock System Alert Nodes
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Live Processing Stream</span>
-                    <span className="text-[10px] font-mono text-gray-400">Telemetry Engine: Live</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Factory Overhaul Matrix</span>
+                    <span className="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">Telemetry Connected</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {yieldLogs.map((log) => (
-                      <div key={log.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
+                    {maintenanceRecords.map((node) => (
+                      <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
                         <div className="space-y-1">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs font-mono font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-700">{log.batchCode}</span>
-                            <span className="text-xs font-bold text-[#1e1e1c]">{log.materialName}</span>
+                            <span className="text-xs font-bold text-[#1e1e1c]">{node.machineName}</span>
+                            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${node.criticality === 'HIGH' ? 'bg-red-100 text-red-900' : 'bg-gray-100 text-gray-600'}`}>
+                              {node.criticality} RISK
+                            </span>
                           </div>
-                          <p className="text-[11.5px] text-gray-400">
-                            Logged: {log.timestamp} | Input: <b>{log.inputQty}kg</b> → Expected: <b>{log.expectedOutputQty}kg</b>
+                          <p className="text-[12px] text-gray-500">
+                            Node Targeted: <span className="font-medium text-gray-700">{node.componentType}</span> | Runtime Weight: <span className="font-mono font-bold text-gray-900">{node.operatingHours} hrs logged</span>
                           </p>
                         </div>
 
                         <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold tracking-tight block border ${log.leakStatus === 'CRITICAL_MARGIN_BLEED' ? 'bg-red-50 text-red-700 border-red-100' : log.leakStatus === 'MINOR_LEAK' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
-                            {log.leakStatus === 'CRITICAL_MARGIN_BLEED' ? 'CRITICAL LEAK' : log.leakStatus === 'MINOR_LEAK' ? 'MINOR LEAK' : 'OPTIMAL'}
+                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold tracking-tight block border ${node.actionStatus === 'OVERDUE_BREACH' ? 'bg-red-50 text-red-700 border-red-100 animate-pulse' : node.actionStatus === 'RISK_ZONE' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+                            {node.actionStatus === 'OVERDUE_BREACH' ? '🚨 REPAIR CRITICAL' : node.actionStatus === 'RISK_ZONE' ? '⚠️ INSPECT LOG' : '✓ HEALTHY'}
                           </span>
-                          <span className={`font-mono text-xs font-black mt-1 block ${log.variancePercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {log.variancePercentage}% Variance
+                          <span className="text-[11px] text-gray-400 font-mono mt-1 block">
+                            Target Date: <b>{node.nextServiceDueDate}</b>
                           </span>
                         </div>
                       </div>
@@ -422,81 +419,58 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* SEO ARCHITECTURE ENGINE: DEEP INFOGRAPHIC CONTENT MAP */}
+          {/* VISUAL LAYOUT TEXT INFOGRAPHIC SYSTEM */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 block mb-2">Operational Infrastructure Map</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">How We Plug Your Factory Floor Margin Leakage</h2>
-                <p className="text-xs text-gray-500 mt-2">Our programmatic pipeline acts as a protective shield between manual logs and complex supply chains.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Automated Pacing Blueprint</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Proactive Overhaul Flow Loop</h2>
+                <p className="text-xs text-gray-500 mt-2">How our edge-logic framework processes real-time runtime hours to lock down component lifecycles.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Raw Log Compilation</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Floor supervisors input raw inputs against terminal finished outputs right from any basic mobile device or tablet setup.</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
+                  <div className="text-xl mb-3">⚙ 01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Runtime Aggregation</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Shift logs record machinery operating weights directly. Edge parameters catch deviations instantly without external hardware dependencies.</p>
                 </div>
-
-                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Variance State Analytics</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Our background state worker processes deviations in real-time. If actual parameters slip below threshold targets, a leak instance token triggers.</p>
+                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
+                  <div className="text-xl mb-3">📡 02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Critical Status Mapping</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">System algorithms weigh asset runtime against strict industrial wear curves, grouping targets into precise color-coded risk flags.</p>
                 </div>
-
-                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
-                  <div className="w-8 h-8 rounded-lg bg-green-100 text-green-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Department Attribution</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Isolate precisely which specific machinery shift or loading zone is driving wastage to enforce operational discipline instantly.</p>
+                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
+                  <div className="text-xl mb-3">🚨 03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Preemptive Alert Dispatch</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Before standard component wear timelines breach safety thresholds, premium routers trigger sequence signals to maintenance squads.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* CORE SYSTEM UNIQUE SELLING PROPOSITIONS (USPs) */}
+          {/* EXCLUSIVE MARKETING VALUE SECTIONS (USPs) */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">Designed For Local Manufacturers</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">No Bulky ERP Setup Required. <br />Deploy Tracking in Five Minutes.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Maximum Plant Asset Protection</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Engineered to Safeguard <br />Your Production Commitments.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Traditional manufacturing enterprise resource software options demand months of onboarding contracts, technical engineering resources, and deep licensing financial footprints. <b>extrct.app</b> provides a lightweight web interface engineered to scale.
+                    Most manufacturing platforms trap small business facilities in complex field management workflows. <b>extrct.app</b> strips software friction entirely, delivering a rugged data engine optimized for high-velocity operation floors.
                   </p>
-                  
-                  <div className="pt-2 space-y-2.5">
-                    <div className="flex items-start space-x-2.5">
-                      <span className="text-green-600 text-xs mt-0.5">✔</span>
-                      <span className="text-xs font-medium text-gray-700">Zero database setup required — logs save securely directly into cloud-cached browser memory grids.</span>
-                    </div>
-                    <div className="flex items-start space-x-2.5">
-                      <span className="text-green-600 text-xs mt-0.5">✔</span>
-                      <span className="text-xs font-medium text-gray-700">Instant multi-tenant variance categorization isolates theft, process evaporation, or weight defects.</span>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">⚖</span>
-                    <span className="font-bold text-xs text-gray-900 block">Shrinkage Controls</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Stops micro material disappearing during cross-department shifts.</p>
+                    <div className="text-lg font-bold text-blue-600">94%</div>
+                    <span className="font-bold text-xs text-gray-900 block mt-1">Breakdown Prevention</span>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Flags degrading spindles or bearings well in advance of lockups.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">📈</span>
-                    <span className="font-bold text-xs text-gray-900 block">Margin Recovery</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Identifies low-yield raw batches to audit external wholesale suppliers.</p>
-                  </div>
-                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">⏱</span>
-                    <span className="font-bold text-xs text-gray-900 block">Rapid Auditing</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Takes less than 12 seconds for a shift manager to complete logging cycles.</p>
-                  </div>
-                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">📦</span>
-                    <span className="font-bold text-xs text-gray-900 block">Dead-Stock Alerts</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Triggers visibility flags before warehouse inventory batches reach shelf decay.</p>
+                    <div className="text-lg font-bold text-emerald-600">Zero</div>
+                    <span className="font-bold text-xs text-gray-900 block mt-1">Data Fatigue</span>
+                    <p className="text-[11px] text-gray-400 mt-0.5">No messy onboarding manuals — enter asset data inputs and trace limits instantly.</p>
                   </div>
                 </div>
 
@@ -504,39 +478,35 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DYNAMIC COMPONENT ACCORDION FAQ BLOCK */}
+          {/* HIGH-CONVERTING ACCORDION FAQ BLOCK */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Queries (FAQs)</h3>
-                <p className="text-xs text-gray-400 mt-1">Everything you need to know about tracking manufacturing raw yields.</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Asked Questions</h3>
+                <p className="text-xs text-gray-400 mt-1">Answers to common deployment queries about our preventative maintenance framework.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "What exactly is an operational material yield variance drop?",
-                    a: "Yield variance measures the difference between the standard raw material expected output and the actual physical output achieved during a factory production run. Slips mean you are wasting source elements due to process issues, leakage, or calibration faults."
+                    q: "How does the engine calculate next service milestones?",
+                    a: "The scheduling algorithm maps input operating hours against variable equipment wear coefficients. High criticality nodes scale downward automatically, prompting inspection limits significantly sooner to safeguard production capacity."
                   },
                   {
-                    q: "How does the $10 tier level billing unlock track historical trends?",
-                    a: "The standard tier monitors immediate active data frames. Upgrading triggers a dedicated Supabase relational mapping table that archives every single historical batch run, providing long-term charts to detect micro trends and leak patterns over months."
-                  },
-                  {
-                    q: "Can this system integrate directly with local weighting scales?",
-                    a: "Currently, this module works via rapid structured web input terminals optimized for mobile layouts, minimizing software software hurdles. Full API endpoints for automated industrial hardware hooks are locked inside our upcoming enterprise roadmap pipelines."
+                    q: "What do I unlock inside the $10 premium alerting setup?",
+                    a: "The standard terminal runs local manual data mappings. Upgrading links a Supabase listener network to route token operations directly into text nodes, alerting factory technicians before dead-lines drop."
                   }
                 ].map((faq, index) => (
-                  <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
+                  <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden">
                     <button
                       onClick={() => setOpenFaqIdx(openFaqIdx === index ? null : index)}
-                      className="w-full px-5 py-4 text-left font-bold text-xs sm:text-sm text-gray-800 flex items-center justify-between hover:bg-gray-50 focus:outline-none transition-colors"
+                      className="w-full px-5 py-4 text-left font-bold text-xs sm:text-sm text-gray-800 flex items-center justify-between hover:bg-gray-50 focus:outline-none"
                     >
                       <span>{faq.q}</span>
                       <span className="text-xs text-gray-400 font-mono">{openFaqIdx === index ? '▲' : '▼'}</span>
                     </button>
                     {openFaqIdx === index && (
-                      <div className="px-5 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-50 pt-2 animate-in fade-in duration-200">
+                      <div className="px-5 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-50 pt-2 animate-in fade-in duration-150">
                         {faq.a}
                       </div>
                     )}
@@ -552,7 +522,7 @@ export default function AppCoreArchitecture() {
 
       {/* FOOTER LAYER */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
-        <span>© 2026 extrct.app SaaS Global Operations Terminal. All parameters verified.</span>
+        <span>© 2026 extrct.app SaaS Global Operations Terminal. All rights reserved.</span>
       </footer>
 
     </div>
