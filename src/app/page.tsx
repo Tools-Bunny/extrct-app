@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { analyzeEcomFees, EcomCsvRow, LeakageReport } from '../modules/ecom/processor';
-import { supabase } from '../lib/supabaseClient';
+import { analyzeMarketingSpend, AdSetRow, MarketingLeakageReport } from '../modules/marketing/marketingProcessor';
 
 export default function NotionWorkspace() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'ecom'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'ecom' | 'marketing'>('dashboard');
   const [report, setReport] = useState<LeakageReport | null>(null);
+  const [marketingReport, setMarketingReport] = useState<MarketingLeakageReport | null>(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [isCloudSyncing, setIsCloudSyncing] = useState(false);
@@ -22,7 +23,6 @@ export default function NotionWorkspace() {
 
   const handleSimulateCsvDrop = async (forceLock = true) => {
     setIsCloudSyncing(true);
-    
     const mockCsvRows: EcomCsvRow[] = [
       { orderId: "ORD-9921", sku: "NEXL-CABLE-01", chargedFee: 45.00, expectedFee: 32.00 },
       { orderId: "ORD-9922", sku: "NEXL-HEAD-02", chargedFee: 85.50, expectedFee: 85.50 },
@@ -31,22 +31,29 @@ export default function NotionWorkspace() {
     ];
     
     const output = analyzeEcomFees(mockCsvRows);
-    if (!forceLock || paymentSuccess) {
-      output.isLocked = false;
-    }
+    if (!forceLock || paymentSuccess) output.isLocked = false;
 
-    // Connect to global cloud instance layer tracking simulation metrics
-    try {
-      console.log("Syncing performance metrics payload context directly over Supabase schema...");
-      // Database tracking engine trigger goes active silently here
-    } catch (err) {
-      console.warn("Local sandbox simulation active context fallback state handled:", err);
-    } finally {
-      setTimeout(() => {
-        setReport(output);
-        setIsCloudSyncing(false);
-      }, 400); // UI micro-delay interface loop feeling simulation
-    }
+    setTimeout(() => {
+      setReport(output);
+      setIsCloudSyncing(false);
+    }, 400);
+  };
+
+  const handleSimulateMarketingDrop = async () => {
+    setIsCloudSyncing(true);
+    const mockAdRows: AdSetRow[] = [
+      { adSetName: "US_Lookalike_Purchasers_PerfMax", spend: 450.00, clicks: 120, conversions: 0, targetCpa: 25.00 },
+      { adSetName: "EU_Interest_Broad_Retargeting", spend: 200.00, clicks: 85, conversions: 8, targetCpa: 20.00 },
+      { adSetName: "CA_Competitor_Keywords_Search", spend: 310.00, clicks: 40, conversions: 1, targetCpa: 30.00 },
+    ];
+
+    const output = analyzeMarketingSpend(mockAdRows);
+    if (paymentSuccess) output.isLocked = false;
+
+    setTimeout(() => {
+      setMarketingReport(output);
+      setIsCloudSyncing(false);
+    }, 400);
   };
 
   const handleCheckout = async () => {
@@ -57,7 +64,7 @@ export default function NotionWorkspace() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("Stripe Configuration Redirect Simulated! Syncing cloud records state active.");
+        alert("Stripe Configuration Redirect Simulated!");
         window.location.href = `${window.location.origin}?payment=success`;
       }
     } catch (err) {
@@ -70,7 +77,7 @@ export default function NotionWorkspace() {
   return (
     <div className="flex min-h-screen bg-white text-[#37352f] font-sans antialiased">
       
-      {/* Sidebar Layout View */}
+      {/* Sidebar Layout */}
       <aside className="w-60 bg-[#fbfbfa] border-r border-[#edece9] flex flex-col justify-between select-none">
         <div className="py-2.5 px-3">
           <div onClick={() => setActiveTab('dashboard')} className="flex items-center space-x-2 p-1.5 hover:bg-[rgba(55,53,47,0.04)] rounded cursor-pointer">
@@ -84,133 +91,93 @@ export default function NotionWorkspace() {
 
           <div className="mt-1 space-y-0.5">
             <div 
-              onClick={() => setActiveTab('ecom')}
+              onClick={() => { setActiveTab('ecom'); setMarketingReport(null); }}
               className={`flex items-center space-x-2 px-2 py-1.5 rounded cursor-pointer text-sm ${activeTab === 'ecom' ? 'bg-[rgba(55,53,47,0.08)] font-medium' : 'hover:bg-[rgba(55,53,47,0.04)]'}`}
             >
               <span>📦</span>
               <span>Marketplace Fee Auditor</span>
             </div>
+            <div 
+              onClick={() => { setActiveTab('marketing'); setReport(null); }}
+              className={`flex items-center space-x-2 px-2 py-1.5 rounded cursor-pointer text-sm ${activeTab === 'marketing' ? 'bg-[rgba(55,53,47,0.08)] font-medium' : 'hover:bg-[rgba(55,53,47,0.04)]'}`}
+            >
+              <span>📈</span>
+              <span>Ad-Spend Budget Burn Alert</span>
+            </div>
           </div>
-        </div>
-        <div className="p-3 border-t border-[#edece9] text-xs text-[#7c7b77] flex items-center space-x-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-          <span>Cloud Core Connection Configured</span>
         </div>
       </aside>
 
-      {/* Primary Context Workspace Frame */}
+      {/* Main Framework View */}
       <main className="flex-1 overflow-y-auto">
         <div className="h-11 px-6 border-b border-[#edece9] flex items-center text-sm text-[#7c7b77]">
           <span>Workspace</span>
           <span className="mx-1.5 text-xs">/</span>
-          <span className="text-[#37352f] font-medium">
-            {activeTab === 'dashboard' ? 'Overview' : 'Marketplace Fee Auditor'}
+          <span className="text-[#37352f] font-medium uppercase text-xs tracking-wider">
+            {activeTab}
           </span>
         </div>
 
         <div className="max-w-3xl mx-auto px-12 pt-16 pb-24">
           
-          {activeTab === 'dashboard' ? (
+          {activeTab === 'dashboard' && (
             <div>
               <div className="flex items-center space-x-3 text-4xl mb-6">
                 <span>🛑</span>
                 <h1 className="text-4xl font-bold tracking-tight">Zero-Setup Leakage Detectors</h1>
               </div>
-              <p className="text-sm text-[#7c7b77] mb-8">Select a utility from the sidebar or click below to audit data.</p>
-              
-              <div 
-                onClick={() => setActiveTab('ecom')}
-                className="border border-[#edece9] rounded-md p-4 hover:bg-[rgba(55,53,47,0.04)] cursor-pointer flex justify-between items-center"
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">📦</span>
-                  <div>
-                    <h3 className="font-medium">Marketplace Fee Auditor</h3>
-                    <p className="text-xs text-[#7c7b77]">Find Amazon/Shopify platform overcharges instantly.</p>
-                  </div>
+              <div className="space-y-3">
+                <div onClick={() => setActiveTab('ecom')} className="border border-[#edece9] rounded-md p-4 hover:bg-[rgba(55,53,47,0.04)] cursor-pointer flex justify-between items-center bg-white">
+                  <div className="flex items-center space-x-3"><span>📦</span><div><h3 className="font-medium text-sm">Marketplace Fee Auditor</h3><p className="text-xs text-[#7c7b77]">Find platform fee discrepancies.</p></div></div>
                 </div>
-                <span className="text-xs font-mono text-red-500 bg-red-50 px-2 py-1 rounded">Leakage Detector Active</span>
+                <div onClick={() => setActiveTab('marketing')} className="border border-[#edece9] rounded-md p-4 hover:bg-[rgba(55,53,47,0.04)] cursor-pointer flex justify-between items-center bg-white">
+                  <div className="flex items-center space-x-3"><span>📈</span><div><h3 className="font-medium text-sm">Ad-Spend Budget Burn Alert</h3><p className="text-xs text-[#7c7b77]">Isolate non-performing bleeding ad networks budget.</p></div></div>
+                </div>
               </div>
             </div>
-          ) : (
+          )}
+
+          {activeTab === 'ecom' && (
             <div>
-              <div className="flex items-center space-x-3 text-4xl mb-4">
-                <span>📦</span>
-                <h1 className="text-4xl font-bold tracking-tight">Marketplace Fee Auditor</h1>
+              <div className="flex items-center space-x-3 text-3xl font-bold mb-6"><span>📦</span><h1>Marketplace Fee Auditor</h1></div>
+              <div onClick={() => handleSimulateCsvDrop(true)} className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-lg p-12 text-center cursor-pointer bg-[#fbfbfa] mb-6">
+                {isCloudSyncing ? <span>🔄 Syncing analytical logs...</span> : <span>📄 Simulate Amazon/Shopify Settlement Drop</span>}
               </div>
-              
-              {paymentSuccess && (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm p-3 rounded-md mb-6 font-medium">
-                  ✓ Payment successful. Premium report features unlocked via cloud records validation.
+              {report && (
+                <div className="border border-[#edece9] rounded-md p-6 bg-white">
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="p-3 bg-[#fbfbfa] rounded border">Scanned Rows: <b>{report.totalAnalyzed}</b></div>
+                    <div className="p-3 bg-[#fbfbfa] rounded border text-red-500">Overcharges: <b>{report.flaggedOrdersCount}</b></div>
+                    <div className="p-3 bg-red-50 rounded border text-red-600">Leaked: <b>${report.totalRevenueLeaked}</b></div>
+                  </div>
+                  {report.isLocked && (
+                    <div className="bg-[#fdebec] border rounded p-4 text-center">
+                      <p className="text-xs mb-3">Unlock dispute-ready recovery data sheet.</p>
+                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs py-2 px-4 rounded">Unlock for $10</button>
+                    </div>
+                  )}
                 </div>
               )}
+            </div>
+          )}
 
-              <p className="text-sm text-[#7c7b77] mb-8">Drop your platform settlement CSV below to scan for silent revenue leakage.</p>
-
-              {/* Upload Dropzone Box Grid Layer Component */}
-              <div 
-                onClick={() => handleSimulateCsvDrop(true)}
-                className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-lg p-12 text-center cursor-pointer bg-[#fbfbfa] transition-colors mb-8"
-              >
-                {isCloudSyncing ? (
-                  <div>
-                    <span className="text-2xl block animate-spin mb-2">🔄</span>
-                    <span className="text-sm font-medium block text-[#37352f]">Syncing data framework logs with secure analytical servers...</span>
-                  </div>
-                ) : (
-                  <div>
-                    <span className="text-3xl block mb-2">📄</span>
-                    <span className="text-sm font-medium block text-[#37352f]">Click here to simulate a CSV File Drop</span>
-                    <span className="text-xs text-[#7c7b77] mt-1 block">Simulates standard Amazon Settlement Export processing</span>
-                  </div>
-                )}
+          {activeTab === 'marketing' && (
+            <div>
+              <div className="flex items-center space-x-3 text-3xl font-bold mb-6"><span>📈</span><h1>Ad-Spend Budget Burn Alert</h1></div>
+              <div onClick={handleSimulateMarketingDrop} className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-lg p-12 text-center cursor-pointer bg-[#fbfbfa] mb-6">
+                {isCloudSyncing ? <span>🔄 Extracting Meta/Google Ads delivery matrix logs...</span> : <span>📄 Click to drop ad-performance campaign report dump</span>}
               </div>
-
-              {/* Real-time Dynamic Report Area Rendering */}
-              {report && (
-                <div className="border border-[#edece9] rounded-md p-6 bg-white shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
-                    <span>📊</span> <span>Audit Performance Report</span>
-                  </h3>
-                  
+              {marketingReport && (
+                <div className="border border-[#edece9] rounded-md p-6 bg-white">
                   <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-[#fbfbfa] p-3 rounded border border-[#edece9]">
-                      <span className="text-xs text-[#7c7b77] block">Rows Scanned</span>
-                      <span className="text-xl font-bold font-mono">{report.totalAnalyzed}</span>
-                    </div>
-                    <div className="bg-[#fbfbfa] p-3 rounded border border-[#edece9]">
-                      <span className="text-xs text-[#7c7b77] block">Overcharged Orders</span>
-                      <span className="text-xl font-bold font-mono text-red-500">{report.flaggedOrdersCount}</span>
-                    </div>
-                    <div className="bg-red-50 p-3 rounded border border-red-100">
-                      <span className="text-xs text-red-700 block">Total Revenue Leaked</span>
-                      <span className="text-xl font-bold font-mono text-red-600">${report.totalRevenueLeaked}</span>
-                    </div>
+                    <div className="p-3 bg-[#fbfbfa] rounded border">Total Spend Checked: <b>${marketingReport.totalSpendAnalyzed}</b></div>
+                    <div className="p-3 bg-[#fbfbfa] rounded border text-red-500">Bleeding Ad-Sets: <b>{marketingReport.bleedingAdSetsCount}</b></div>
+                    <div className="p-3 bg-red-50 rounded border text-red-600">Wasted Budget: <b>${marketingReport.estimatedWastedBudget}</b></div>
                   </div>
-
-                  {report.isLocked ? (
-                    <div className="bg-[#fdebec] border border-[#f5c2c2] rounded p-4 text-center">
-                      <span className="text-lg block mb-1">🔒 Premium Data Export Gated</span>
-                      <p className="text-xs text-[#37352f] mb-3">
-                        We found exactly where you are bleeding cash. Unlock the dispute-ready CSV sheet with individual Order IDs to file your recovery claims.
-                      </p>
-                      <button 
-                        onClick={handleCheckout}
-                        disabled={isLoadingPayment}
-                        className="bg-[#37352f] hover:bg-[#222] text-white font-medium text-xs py-2 px-4 rounded transition-colors shadow-sm disabled:opacity-50"
-                      >
-                        {isLoadingPayment ? 'Processing...' : 'Unlock Claim Sheet for $10'}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded p-4 text-center">
-                      <span className="text-lg block mb-1 text-emerald-900 font-semibold">🔓 Full Claim Export Available</span>
-                      <p className="text-xs text-emerald-700 mb-3">
-                        All individual Order IDs match logs verified. Your download layout is fully optimized.
-                      </p>
-                      <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs py-2 px-4 rounded transition-colors shadow-sm">
-                        Download Full Claim Sheet (.CSV)
-                      </button>
+                  {marketingReport.isLocked && (
+                    <div className="bg-[#fdebec] border rounded p-4 text-center">
+                      <p className="text-xs mb-3">Unlock automated API script tools to instantly pause these bleeding targets dynamically.</p>
+                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs py-2 px-4 rounded">Unlock Optimization Script for $10</button>
                     </div>
                   )}
                 </div>
@@ -220,7 +187,6 @@ export default function NotionWorkspace() {
 
         </div>
       </main>
-
     </div>
   );
 }
