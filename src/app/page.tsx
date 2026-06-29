@@ -111,44 +111,49 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface MaintenanceScheduleNode {
+interface CostingBatchNode {
   id: string;
-  machineName: string;
-  componentType: string;
-  operatingHours: number;
-  criticality: 'HIGH' | 'MEDIUM' | 'LOW';
-  nextServiceDueDate: string;
-  actionStatus: 'PROACTIVE' | 'RISK_ZONE' | 'OVERDUE_BREACH';
+  batchName: string;
+  rawMaterialCost: number;
+  laborOverhead: number;
+  unitsProduced: number;
+  targetWholesalePrice: number;
+  costPerUnit: number;
+  grossMarginPercentage: number;
+  profitRiskStatus: 'HEALTHY_MARGIN' | 'COMPRESSED_WARN' | 'LOSS_BLEED';
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('mfg_maintenance'); // Active tool locked
+  const [activeTool, setActiveTool] = useState<string>('mfg_costing'); // Dynamic routing lock
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('mfg');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('mfg');
 
-  // Shared Stripe Processing Billing States
+  // Shared Core Gateway Payments Telemetry
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Maintenance Scheduler States
-  const [inputMachine, setInputMachine] = useState<string>('');
-  const [inputComponent, setInputComponent] = useState<string>('');
-  const [runtimeHours, setRuntimeHours] = useState<number>(1200);
-  const [criticalityTier, setCriticalityTier] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('HIGH');
-  const [maintenancePremiumLock, setMaintenancePremiumLock] = useState<boolean>(false);
+  // Batch Costing State Matrices
+  const [batchName, setBatchName] = useState<string>('');
+  const [rawCost, setRawCost] = useState<number>(35000);
+  const [laborCost, setLaborCost] = useState<number>(8000);
+  const [unitsQty, setUnitsQty] = useState<number>(1000);
+  const [wholesaleTarget, setWholesaleTarget] = useState<number>(55);
+  const [costingPremiumLock, setCostingPremiumLock] = useState<boolean>(false);
   
-  // Interactive On-Page FAQ Toggle States
+  // Accordion Controller State
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceScheduleNode[]>([
+  const [costingBatches, setCostingBatches] = useState<CostingBatchNode[]>([
     {
       id: "1",
-      machineName: "Heavy Injection Molding Rig-04",
-      componentType: "Hydraulic Seal Valves",
-      operatingHours: 4200,
-      criticality: "HIGH",
-      nextServiceDueDate: "2026-07-08",
-      actionStatus: "RISK_ZONE"
+      batchName: "Premium Fried Snacks Batch #22",
+      rawMaterialCost: 45000,
+      laborOverhead: 12000,
+      unitsProduced: 1500,
+      targetWholesalePrice: 48,
+      costPerUnit: 38.0,
+      grossMarginPercentage: 20.8,
+      profitRiskStatus: 'COMPRESSED_WARN'
     }
   ]);
 
@@ -161,42 +166,41 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Checkout Session Trigger: Handshake initialized for $10 Premium Alert Unlock Module.");
+      alert("Stripe Verification Gateway: Connected node validation complete.");
     }, 1100);
   };
 
-  // Scheduler Automation Engine logic calculation parameters
-  const executeCompileMaintenanceSchedule = () => {
-    if (!inputMachine.trim() || !inputComponent.trim()) return;
+  // Production batch margin calculation processor framework
+  const executeCompileBatchCosting = () => {
+    if (!batchName.trim() || rawCost <= 0 || unitsQty <= 0 || wholesaleTarget <= 0) return;
 
-    // Strict limitation threshold check for conversion triggers
-    if (maintenanceRecords.length >= 2) {
-      setMaintenancePremiumLock(true);
+    if (costingBatches.length >= 2) {
+      setCostingPremiumLock(true);
       return;
     }
 
-    let status: 'PROACTIVE' | 'RISK_ZONE' | 'OVERDUE_BREACH' = 'PROACTIVE';
-    if (runtimeHours > 3500 || criticalityTier === 'HIGH') status = 'RISK_ZONE';
-    if (runtimeHours > 5000) status = 'OVERDUE_BREACH';
+    const totalExpense = rawCost + laborCost;
+    const computedUnitCost = parseFloat((totalExpense / unitsQty).toFixed(2));
+    const marginPercentage = parseFloat((((wholesaleTarget - computedUnitCost) / wholesaleTarget) * 100).toFixed(1));
 
-    // Calculating standard production offset date rules natively
-    const currentDate = new Date();
-    currentDate.setDate(currentDate.getDate() + (runtimeHours > 3000 ? 5 : 20));
-    const finalFormattedDate = currentDate.toISOString().split('T')[0];
+    let riskStatus: 'HEALTHY_MARGIN' | 'COMPRESSED_WARN' | 'LOSS_BLEED' = 'HEALTHY_MARGIN';
+    if (marginPercentage < 10) riskStatus = 'LOSS_BLEED';
+    else if (marginPercentage < 25) riskStatus = 'COMPRESSED_WARN';
 
-    const newRecord: MaintenanceScheduleNode = {
+    const newBatch: CostingBatchNode = {
       id: Date.now().toString(),
-      machineName: inputMachine.trim(),
-      componentType: inputComponent.trim(),
-      operatingHours: runtimeHours,
-      criticality: criticalityTier,
-      nextServiceDueDate: finalFormattedDate,
-      actionStatus: status
+      batchName: batchName.trim(),
+      rawMaterialCost: rawCost,
+      laborOverhead: laborCost,
+      unitsProduced: unitsQty,
+      targetWholesalePrice: wholesaleTarget,
+      costPerUnit: computedUnitCost,
+      grossMarginPercentage: marginPercentage,
+      profitRiskStatus: riskStatus
     };
 
-    setMaintenanceRecords([newRecord, ...maintenanceRecords]);
-    setInputMachine('');
-    setInputComponent('');
+    setCostingBatches([newBatch, ...costingBatches]);
+    setBatchName('');
   };
 
   return (
@@ -257,157 +261,161 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* CORE FRAMEWORK CONTROLLER ROUTER SPLIT */}
+      {/* COMPONENT INTERACTIVE SWITCHER SCREEN BLOCK */}
       {activeTool === 'dashboard' ? (
-        <div className="p-12 text-center text-xs font-mono text-gray-400">Router Terminal Home state context link.</div>
-      ) : activeTool === 'mfg_maintenance' ? (
+        <div className="p-12 text-center text-xs font-mono text-gray-400">Main State Matrix Controller Shell.</div>
+      ) : activeTool === 'mfg_costing' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* PROGRAMMATIC ON-PAGE SEO SPEC DATA ENGINES */}
+          {/* CRITICAL ATTRIBUTION DATA ON-PAGE SEO VAULT */}
           <div className="hidden">
-            <h1>Machine Breakdown & Preventative Maintenance Scheduler Engine</h1>
-            <h2>MSME predictive hardware down-time reduction software templates.</h2>
-            <p>Schedule systematic factory floor machine overhauls, calculate runtime critical deterioration offsets, trace machinery strain parameters, and connect automated sequence alerts before production breaches.</p>
+            <h1>Production Batch Costing & Profit Margin Framework Tool | MSME Cost Matrix</h1>
+            <h2>Algorithmic batch pricing logic models for variable factory components and scaling manufacturers.</h2>
+            <p>Calculate unit level gross cost matrices, isolate raw material scaling spikes, trace labor resource drain coefficients, and preserve wholesale net realization percentages metrics natively.</p>
           </div>
 
-          {/* PREMIUM LANDING HERO SECTION */}
+          {/* DYNAMIC SALES HERO SECTION */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-700 border border-blue-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>🔧</span> <span>Predictive Operational Risk Matrix</span>
+              <span className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>🧮</span> <span>Granular Unit-Level Margin Armor</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Eliminate Unplanned Factory Downtime. <br />
-                <span className="text-blue-600">Automate Proactive Machine Overhaul Logs.</span>
+                Stop Underestimating Production Costs. <br />
+                <span className="text-emerald-600">Lock In Real Batch Gross Profit Margins.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Unplanned assembly breaks crush delivery timelines and burn through client trust margins. Track operating runtime milestones natively to enforce proactive sequence maintenance before hardware failure.
+                Volatile ingredient quotes and hidden labor leakages destroy batch profit targets completely. Calculate precise real-time cost boundaries before shipping inventory lots to external distributors.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#scheduler-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Open Maintenance Scheduler Terminal ↓
+                <a href="#costing-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Launch Costing Analyzer Console ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Activate Live Supabase Sequence Alerts ($10)
+                  Export Deep Margin Data Ledger ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* INTERACTIVE COMPONENT WORKSPACE */}
-          <section id="scheduler-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* APPLICATION INTERACTIVE TELEMETRY CONSOLE */}
+          <section id="costing-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* SCHEDULER ENTRY CONSOLE */}
+              {/* COST CONFIGURATOR TERMINAL CARD */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Hardware Telemetry Input</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Batch Cost Metrics</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Machine Asset Title / ID</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Production Lot / Item Reference</label>
                     <input 
                       type="text" 
-                      value={inputMachine}
-                      onChange={(e) => setInputMachine(e.target.value)}
-                      placeholder="e.g. CNC Heavy Milling Unit A"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] text-[#1e1e1c] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Vulnerable Component Node</label>
-                    <input 
-                      type="text" 
-                      value={inputComponent}
-                      onChange={(e) => setInputComponent(e.target.value)}
-                      placeholder="e.g. Main Spindle Bearings"
+                      value={batchName}
+                      onChange={(e) => setBatchName(e.target.value)}
+                      placeholder="e.g. Potato Chips Lot #45"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Accumulated Runtime (hrs)</label>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Raw Materials (₹)</label>
                       <input 
                         type="number" 
-                        value={runtimeHours}
-                        onChange={(e) => setRuntimeHours(Number(e.target.value))}
+                        value={rawCost}
+                        onChange={(e) => setRawCost(Number(e.target.value))}
                         className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Criticality Tier</label>
-                      <select
-                        value={criticalityTier}
-                        onChange={(e) => setCriticalityTier(e.target.value as 'HIGH' | 'MEDIUM' | 'LOW')}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700"
-                      >
-                        <option value="HIGH">CRITICAL</option>
-                        <option value="MEDIUM">STANDARD</option>
-                        <option value="LOW">DEFERRED</option>
-                      </select>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Labor & Power (₹)</label>
+                      <input 
+                        type="number" 
+                        value={laborCost}
+                        onChange={(e) => setLaborCost(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Units Produced Qty</label>
+                      <input 
+                        type="number" 
+                        value={unitsQty}
+                        onChange={(e) => setUnitsQty(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Target Price / Unit (₹)</label>
+                      <input 
+                        type="number" 
+                        value={wholesaleTarget}
+                        onChange={(e) => setWholesaleTarget(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      />
                     </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={executeCompileMaintenanceSchedule}
-                  disabled={!inputMachine.trim() || !inputComponent.trim()}
-                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileBatchCosting}
+                  disabled={!batchName.trim() || rawCost <= 0 || unitsQty <= 0}
+                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Compute Next Service Anchor
+                  Analyze Cost Architecture
                 </button>
               </div>
 
-              {/* AUTOMATION MONITOR SCHEDULING DISPATCH TABLE */}
+              {/* LIVE MARGIN LEDGER REAL-TIME MONITOR GRID */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {/* PRE-FILLED PREMIUM ALERT BOX HOOK */}
-                {maintenancePremiumLock && (
+                {costingPremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Automated SMS & Sequence Dispatch Alerts Engaged</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free local workspace layout saves current state only. Pay $10 to enable active background cron triggers that dispatch warning text nodes directly to engineers before production deadlines.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 CSV Costing Data Ledger Locked</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free analytical frame caps at 2 parallel items logs. Transition to our professional module package to map macro historical trends and unpack structural yield reports.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-blue-700 transition-colors">
-                      Unlock System Alert Nodes
+                    <button onClick={triggerSecureStripeCheckout} className="bg-emerald-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-emerald-700 transition-colors">
+                      Activate Tier Setup
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Factory Overhaul Matrix</span>
-                    <span className="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">Telemetry Connected</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Granular Batch Diagnostics Feed</span>
+                    <span className="text-[10px] font-mono text-gray-400">Status: Real-Time Active</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {maintenanceRecords.map((node) => (
+                    {costingBatches.map((node) => (
                       <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs font-bold text-[#1e1e1c]">{node.machineName}</span>
-                            <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-bold ${node.criticality === 'HIGH' ? 'bg-red-100 text-red-900' : 'bg-gray-100 text-gray-600'}`}>
-                              {node.criticality} RISK
-                            </span>
+                        <div className="space-y-1.5">
+                          <span className="font-bold text-sm text-[#1e1e1c] block">{node.batchName}</span>
+                          <div className="text-xs text-gray-500">
+                            Volume: <b>{node.unitsProduced} items</b> | Cost/Unit: <span className="font-mono font-bold text-gray-900">₹{node.costPerUnit}</span>
                           </div>
-                          <p className="text-[12px] text-gray-500">
-                            Node Targeted: <span className="font-medium text-gray-700">{node.componentType}</span> | Runtime Weight: <span className="font-mono font-bold text-gray-900">{node.operatingHours} hrs logged</span>
-                          </p>
+                          <div className="text-[11px] text-gray-400 font-mono">
+                            Materials Matrix: ₹{node.rawMaterialCost.toLocaleString('en-IN')} + Overhead: ₹{node.laborOverhead.toLocaleString('en-IN')}
+                          </div>
                         </div>
 
                         <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold tracking-tight block border ${node.actionStatus === 'OVERDUE_BREACH' ? 'bg-red-50 text-red-700 border-red-100 animate-pulse' : node.actionStatus === 'RISK_ZONE' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
-                            {node.actionStatus === 'OVERDUE_BREACH' ? '🚨 REPAIR CRITICAL' : node.actionStatus === 'RISK_ZONE' ? '⚠️ INSPECT LOG' : '✓ HEALTHY'}
+                          <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold tracking-tight block border ${node.profitRiskStatus === 'LOSS_BLEED' ? 'bg-red-50 text-red-700 border-red-100' : node.profitRiskStatus === 'COMPRESSED_WARN' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+                            {node.profitRiskStatus === 'LOSS_BLEED' ? '🚨 MARGIN LEAK' : node.profitRiskStatus === 'COMPRESSED_WARN' ? '⚠️ RISK SPIKE' : '✓ HEALTHY CUT'}
                           </span>
-                          <span className="text-[11px] text-gray-400 font-mono mt-1 block">
-                            Target Date: <b>{node.nextServiceDueDate}</b>
+                          <span className={`font-mono text-xs font-black mt-1.5 block ${node.grossMarginPercentage < 10 ? 'text-red-600' : 'text-emerald-600'}`}>
+                            {node.grossMarginPercentage}% Net Cut
                           </span>
                         </div>
                       </div>
@@ -419,58 +427,58 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* VISUAL LAYOUT TEXT INFOGRAPHIC SYSTEM */}
+          {/* SYSTEM VALUE VISUAL REVENUE FLOW BLUEPRINT INFOGRAPHICS */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Automated Pacing Blueprint</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Proactive Overhaul Flow Loop</h2>
-                <p className="text-xs text-gray-500 mt-2">How our edge-logic framework processes real-time runtime hours to lock down component lifecycles.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block mb-2">Attribution Workflow Mapping</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Unit-Level Margin Recovery Loop</h2>
+                <p className="text-xs text-gray-500 mt-2">How structured data isolation blocks out hidden losses before wholesale contracts execute.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">⚙ 01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Runtime Aggregation</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Shift logs record machinery operating weights directly. Edge parameters catch deviations instantly without external hardware dependencies.</p>
+                  <div className="text-xl mb-3">🧮 01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Expense Aggregation</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">System compiles direct source raw inventory prices nested cleanly alongside shift metrics, wiping out manual ledger mistakes.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">📡 02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Critical Status Mapping</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">System algorithms weigh asset runtime against strict industrial wear curves, grouping targets into precise color-coded risk flags.</p>
+                  <div className="text-xl mb-3">📊 02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Lot Variable Splitting</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Instantly parses total investments across production volume lots, mapping exact real-time component costs to single piece targets.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">🚨 03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Preemptive Alert Dispatch</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Before standard component wear timelines breach safety thresholds, premium routers trigger sequence signals to maintenance squads.</p>
+                  <div className="text-xl mb-3">🛡 03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Profit Boundary Lock</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Alert codes instantly surface margins falling underneath custom thresholds, signaling managers to re-negotiate quotes before shipments.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* EXCLUSIVE MARKETING VALUE SECTIONS (USPs) */}
+          {/* PRODUCT UNIQUE SELLING PROPOSITIONS (USPs) MARKETING CONTENT */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Maximum Plant Asset Protection</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Engineered to Safeguard <br />Your Production Commitments.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">MSME Financial Guard Suite</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Ditch Chaotic Spreadsheets. <br />Govern Factory Profitability.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Most manufacturing platforms trap small business facilities in complex field management workflows. <b>extrct.app</b> strips software friction entirely, delivering a rugged data engine optimized for high-velocity operation floors.
+                    Messy offline tables obscure true conversion spend details, making products look profitable when they are bleeding cash. <b>extrct.app</b> forces complete structural mathematical clarity across fast-moving workflows.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <div className="text-lg font-bold text-blue-600">94%</div>
-                    <span className="font-bold text-xs text-gray-900 block mt-1">Breakdown Prevention</span>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Flags degrading spindles or bearings well in advance of lockups.</p>
+                    <span className="text-2xl block mb-1">📈</span>
+                    <span className="font-bold text-xs text-gray-900 block">Leak Eradication</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Isolates exactly which product batches drop under target thresholds.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <div className="text-lg font-bold text-emerald-600">Zero</div>
-                    <span className="font-bold text-xs text-gray-900 block mt-1">Data Fatigue</span>
-                    <p className="text-[11px] text-gray-400 mt-0.5">No messy onboarding manuals — enter asset data inputs and trace limits instantly.</p>
+                    <span className="text-2xl block mb-1">⚡</span>
+                    <span className="font-bold text-xs text-gray-900 block">Instant Pricing Audits</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Re-calculate pricing frameworks on the fly when input supplier quotes change.</p>
                   </div>
                 </div>
 
@@ -478,26 +486,26 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* HIGH-CONVERTING ACCORDION FAQ BLOCK */}
+          {/* DEEP ON-PAGE SEO ACCORDION FAQ SYSTEM BLOCK */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Asked Questions</h3>
-                <p className="text-xs text-gray-400 mt-1">Answers to common deployment queries about our preventative maintenance framework.</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Framework Queries</h3>
+                <p className="text-xs text-gray-400 mt-1">Everything you need to map about local production gross margins.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "How does the engine calculate next service milestones?",
-                    a: "The scheduling algorithm maps input operating hours against variable equipment wear coefficients. High criticality nodes scale downward automatically, prompting inspection limits significantly sooner to safeguard production capacity."
+                    q: "How exactly do hidden operational parameters corrupt single unit calculations?",
+                    a: "Most local business operators track basic ingredient bills but overlook baseline shifting variables like factory power spikes, machine setup wear, and product wastage rates. Bundling labor splits isolates true product costs down to the package level."
                   },
                   {
-                    q: "What do I unlock inside the $10 premium alerting setup?",
-                    a: "The standard terminal runs local manual data mappings. Upgrading links a Supabase listener network to route token operations directly into text nodes, alerting factory technicians before dead-lines drop."
+                    q: "Can I leverage this matrix to model wholesale distribution tier discounts?",
+                    a: "Absolutely. By establishing the firm floor production cost per unit, you can safely map out the exact range for distributor commission cuts without slipping into structural cash flow losses."
                   }
                 ].map((faq, index) => (
-                  <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden">
+                  <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
                     <button
                       onClick={() => setOpenFaqIdx(openFaqIdx === index ? null : index)}
                       className="w-full px-5 py-4 text-left font-bold text-xs sm:text-sm text-gray-800 flex items-center justify-between hover:bg-gray-50 focus:outline-none"
@@ -522,7 +530,7 @@ export default function AppCoreArchitecture() {
 
       {/* FOOTER LAYER */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
-        <span>© 2026 extrct.app SaaS Global Operations Terminal. All rights reserved.</span>
+        <span>© 2026 extrct.app SaaS Global Operations Terminal. All system nodes synchronized.</span>
       </footer>
 
     </div>
