@@ -1,268 +1,243 @@
 "use client";
 
 import React, { useState } from 'react';
-import { matrixData, processMatrixTool, MatrixReport } from '../modules/matrixProcessor';
 
-type IndustryKey = 'ecom' | 'marketing' | 'mfg' | 'real_estate' | 'content' | 'hotels' | 'gym' | 'freelance' | 'cafe' | 'dtc';
+type IndustryKey = 
+  | 'ecom' | 'marketing' | 'mfg' | 'real_estate' | 'content' 
+  | 'hotels' | 'gym' | 'freelance' | 'cafe' | 'dtc';
+
+interface ToolItem {
+  id: string;
+  shortName: string;
+  tagline: string;
+}
 
 interface IndustryConfig {
   label: string;
-  tools: { id: string; shortName: string }[];
+  tools: ToolItem[];
 }
 
 const industriesMap: Record<IndustryKey, IndustryConfig> = {
   ecom: {
     label: "📦 E-Commerce",
     tools: [
-      { id: 'ecom_fee', shortName: "📑 Fee & Overcharge Auditor" },
-      { id: 'ecom_img', shortName: "🗜️ Image WebP Compressor" },
-      { id: 'ecom_radar', shortName: "📡 Competitor Price Radar" }
+      { id: 'ecom_fee', shortName: "📑 Fee & Overcharge Auditor", tagline: "Audits structural weight tier discrepancies." },
+      { id: 'ecom_img', shortName: "🗜️ Image WebP Compressor", tagline: "Batch conversion pipeline for rapid assets." },
+      { id: 'ecom_radar', shortName: "📡 Competitor Price Radar", tagline: "Automated daily listing scraper and map tracker." }
     ]
   },
   marketing: {
-    label: "📈 Marketing Agencies",
+    label: "📈 Digital Marketing Agencies",
     tools: [
-      { id: 'marketing_burn', shortName: "🚨 Ad-Spend Budget Burn Alert" },
-      { id: 'marketing_portal', shortName: "🌐 Whitelabel Client Portal" },
-      { id: 'marketing_utm', shortName: "🔗 UTM Campaign Link Builder" }
+      { id: 'marketing_burn', shortName: "🚨 Ad-Spend Budget Burn Alert", tagline: "Triggers active velocity alerts across network spends." },
+      { id: 'marketing_portal', shortName: "🌐 Whitelabel Notion Client Portal", tagline: "One-click clean portfolio sharing dashboards." },
+      { id: 'marketing_utm', shortName: "🔗 UTM Campaign Link Generator", tagline: "Structured matrix parameters for clean attribution flow." }
     ]
   },
   mfg: {
     label: "🏗️ Manufacturing & MSMEs",
     tools: [
-      { id: 'mfg_yield', shortName: "📉 Raw Material Yield Detector" },
-      { id: 'mfg_maintenance', shortName: "🔧 Maintenance Scheduler Alert" },
-      { id: 'mfg_costing', shortName: "🧮 Production Batch Costing Tool" }
+      { id: 'mfg_yield', shortName: "📉 Raw Material Yield Detector", tagline: "Flags floor drop waste levels against input logs." },
+      { id: 'mfg_maintenance', shortName: "🔧 Maintenance Scheduler Alert", tagline: "Supabase sequence alerts before production deadlines." },
+      { id: 'mfg_costing', shortName: "🧮 Production Batch Costing Tool", tagline: "Real-time components margin framework calculators." }
     ]
   },
   real_estate: {
     label: "🏡 Real Estate Agents",
     tools: [
-      { id: 'real_estate_whatsapp', shortName: "💬 WhatsApp Bulk Match Engine" },
-      { id: 'real_estate_commission', shortName: "📊 Split-Commission Calculator" },
-      { id: 'real_estate_flyer', shortName: "🖼️ Instant Social Flyer Maker" }
+      { id: 'real_estate_whatsapp', shortName: "💬 WhatsApp Bulk Match Engine", tagline: "Parses parameters directly into client broadcasts." },
+      { id: 'real_estate_commission', shortName: "📊 Split-Commission Calculator", tagline: "Calculates gross agency margins and multi-broker cuts." },
+      { id: 'real_estate_flyer', shortName: "🖼️ Instant Social Flyer Maker", tagline: "Stitches property launch specs into sleek markups." }
     ]
   },
   content: {
     label: "🎬 Content Creators",
     tools: [
-      { id: 'content_repurpose', shortName: "🎞️ Video Hook Repurpose Tool" },
-      { id: 'content_sponsor', shortName: "💰 Sponsorship Price Estimator" },
-      { id: 'content_script', shortName: "📝 Script Structure Engine" }
+      { id: 'content_repurpose', shortName: "🎞️ Video Hook Repurpose Framework", tagline: "Splits long-form topics into structured format clips." },
+      { id: 'content_sponsor', shortName: "💰 Sponsorship Price Estimator", tagline: "Algorithmic pricing calculator for audience deliverables." },
+      { id: 'content_script', shortName: "📝 Script Structure Engine", tagline: "Enforces engagement markers for short-form retention." }
     ]
   },
   hotels: {
     label: "🏨 Boutique Hotels & Guesthouses",
     tools: [
-      { id: 'hotel_overbook', shortName: "🗓️ Overbooking Sync Matrix" },
-      { id: 'hotel_compendium', shortName: "📖 Guest Digital Compendium" },
-      { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Automator" }
+      { id: 'hotel_overbook', shortName: "🗓️ Overbooking Sync Matrix", tagline: "Lightweight single source central calendar hub." },
+      { id: 'hotel_compendium', shortName: "📖 Guest Digital Compendium", tagline: "Generates quick mobile guide web links via QR codes." },
+      { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Automator", tagline: "Sends departure upsell nodes directly to guest pipelines." }
     ]
   },
   gym: {
     label: "💪 Gyms & Fitness Studios",
     tools: [
-      { id: 'gym_churn', shortName: "📉 Member Churn Predictor" },
-      { id: 'gym_class', shortName: "📅 Class Capacity Optimizer" },
-      { id: 'gym_trainer', shortName: "🧮 Trainer Split Ledger" }
+      { id: 'gym_churn', shortName: "📉 Member Churn Predictor", tagline: "Monitors attendance velocity logs for warning offsets." },
+      { id: 'gym_class', shortName: "📅 Class Capacity Optimizer", tagline: "Staggers peak shift slots based on historical volume logs." },
+      { id: 'gym_trainer', shortName: "🧮 Trainer Split Ledger", tagline: "Processes tier base payouts avoiding manual math traps." }
     ]
   },
   freelance: {
     label: "✒️ Freelance Designers & Writers",
     tools: [
-      { id: 'freelance_scope', shortName: "🛡️ Scope Creep Guard" },
-      { id: 'freelance_retainer', shortName: "📊 Retainer Hours Tracker" },
-      { id: 'freelance_proposal', shortName: "📋 Dynamic Project Proposal Engine" }
+      { id: 'freelance_scope', shortName: "🛡️ Scope Creep Guard", tagline: "Isolates and logs client change requests on the fly." },
+      { id: 'freelance_retainer', shortName: "📊 Retainer Hours Tracker", tagline: "Visual hourly burn charts to share transparent client logs." },
+      { id: 'freelance_proposal', shortName: "📋 Dynamic Project Proposal Engine", tagline: "Models production risk buffers for fixed-rate estimates." }
     ]
   },
   cafe: {
     label: "☕ Cafes & Coffee Shops",
     tools: [
-      { id: 'cafe_waste', shortName: "🗑️ Perishable Waste Auditor" },
-      { id: 'cafe_recipe', shortName: "💲 Coffee Costing Ledger" },
-      { id: 'cafe_roster', shortName: "👥 Peak Transaction Rosterer" }
+      { id: 'cafe_waste', shortName: "🗑️ Perishable Waste Auditor", tagline: "Tracks daily kitchen throwaways against production curves." },
+      { id: 'cafe_recipe', shortName: "💲 Coffee Costing Ledger", tagline: "Calculates variable ingredient price updates down to cup levels." },
+      { id: 'cafe_roster', shortName: "👥 Peak Transaction Rosterer", tagline: "Optimizes staff rosters against peak historical POS curves." }
     ]
   },
   dtc: {
     label: "🛍️ Direct-to-Consumer Brands",
     tools: [
-      { id: 'dtc_cac', shortName: "📊 Multi-Channel CAC Tracker" },
-      { id: 'dtc_refund', shortName: "🔄 Return Rate Margin Bleed Auditor" },
-      { id: 'dtc_cohort', shortName: "👥 Customer LTV Cohort Matrix" }
+      { id: 'dtc_cac', shortName: "📊 Multi-Channel CAC Tracker", tagline: "Aggregates blended ecosystem metrics over isolated platform tracking." },
+      { id: 'dtc_refund', shortName: "🔄 Return Rate Margin Bleed Auditor", tagline: "Flags high-risk size variants draining fulfillment margins." },
+      { id: 'dtc_cohort', shortName: "👥 Customer LTV Cohort Matrix", tagline: "Slices monthly retention trends to track cohort parameters." }
     ]
   }
 };
 
-export default function SolopreneurMasterMegaMenu() {
+export default function SolopreneurMasterLayoutShell() {
   const [activeTool, setActiveTool] = useState<string>('dashboard');
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('ecom');
-  const [currentOutput, setCurrentOutput] = useState<MatrixReport | null>(null);
-  const [imageCount, setImageCount] = useState<number>(6);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
-    setCurrentOutput(null);
     setIsMegaMenuOpen(false);
   };
-
-  const triggerToolSimulation = (toolId: string, customInput?: any) => {
-    setIsProcessing(true);
-    const result = processMatrixTool(toolId, customInput);
-    setTimeout(() => {
-      setCurrentOutput(result);
-      setIsProcessing(false);
-    }, 300);
-  };
-
-  const selectedToolMeta = matrixData[activeTool];
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-[#37352f] font-sans antialiased text-[14px] relative">
       
-      {/* Top Header menu navigation bar */}
+      {/* HEADER NAVIGATION PIPELINE */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
+        
+        {/* LEFT SECTION: Logo + Menu Items */}
         <div className="flex items-center space-x-8">
           
-          <div onClick={() => { setActiveTool('dashboard'); setCurrentOutput(null); }} className="flex items-center space-x-2 cursor-pointer">
+          {/* Logo Brand Terminal */}
+          <div onClick={() => setActiveTool('dashboard')} className="flex items-center space-x-2 cursor-pointer shrink-0">
             <div className="w-6 h-6 bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-xs">M</div>
             <span className="font-bold text-base tracking-tight text-[#37352f]">extrct.app</span>
           </div>
 
-          <nav className="relative flex items-center h-full">
-            <button 
-              onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
-              className={`flex items-center space-x-1 font-medium text-sm px-3 py-1.5 rounded-md transition-colors ${isMegaMenuOpen ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}
-            >
-              <span>Solutions</span>
-              <span className="text-[9px] text-[#7c7b77]">▼</span>
-            </button>
+          {/* Core Menu Bar Links Container */}
+          <nav className="flex items-center space-x-2 h-full">
+            
+            {/* 1. Solutions Mega Dropdown Anchor */}
+            <div className="relative flex items-center h-full">
+              <button 
+                onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
+                className={`flex items-center space-x-1 font-medium text-sm px-3 py-1.5 rounded-md transition-colors ${isMegaMenuOpen ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}
+              >
+                <span>Solutions</span>
+                <span className={`text-[9px] text-[#7c7b77] transform transition-transform duration-150 ${isMegaMenuOpen ? 'rotate-180' : ''}`}>▼</span>
+              </button>
 
-            {/* EXPANDED 10-INDUSTRY MEGA MENU COMPONENT */}
-            {isMegaMenuOpen && (
-              <div className="absolute top-[52px] left-0 w-[780px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                
-                {/* Left Side: All 10 Matrix Industries Listed */}
-                <div className="w-[280px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px] overflow-y-auto max-h-[450px]">
-                  <div className="px-2 py-1.5 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider">Industries (10)</div>
-                  
-                  {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
-                    <div 
-                      key={indKey}
-                      onMouseEnter={() => setHoveredIndustry(indKey)}
-                      className={`px-3 py-1.5 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === indKey ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
-                    >
-                      <span className="truncate">{industriesMap[indKey].label}</span>
-                      {hoveredIndustry === indKey && <span className="text-[10px] text-[#7c7b77] shrink-0">→</span>}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Right Side: Respective 3 Micro-Tools Suite */}
-                <div className="flex-1 p-4 bg-white space-y-1 overflow-y-auto max-h-[450px]">
-                  <div className="px-2 pb-2 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider border-b border-[#f1f0ee] mb-2">
-                    {industriesMap[hoveredIndustry].label} Suite
+              {/* SOLUTIONS MEGA DROPDOWN PANEL */}
+              {isMegaMenuOpen && (
+                <div className="absolute top-[44px] left-0 w-[820px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in duration-100">
+                  {/* Left Side Industries Selection List */}
+                  <div className="w-[300px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px] overflow-y-auto max-h-[460px]">
+                    <div className="px-2 py-1.5 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider mb-1">Target Sectors</div>
+                    {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
+                      <div 
+                        key={indKey}
+                        onMouseEnter={() => setHoveredIndustry(indKey)}
+                        className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === indKey ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
+                      >
+                        <span className="truncate">{industriesMap[indKey].label}</span>
+                        {hoveredIndustry === indKey && <span className="text-[10px] text-[#7c7b77]">→</span>}
+                      </div>
+                    ))}
                   </div>
-                  
-                  {industriesMap[hoveredIndustry].tools.map((tool) => {
-                    const fullMeta = matrixData[tool.id];
-                    return (
+
+                  {/* Right Side Tools Navigation Grid */}
+                  <div className="flex-1 p-5 bg-white space-y-2 overflow-y-auto max-h-[460px]">
+                    <div className="px-2 pb-2 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider border-b border-[#f1f0ee] mb-1">
+                      {industriesMap[hoveredIndustry].label} Operational Node Suite
+                    </div>
+                    {industriesMap[hoveredIndustry].tools.map((tool) => (
                       <div 
                         key={tool.id} 
                         onClick={() => selectToolFromMenu(tool.id)} 
-                        className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer transition-colors"
+                        className="p-2.5 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer transition-colors group"
                       >
-                        <div className="font-semibold text-[13px] text-[#37352f]">{tool.shortName}</div>
-                        <div className="text-[11px] text-[#7c7b77] line-clamp-1">{fullMeta?.painPoint}</div>
+                        <div className="font-semibold text-[13.5px] text-[#37352f] group-hover:text-black">{tool.shortName}</div>
+                        <div className="text-[11.5px] text-[#7c7b77] mt-0.5 leading-snug">{tool.tagline}</div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
+              )}
+            </div>
 
-              </div>
-            )}
+            {/* 2. Resources Static Button Node */}
+            <a href="#resources" className="text-sm font-medium text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-3 py-1.5 rounded-md transition-colors">
+              Resources
+            </a>
+
+            {/* 3. Pricing Static Button Node */}
+            <a href="#pricing" className="text-sm font-medium text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-3 py-1.5 rounded-md transition-colors">
+              Pricing
+            </a>
+
+            {/* 4. Demo Static Button Node */}
+            <a href="#demo" className="text-sm font-medium text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-3 py-1.5 rounded-md transition-colors">
+              Demo
+            </a>
+
           </nav>
         </div>
 
-        <div className="text-xs text-[#7c7b77] border border-[#edece9] px-3 py-1 rounded-full bg-[#fbfbfa]">
-          Ecosystem Status: <b>30 Tools Configured</b>
+        {/* RIGHT SECTION: Action Control Call-To-Actions */}
+        <div className="flex items-center space-x-3 shrink-0">
+          
+          {/* Highlighted Color Button Node */}
+          <button 
+            onClick={() => alert("Registration Portal Access")}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm"
+          >
+            Get Started for Free
+          </button>
+
+          {/* Secondary Action Log-In Button Node */}
+          <button 
+            onClick={() => alert("Log In Interface Triggered")}
+            className="text-sm font-semibold text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)] px-4 py-2 rounded-lg transition-colors"
+          >
+            Log in
+          </button>
+
         </div>
+
       </header>
 
-      {/* DISMISSER LAYER */}
+      {/* DISMISSER PLANE INTERCEPTOR */}
       {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
 
-      {/* WORKSPACE MATRIX MAIN GRAPH */}
-      <main className="max-w-[800px] mx-auto px-6 pt-16 pb-32">
-        <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-12 min-h-[460px]">
+      {/* WORKSPACE PREVIEW FRAMEWORK HOOK */}
+      <main className="max-w-[840px] mx-auto px-6 pt-16 pb-32">
+        <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-12 min-h-[460px] relative">
           
           {activeTool === 'dashboard' ? (
-            <div className="text-center pt-12">
-              <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-3">Master Platform Core Grid</h1>
-              <p className="text-[#7c7b77] text-base max-w-lg mx-auto mb-8">All 10 industry segments with their respective 3-tool setups are mapped perfectly. Open the <b>Solutions mega menu</b> dropdown above to view the grid.</p>
-              <div className="inline-flex items-center space-x-2 text-xs bg-[#fbfbfa] border px-3 py-1.5 rounded-md text-[#5a5750]">
-                <span>💡 Protocol Tip: Hover across all 10 industries to load their corresponding tools list</span>
+            <div className="text-center pt-16">
+              <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-3">Master Platform Infrastructure</h1>
+              <p className="text-[#7c7b77] text-base max-w-lg mx-auto mb-8">Navigation header controls (Solutions, Resources, Pricing, Demo) with responsive alignment links are completely locked down.</p>
+              <div className="inline-flex items-center space-x-2 text-xs bg-[#fbfbfa] border px-4 py-2 rounded-lg text-[#5a5750] shadow-sm">
+                <span>⚡ Complete Core Setup: Header architecture matches requirements. Ready to branch into functional internal sub-pages.</span>
               </div>
             </div>
           ) : (
-            <div>
-              <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-[#7c7b77] mb-1">
-                <span>Active Sandbox Workspace Node</span>
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#37352f] mb-6">
-                {selectedToolMeta?.name}
-              </h1>
-
-              {/* Core Pain Point UI card block */}
-              <div className="bg-[#fdebec] border border-[#f5c2c2] p-4 rounded-xl mb-4">
-                <span className="text-[11px] font-bold text-[#601a1a] uppercase tracking-wider block mb-1">Core Pain Point</span>
-                <p className="text-sm text-[#601a1a] leading-relaxed">{selectedToolMeta?.painPoint}</p>
-              </div>
-
-              {/* Functional Framework Setup */}
-              <div className="bg-[#fbfbfa] border border-[#edece9] p-4 rounded-xl mb-8">
-                <span className="text-[11px] font-bold text-[#7c7b77] uppercase tracking-wider block mb-1">Functional Processing Logic</span>
-                <p className="text-sm text-[#5a5750] leading-relaxed">{selectedToolMeta?.logic}</p>
-              </div>
-
-              {activeTool === 'ecom_img' && (
-                <div className="mb-4 flex items-center space-x-3 bg-white border p-3 rounded-lg max-w-xs">
-                  <label className="text-xs font-medium text-[#7c7b77]">Upload Test Count:</label>
-                  <input type="number" value={imageCount} onChange={(e) => setImageCount(Number(e.target.value))} className="w-16 border rounded p-1 text-xs text-center outline-none" />
-                </div>
-              )}
-
-              {/* Interaction drop simulation grid */}
-              <div 
-                onClick={() => triggerToolSimulation(activeTool, activeTool === 'ecom_img' ? imageCount : null)} 
-                className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-xl p-16 text-center cursor-pointer mb-8 transition-all bg-[#fbfbfa]"
-              >
-                {isProcessing ? (
-                  <span className="text-sm font-medium text-[#7c7b77] animate-pulse">Analyzing system database matrix parameters...</span>
-                ) : (
-                  <span className="text-sm font-medium text-[#37352f]">📄 Click to simulate dragging & dropping industry data logs</span>
-                )}
-              </div>
-
-              {/* Output parameters view panel */}
-              {currentOutput && (
-                <div className="space-y-4 border-t border-[#edece9] pt-6 transition-all">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Output A</span><b className="text-base text-[#37352f]">{currentOutput.metricA}</b></div>
-                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Output B</span><b className="text-base text-red-600">{currentOutput.metricB}</b></div>
-                  </div>
-
-                  {currentOutput.isLocked && (
-                    <div className="bg-[#fbfbfa] border border-[#edece9] rounded-xl p-6 text-center">
-                      <p className="text-sm text-[#37352f] mb-4 font-medium">{selectedToolMeta?.unlockHook}</p>
-                      <button onClick={() => alert("Premium access node triggered.")} className="bg-[#37352f] text-white text-xs font-semibold py-2 px-5 rounded-lg hover:bg-[#2c2a27] transition-all">
-                        Unlock Full Sheet Integration Export Tier ($10)
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+            <div className="text-center pt-24 animate-fade-in">
+              <div className="w-12 h-12 bg-[rgba(55,53,47,0.04)] rounded-full flex items-center justify-center text-xl mx-auto mb-4">🛠️</div>
+              <h2 className="text-xl font-bold text-[#37352f] mb-2 uppercase tracking-wide font-mono text-xs text-[#7c7b77]">Target System Endpoint Located</h2>
+              <p className="text-xl font-bold text-[#37352f] mb-2 capitalize">`{activeTool.split('_').join(' ')}` Node Sandbox Ready</p>
+              <p className="text-xs text-[#7c7b77] max-w-sm mx-auto">This specialized section page will be built out next with custom logic algorithms from your Excel spreadsheet layout.</p>
             </div>
           )}
 
