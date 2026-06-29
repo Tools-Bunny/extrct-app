@@ -92,10 +92,9 @@ export default function AppCoreArchitecture() {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('ecom');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('ecom');
-  const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  // States for All Tools
+  // Core App Tool Forms Parameters
   const [mfgIn, setMfgIn] = useState<number>(1000);
   const [mfgOut, setMfgOut] = useState<number>(910);
   const [mfgMachine, setMfgMachine] = useState<string>('');
@@ -123,7 +122,6 @@ export default function AppCoreArchitecture() {
   const [healthPatientName, setHealthPatientName] = useState<string>('');
   const [utmUrl, setUtmUrl] = useState<string>('https://vantageprintco.com');
   const [utmSource, setUtmSource] = useState<string>('google');
-  const [utmMedium, setUtmMedium] = useState<string>('cpc');
   const [utmResult, setUtmResult] = useState<string>('');
   const [mfgYieldResult, setMfgYieldResult] = useState<string>('');
   const [mfgCostResult, setMfgCostResult] = useState<string>('');
@@ -135,29 +133,16 @@ export default function AppCoreArchitecture() {
     setOpenFaqIdx(null);
   };
 
-  const triggerSecureStripeCheckout = () => {
-    setIsStripeProcessing(true);
-    setTimeout(() => {
-      setIsStripeProcessing(false);
-      alert("Stripe Checkout Framework: Initializing $10 premium feature access tokens.");
-    }, 1100);
-  };
-
   return (
     <div className="min-h-screen bg-white text-[#1a1a1a] font-sans antialiased text-[14px] sm:text-[15px]">
       
-      {/* ---------------------------------------------------------------------
-         NOTION-BLUEPRINT EXACT NAVIGATION LAYOUT FIXED
-         --------------------------------------------------------------------- */}
+      {/* HEADER NAVBAR CONTAINER */}
       <header className="h-14 bg-white border-b border-[#eaeaea] sticky top-0 z-50 px-6 flex items-center justify-between select-none">
-        
-        {/* Left: Logo */}
         <div onClick={() => setActiveTool('dashboard')} className="flex items-center space-x-2 cursor-pointer shrink-0">
           <div className="w-5 h-5 bg-black text-white rounded flex items-center justify-center font-black text-xs">E</div>
           <span className="font-bold text-[15px] tracking-tight text-black">extrct.app</span>
         </div>
 
-        {/* Center: Menu Bar Links */}
         <nav className="hidden md:flex items-center space-x-1">
           <div className="relative">
             <button 
@@ -196,28 +181,19 @@ export default function AppCoreArchitecture() {
             )}
           </div>
 
-          <button onClick={() => alert("Resources Management Dashboard Hub")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Resources</button>
-          <button onClick={() => alert("SaaS Pricing Matrix Tier Configuration")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Pricing</button>
-          <button onClick={() => alert("Request Dedicated Operations Sandbox Demo")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Demo</button>
+          <button onClick={() => alert("Resources Hub")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Resources</button>
+          <button onClick={() => alert("Pricing Matrix")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Pricing</button>
+          <button onClick={() => alert("Request Demo")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Demo</button>
         </nav>
 
-        {/* Right-Aligned Authentication Split Buttons */}
         <div className="flex items-center space-x-2.5 shrink-0">
-          <button onClick={() => alert("Sign In Interface Session Token")} className="text-[14px] font-medium text-[#4a4a4a] hover:bg-[#efefef] px-3 py-1.5 rounded-md transition-colors">
-            Sign In
-          </button>
-          <button onClick={() => alert("Free Account Registration Terminal")} className="bg-black hover:bg-[#333] text-white font-bold text-[13px] px-3.5 py-1.5 rounded-md transition-colors shadow-sm">
-            Get Started for Free
-          </button>
+          <button onClick={() => alert("Sign In Window")} className="text-[14px] font-medium text-[#4a4a4a] hover:bg-[#efefef] px-3 py-1.5 rounded-md transition-colors">Sign In</button>
+          <button onClick={() => alert("Registration Gateway")} className="bg-black hover:bg-[#333] text-white font-bold text-[13px] px-3.5 py-1.5 rounded-md transition-colors shadow-sm">Get Started for Free</button>
         </div>
       </header>
 
-      {/* ---------------------------------------------------------------------
-         GLOBAL MUX STATE SYSTEM ROUTER SWITCH
-         --------------------------------------------------------------------- */}
+      {/* GLOBAL ROUTER CONTROLLER */}
       {activeTool === 'dashboard' ? (
-        
-        /* EXACT NOTION LANDING LAYOUT MAPPED TO PRODUCT SPEC */
         <div className="bg-white">
           <section className="max-w-[1020px] mx-auto px-6 pt-24 pb-16 text-center">
             <h1 className="text-5xl sm:text-6xl font-black text-black tracking-tight leading-[1.05] mb-6 max-w-3xl mx-auto">
@@ -227,38 +203,22 @@ export default function AppCoreArchitecture() {
               extrct.app transforms fragmented data parameters into high-performing solo operations terminal layers. Secure profit bounds, block leakage splits, and audit operations natively.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
-              <button onClick={() => alert("Registration Initialized")} className="w-full sm:w-auto bg-black text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#333] shadow-md transition-all">
-                Get extrct.app free →
-              </button>
-              <button onClick={() => alert("Demo Initialized")} className="w-full sm:w-auto border text-black font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#f7f7f5] transition-all">
-                Request custom enterprise demo
-              </button>
+              <button onClick={() => alert("Registration Initialized")} className="w-full sm:w-auto bg-black text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#333] shadow-md transition-all">Get extrct.app free →</button>
+              <button onClick={() => alert("Demo Initialized")} className="w-full sm:w-auto border text-black font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#f7f7f5] transition-all">Request custom enterprise demo</button>
             </div>
 
-            {/* NOTION GRAPHIC FRAME ELEMENT */}
             <div className="border border-[#eaeaea] shadow-2xl rounded-2xl bg-white p-2 max-w-[920px] mx-auto overflow-hidden">
-              <div className="bg-[#f7f7f5] border rounded-xl p-8 text-left min-h-[340px] flex flex-col justify-between">
-                <div className="flex items-center space-x-2 border-b pb-3 mb-4 select-none">
-                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  <span className="text-xs text-gray-400 font-mono ml-4">https://extrct.app/operational/notion_matrix_hub</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-bold text-black tracking-tight mb-4">Click a category tier to pop itemized standalone workspaces instantly:</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {['UTM Attribution Linker', 'Raw Material Yield Detector', 'WhatsApp Property Alert Engine', 'Rental Upkeep Expense Categorizer', 'Shift Tip-Pooling Ledger', 'Billable Hour Activity Logger'].map((box, idx) => (
-                      <div key={idx} className="p-4 bg-white border rounded-xl shadow-sm text-xs font-bold hover:border-black transition-colors cursor-pointer text-center">
-                        {box}
-                      </div>
-                    ))}
-                  </div>
+              <div className="bg-[#f7f7f5] border rounded-xl p-8 text-left min-h-[340px]">
+                <h3 className="text-base font-bold text-black tracking-tight mb-4">Click a category tier to pop itemized standalone workspaces instantly:</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {['UTM Attribution Linker', 'Raw Material Yield Detector', 'WhatsApp Property Alert Engine', 'Rental Upkeep Expense Categorizer', 'Shift Tip-Pooling Ledger', 'Billable Hour Activity Logger'].map((box, idx) => (
+                    <div key={idx} className="p-4 bg-white border rounded-xl shadow-sm text-xs font-bold hover:border-black transition-colors cursor-pointer text-center">{box}</div>
+                  ))}
                 </div>
               </div>
             </div>
           </section>
 
-          {/* NOTION TAB-DECK NAVIGATION BLOCK CONTAINER */}
           <section className="max-w-[1040px] mx-auto px-6 py-16 border-t border-[#eaeaea]">
             <div className="border border-[#eaeaea] rounded-xl shadow-sm bg-white overflow-hidden">
               <div className="flex border-b border-[#eaeaea] bg-[#f7f7f5] overflow-x-auto select-none no-scrollbar">
@@ -272,18 +232,11 @@ export default function AppCoreArchitecture() {
                   </button>
                 ))}
               </div>
-
               <div className="p-8">
-                <p className="text-xs font-mono text-gray-400 mb-6 border-l-2 border-black pl-3 italic">
-                  {industriesMap[notionActiveTab].notionHeroSub}
-                </p>
+                <p className="text-xs font-mono text-gray-400 mb-6 border-l-2 border-black pl-3 italic">{industriesMap[notionActiveTab].notionHeroSub}</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {industriesMap[notionActiveTab].tools.map((tool) => (
-                    <div 
-                      key={tool.id}
-                      onClick={() => selectToolFromMenu(tool.id)}
-                      className="p-5 border border-[#eaeaea] rounded-xl hover:border-black hover:shadow-md cursor-pointer transition-all bg-white"
-                    >
+                    <div key={tool.id} onClick={() => selectToolFromMenu(tool.id)} className="p-5 border border-[#eaeaea] rounded-xl hover:border-black hover:shadow-md cursor-pointer transition-all bg-white">
                       <h3 className="font-bold text-sm text-black mb-1">{tool.shortName}</h3>
                       <p className="text-xs text-gray-400 leading-relaxed">{tool.tagline}</p>
                     </div>
@@ -294,410 +247,162 @@ export default function AppCoreArchitecture() {
           </section>
         </div>
       ) : (
-        
-        /* INDIVIDUAL COMPLETED LANDING INTERFACES DETAILED VIEWS */
-        <div className="bg-[#fafafa]">
-          
-          <div className="max-w-[1040px] mx-auto pt-6 px-6">
-            <button onClick={() => setActiveTool('dashboard')} className="text-xs font-bold text-gray-400 hover:text-black focus:outline-none">
-              <span>← Back To Notion Home Matrix Hub</span>
+        <div className="bg-[#fafafa] py-12">
+          <div className="max-w-[1040px] mx-auto px-6">
+            <button onClick={() => setActiveTool('dashboard')} className="text-xs font-bold text-gray-400 hover:text-black focus:outline-none mb-6">
+              ← Back To Notion Home Matrix
             </button>
-          </div>
 
-          {/* 1. MARKETING UTM LINK GENERATOR */}
-          {activeTool === 'marketing_utm' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-blue-50 text-blue-800 font-bold px-3 py-1 rounded-full text-xs mb-3">🔗 Attribution Linker</span>
-                <h1 className="text-3xl font-black text-black mb-4">UTM Campaign Link Generator Engine</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Target Campaign URL</label>
-                    <input type="text" value={utmUrl} onChange={(e)=>setUtmUrl(e.target.value)} className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Source Token</label>
-                    <input type="text" value={utmSource} onChange={(e)=>setUtmSource(e.target.value)} className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>setUtmResult(`${utmUrl}?utm_source=${utmSource}&utm_medium=${utmMedium}`)} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Compile Link Parameters</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 font-mono text-xs text-gray-600 break-all">
-                  {utmResult || 'Live attribution tracking token URL preview will render here.'}
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 2. RAW MATERIAL YIELD MONITOR */}
-          {activeTool === 'mfg_yield' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-emerald-50 text-emerald-800 font-bold px-3 py-1 rounded-full text-xs mb-3">📉 Floor Scrap Monitor</span>
-                <h1 className="text-3xl font-black text-black mb-4">Raw Material Yield & Dead-Stock Leak Detector</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Raw Input Weight (kg)</label>
-                    <input type="number" value={mfgIn} onChange={(e)=>setMfgIn(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Final Dispatched Output (kg)</label>
-                    <input type="number" value={mfgOut} onChange={(e)=>setMfgOut(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>setMfgYieldResult(`Efficiency Extraction Rate Matrix: ${((mfgOut/mfgIn)*100).toFixed(1)}%`)} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Verify Waste Ratio</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-sm font-bold text-gray-700 flex items-center justify-center">
-                  {mfgYieldResult || 'Yield efficiency analysis solver stream live.'}
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 3. MAINTENANCE SCHEDULER */}
-          {activeTool === 'mfg_maintenance' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-red-50 text-red-800 font-bold px-3 py-1 rounded-full text-xs mb-3">🔧 Overhaul Framework</span>
-                <h1 className="text-3xl font-black text-black mb-4">Machine Breakdown & Preventative Maintenance Scheduler</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Machinery ID Asset Ref</label>
-                    <input type="text" value={mfgMachine} onChange={(e)=>setMfgMachine(e.target.value)} placeholder="e.g. CNC Line #2" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Preventative service milestones anchored securely.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Lock Service Milestone</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Predictive maintenance timeline grid array is running active.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 4. BATCH PRODUCTION COSTING */}
-          {activeTool === 'mfg_costing' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-amber-50 text-amber-800 font-bold px-3 py-1 rounded-full text-xs mb-3">🧮 Margin Logs</span>
-                <h1 className="text-3xl font-black text-black mb-4">Production Batch Costing & Dynamic Margin Calculator</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Batch Lot Name</label>
-                    <input type="text" value={mfgBatchName} onChange={(e)=>setMfgBatchName(e.target.value)} placeholder="e.g. Snacks Lot #4" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-bold block text-gray-500 mb-1">Raw Expense (₹)</label>
-                      <input type="number" value={mfgRawCost} onChange={(e)=>setMfgRawCost(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold block text-gray-500 mb-1">Quantity Units</label>
-                      <input type="number" value={mfgQty} onChange={(e)=>setMfgQty(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                    </div>
-                  </div>
-                  <button onClick={()=>setMfgCostResult(`Realized Item Level Unit Cost: ₹${(mfgRawCost/mfgQty).toFixed(2)}`)} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Audit Cost Layout</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-sm font-bold text-gray-700 flex items-center justify-center">
-                  {mfgCostResult || 'Batch margin calculations output board is operational.'}
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 5. WHATSAPP BROKER ENGINE */}
-          {activeTool === 'real_estate_whatsapp' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-indigo-50 text-indigo-800 font-bold px-3 py-1 rounded-full text-xs mb-3">💬 Broadcast Engine</span>
-                <h1 className="text-3xl font-black text-black mb-4">WhatsApp Bulk Property Alert & Match Engine</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Township Project Title</label>
-                    <input type="text" value={reProject} onChange={(e)=>setReProject(e.target.value)} placeholder="e.g. DLF Heights" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Lead database parameters synchronized successfully.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Parse & Match Leads</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Broker profiling log streams are active.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 6. RENTAL EXPENSE LOGS */}
-          {activeTool === 'real_estate_rental' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-blue-50 text-blue-800 font-bold px-3 py-1 rounded-full text-xs mb-3">📊 Upkeep Guard</span>
-                <h1 className="text-3xl font-black text-black mb-4">Rental Maintenance Log & Expense Categorizer</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Property Reference Address</label>
-                    <input type="text" value={reRentalAddr} onChange={(e)=>setReRentalAddr(e.target.value)} placeholder="e.g. Sector 3 Plot 14" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Repair Cost (₹)</label>
-                    <input type="number" value={reRentalCost} onChange={(e)=>setReRentalCost(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Log node committed cleanly.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Commit Log Node</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Landlord tax deductions ledger framework view live.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 7. PROPERTY AI DESCRIPTION */}
-          {activeTool === 'real_estate_desc' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-purple-50 text-purple-800 font-bold px-3 py-1 rounded-full text-xs mb-3">📝 Listing Copywriter</span>
-                <h1 className="text-3xl font-black text-black mb-4">Property Listing Feature Description Engine</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Micro Neighborhood Location</label>
-                    <input type="text" value={reDescLoc} onChange={(e)=>setReDescLoc(e.target.value)} placeholder="e.g. Mithanpura, Muzaffarpur" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Total Verified Area (Sq.Ft.)</label>
-                    <input type="number" value={reDescSqft} onChange={(e)=>setReDescSqft(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert(`Compiled listing headline hook: Ultra premium layout tracking ${reDescSqft} Sq.Ft. right inside ${reDescLoc || 'Location'}`)} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Compile Listing Copy</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Portal metadata optimization matrix live stream feed.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 8. CAFE TIP SPLITTER */}
-          {activeTool === 'cafe_tips' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-amber-50 text-amber-800 font-bold px-3 py-1 rounded-full text-xs mb-3">👥 Shift Allocator</span>
-                <h1 className="text-3xl font-black text-black mb-4">Daily Tip-Pooling & Shift-Split Calculator</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Tip Pool Total (₹)</label>
-                    <input type="number" value={cafeTipPool} onChange={(e)=>setCafeTipPool(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Tip fractional calculations compiled based on shift weights.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Compile Allocation</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Proportional restaurant staff payout registry view.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 9. RECIPE FOOD COSTING */}
-          {activeTool === 'cafe_costing' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-green-50 text-green-800 font-bold px-3 py-1 rounded-full text-xs mb-3">🍳 Recipe Defense</span>
-                <h1 className="text-3xl font-black text-black mb-4">Recipe Food-Cost & Inflation Tracker</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Recipe Dish Name</label>
-                    <input type="text" value={cafeRecipeName} onChange={(e)=>setCafeRecipeName(e.target.value)} placeholder="e.g. Alfredo Basil Pasta" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-bold block text-gray-500 mb-1">Ingredient Cost (₹)</label>
-                      <input type="number" value={cafeIngCost} onChange={(e)=>setCafeIngCost(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold block text-gray-500 mb-1">Menu Card Price (₹)</label>
-                      <input type="number" value={cafeCardPrice} onChange={(e)=>setCafeCardPrice(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                    </div>
-                  </div>
-                  <button onClick={()=>alert(`Food Cost Ratio output: ${((cafeIngCost/cafeCardPrice)*100).toFixed(1)}%`)} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Verify Ratio Matrix</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Granular culinary margin protection ledger active.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 10. QR DIGITAL MENU PRESENTER */}
-          {activeTool === 'cafe_qr' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-indigo-50 text-indigo-800 font-bold px-3 py-1 rounded-full text-xs mb-3">📱 Dynamic Card Architect</span>
-                <h1 className="text-3xl font-black text-black mb-4">Dynamic QR Code Digital Menu Presenter</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Dish Title on Card</label>
-                    <input type="text" value={cafeQrDish} onChange={(e)=>setCafeQrDish(e.target.value)} placeholder="e.g. Paneer Tikka Platter" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Price realization (₹)</label>
-                    <input type="number" value={cafeQrPrice} onChange={(e)=>setCafeQrPrice(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>{setMenuItems([...menuItems, { id: Date.now().toString(), name: cafeQrDish, price: cafeQrPrice }]); setCafeQrDish('');}} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Deploy Item Live</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-6 max-w-sm mx-auto border-t-[10px] border-t-black rounded-b-2xl shadow-lg">
-                  <div className="p-4 border-b text-center text-xs font-bold tracking-widest uppercase">✨ LOCAL CAFE MENU ✨</div>
-                  <div className="p-4 space-y-2 min-h-[160px] divide-y divide-gray-100">
-                    {menuItems.map(item=>(
-                      <div key={item.id} className="pt-2 flex justify-between text-xs">
-                        <span><b>{item.name}</b></span>
-                        <span className="font-mono text-indigo-600 font-bold">₹{item.price}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 11. LEGAL BILLABLE HOURS TRACKER */}
-          {activeTool === 'legal_hours' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-blue-50 text-blue-800 font-bold px-3 py-1 rounded-full text-xs mb-3">⏳ Realization Guard</span>
-                <h1 className="text-3xl font-black text-black mb-4">Billable Hour Tracker & Activity Logger</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Client Reference Title</label>
-                    <input type="text" value={legalClient} onChange={(e)=>setLegalClient(e.target.value)} placeholder="e.g. Sonali Advisory Group" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-bold block text-gray-500 mb-1">Hours Logged</label>
-                      <input type="number" value={legalHours} onChange={(e)=>setLegalHours(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold block text-gray-500 mb-1">Hourly Rate (₹)</label>
-                      <input type="number" value={legalRate} onChange={(e)=>setLegalRate(Number(e.target.value))} className="w-full p-2.5 border rounded text-xs font-mono bg-[#faf9f6]" />
-                    </div>
-                  </div>
-                  <button onClick={()=>alert(`Unbilled accrual total logged: ₹${legalHours*legalRate}`)} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Commit Activity Block</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Timesheet itemized database audit output view live.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 12. LEGAL CONTRACT FILLER */}
-          {activeTool === 'legal_doc' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-indigo-50 text-indigo-800 font-bold px-3 py-1 rounded-full text-xs mb-3">📄 Variable Replacement Filler</span>
-                <h1 className="text-3xl font-black text-black mb-4">Boilerplate Legal Document Filler & Variable Replacer</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Party A Name (Discloser)</label>
-                    <input type="text" value={legalPartyA} onChange={(e)=>setLegalPartyA(e.target.value)} placeholder="e.g. Vantage Print Co." className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Party B Name (Recipient)</label>
-                    <input type="text" value={legalPartyB} onChange={(e)=>setLegalPartyB(e.target.value)} placeholder="e.g. Acme Agency Ltd" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Boilerplate fields synchronized smoothly.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Populate Template Fields</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Finalized draft covenant text layout wrapper is empty.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 13. COURT CALENDAR DEADLINES */}
-          {activeTool === 'legal_calendar' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-red-50 text-red-800 font-bold px-3 py-1 rounded-full text-xs mb-3">📅 Procedural Compliance Radar</span>
-                <h1 className="text-3xl font-black text-black mb-4">Court Hearing Calendar & Deadline Tracker</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Case Title Ref</label>
-                    <input type="text" value={legalCaseRef} onChange={(e)=>setLegalCaseRef(e.target.value)} placeholder="e.g. Poddar vs Capital Corp" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Case matter reference timelines locked into risk alerts scheduler.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Analyze Timeline Risk</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Litigation docket monitoring tracking dashboard is active.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* 14. HEALTHCARE APPOINTMENT NO SHOW PREVENTER */}
-          {activeTool === 'health_noshow' && (
-            <div>
-              <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
-                <span className="inline-flex bg-blue-50 text-blue-800 font-bold px-3 py-1 rounded-full text-xs mb-3">🩺 Arrival Protection Radar</span>
-                <h1 className="text-3xl font-black text-black mb-4">Patient Appointment No-Show Preventer</h1>
-              </section>
-              <section className="max-w-[1040px] mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-white border p-6 rounded-xl shadow-sm space-y-4">
-                  <div>
-                    <label className="text-[11px] font-bold block text-gray-500 mb-1">Patient Full Name</label>
-                    <input type="text" value={healthPatientName} onChange={(e)=>setHealthPatientName(e.target.value)} placeholder="e.g. Aman Verma" className="w-full p-2.5 border rounded text-xs bg-[#faf9f6]" />
-                  </div>
-                  <button onClick={()=>alert("Attendance matrix risk factors evaluated.")} className="w-full bg-black text-white text-xs font-bold py-3 rounded-lg uppercase">Analyze Schedule Risk</button>
-                </div>
-                <div className="lg:col-span-2 bg-white border rounded-xl p-8 text-xs text-gray-400 italic flex items-center justify-center">
-                  Clinical booking attendance feed dashboard.
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* SHARED VALUE MARKETING BOTTOM SYSTEM STRIPS */}
-          <section className="max-w-[1040px] mx-auto px-6 pb-16">
-            <div className="border border-amber-200 bg-amber-50/40 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm mb-6">
-              <div>
-                <span className="text-xs font-bold text-amber-950 block">🔒 Cloud Sync Webhook Routing Locked (Free Sandbox Space Rules)</span>
-                <p className="text-[11px] text-amber-800 mt-0.5">Free tiers map active operations metrics inside localized frame layouts. Remit $10 to unlock database workflows and whitelabel document downloads.</p>
+            {/* 1. UTM TOOL */}
+            {activeTool === 'marketing_utm' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">UTM Campaign Link Generator Engine</h1>
+                <input type="text" value={utmUrl} onChange={(e)=>setUtmUrl(e.target.value)} className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>setUtmResult(`${utmUrl}?utm_source=${utmSource}`)} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Compile Link</button>
+                <p className="text-xs font-mono bg-gray-50 p-3 rounded break-all">{utmResult || 'Output parameters preview pipeline.'}</p>
               </div>
-              <button onClick={triggerSecureStripeCheckout} className="bg-black text-white text-xs font-bold px-3 py-2 rounded-lg shrink-0">Unlock Workspace Core</button>
-            </div>
-            
-            <div className="bg-white border rounded-xl p-8 shadow-sm">
-              <h3 className="text-xs font-black text-center tracking-wider uppercase mb-6 text-black">The 3-Stage Operational Margin Recovery Pipeline</h3>
+            )}
+
+            {/* 2. MANUFACTURING YIELD */}
+            {activeTool === 'mfg_yield' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Raw Material Yield & Dead-Stock Leak Detector</h1>
+                <div className="grid grid-cols-2 gap-4">
+                  <input type="number" value={mfgIn} onChange={(e)=>setMfgIn(Number(e.target.value))} className="p-2 border rounded text-xs" />
+                  <input type="number" value={mfgOut} onChange={(e)=>setMfgOut(Number(e.target.value))} className="p-2 border rounded text-xs" />
+                </div>
+                <button onClick={()=>setMfgYieldResult(`Efficiency: ${((mfgOut/mfgIn)*100).toFixed(1)}%`)} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Verify Ratio</button>
+                <p className="text-sm font-bold text-gray-700">{mfgYieldResult}</p>
+              </div>
+            )}
+
+            {/* 3. MAINTENANCE */}
+            {activeTool === 'mfg_maintenance' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Machine Breakdown & Preventative Scheduler</h1>
+                <input type="text" value={mfgMachine} onChange={(e)=>setMfgMachine(e.target.value)} placeholder="CNC Machine ID" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Service milestone committed.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Lock Milestone</button>
+              </div>
+            )}
+
+            {/* 4. COSTING */}
+            {activeTool === 'mfg_costing' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Production Batch Costing Tool</h1>
+                <input type="number" value={mfgRawCost} onChange={(e)=>setMfgRawCost(Number(e.target.value))} className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>setMfgCostResult(`Unit Cost: ₹${(mfgRawCost/mfgQty).toFixed(2)}`)} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Audit Cost</button>
+                <p className="text-sm font-bold">{mfgCostResult}</p>
+              </div>
+            )}
+
+            {/* 5. WHATSAPP ENG */}
+            {activeTool === 'real_estate_whatsapp' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">WhatsApp Bulk Property Alert Matcher</h1>
+                <input type="text" value={reProject} onChange={(e)=>setReProject(e.target.value)} placeholder="Greenwood Complex" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Database synchronization running.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Match Leads</button>
+              </div>
+            )}
+
+            {/* 6. RENTAL EXPENSE */}
+            {activeTool === 'real_estate_rental' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Rental Maintenance Log & Categorizer</h1>
+                <input type="text" value={reRentalAddr} onChange={(e)=>setReRentalAddr(e.target.value)} className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Expense node committed.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Commit Log</button>
+              </div>
+            )}
+
+            {/* 7. PROPERTY DESCRIPTION */}
+            {activeTool === 'real_estate_desc' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Property Listing Feature Description Engine</h1>
+                <input type="text" value={reDescLoc} onChange={(e)=>setReDescLoc(e.target.value)} placeholder="Mithanpura" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert(`Compiled listing headline at ${reDescLoc}`)} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Compile Copy</button>
+              </div>
+            )}
+
+            {/* 8. TIP POOLING */}
+            {activeTool === 'cafe_tips' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Daily Tip-Pooling & Shift-Split Calculator</h1>
+                <input type="number" value={cafeTipPool} onChange={(e)=>setCafeTipPool(Number(e.target.value))} className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Tip calculations fractions applied.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Compile Map</button>
+              </div>
+            )}
+
+            {/* 9. RECIPE FOOD COSTING */}
+            {activeTool === 'cafe_costing' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Recipe Food-Cost & Inflation Tracker</h1>
+                <input type="text" value={cafeRecipeName} onChange={(e)=>setCafeRecipeName(e.target.value)} className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert(`Food Cost verified: ${((cafeIngCost/cafeCardPrice)*100).toFixed(1)}%`)} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Verify Matrix</button>
+              </div>
+            )}
+
+            {/* 10. QR DIGITAL MENU */}
+            {activeTool === 'cafe_qr' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Dynamic QR Code Digital Menu Presenter</h1>
+                <input type="text" value={cafeQrDish} onChange={(e)=>setCafeQrDish(e.target.value)} className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>{setMenuItems([...menuItems, { id: Date.now().toString(), name: cafeQrDish, price: cafeQrPrice }]); setCafeQrDish('');}} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Deploy Live</button>
+                <div className="mt-4 p-4 border rounded max-w-xs bg-gray-50">
+                  {menuItems.map(item=><div key={item.id} className="flex justify-between text-xs py-1"><span>{item.name}</span><span>₹{item.price}</span></div>)}
+                </div>
+              </div>
+            )}
+
+            {/* 11. LEGAL BILLABLE HOUR */}
+            {activeTool === 'legal_hours' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Billable Hour Tracker & Activity Logger</h1>
+                <input type="text" value={legalClient} onChange={(e)=>setLegalClient(e.target.value)} placeholder="Client Name" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert(`Accrual total logged: ₹${legalHours*legalRate}`)} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Commit Block</button>
+              </div>
+            )}
+
+            {/* 12. LEGAL CONTRACT REPLACER */}
+            {activeTool === 'legal_doc' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Boilerplate Legal Document Filler</h1>
+                <input type="text" value={legalPartyA} onChange={(e)=>setLegalPartyA(e.target.value)} placeholder="Party A" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Boilerplate metadata synchronized.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Populate Fields</button>
+              </div>
+            )}
+
+            {/* 13. COURT CALENDAR */}
+            {activeTool === 'legal_calendar' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Court Hearing Calendar & Deadline Tracker</h1>
+                <input type="text" value={legalCaseRef} onChange={(e)=>setLegalCaseRef(e.target.value)} placeholder="Case Title" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Case limits locked into alert timeline channels.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Analyze Timeline</button>
+              </div>
+            )}
+
+            {/* 14. HEALTHCARE NO SHOW */}
+            {activeTool === 'health_noshow' && (
+              <div className="bg-white border p-8 rounded-xl shadow-sm space-y-4">
+                <h1 className="text-2xl font-black">Patient Appointment No-Show Preventer</h1>
+                <input type="text" value={healthPatientName} onChange={(e)=>setHealthPatientName(e.target.value)} placeholder="Patient Name" className="w-full p-2 border rounded text-xs" />
+                <button onClick={()=>alert("Schedule analytics checked.")} className="bg-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Analyze Risk</button>
+              </div>
+            )}
+
+            {/* GLOBAL TOOL ON-PAGE VALUE INFOGRAPHICS MAP & ACCORDIONS */}
+            <div className="bg-white border rounded-xl p-8 shadow-sm mt-8">
+              <h3 className="text-xs font-black tracking-wider uppercase mb-6 text-center">The 3-Stage Operational Margin Recovery Pipeline</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-4 bg-[#fbfbfa] border rounded-xl">
-                  <span className="text-sm font-bold text-black block mb-1">01. Entry Log Injection</span>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">Operators enter parameters directly into layout dashboards from desks flat, avoiding lag parameters.</p>
+                <div className="p-4 bg-[#fbfbfa] border rounded-xl text-xs">
+                  <span className="font-bold text-black block mb-1">01. Log Injection</span>
+                  <p className="text-gray-400">Operators enter data directly into dashboards on the fly, avoiding latency.</p>
                 </div>
-                <div className="p-4 bg-[#fbfbfa] border rounded-xl">
-                  <span className="text-sm font-bold text-black block mb-1">02. Syntactic Optimization</span>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">System algorithms calculate cost variances natively to remove human manual calculation dispute gaps.</p>
+                <div className="p-4 bg-[#fbfbfa] border rounded-xl text-xs">
+                  <span className="font-bold text-black block mb-1">02. Optimization Loop</span>
+                  <p className="text-gray-400">System algorithms process variations natively to clear computational calculation disputes.</p>
                 </div>
-                <div className="p-4 bg-[#fbfbfa] border rounded-xl">
-                  <span className="text-sm font-bold text-black block mb-1">03. Preemptive Alert Shields</span>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">Flags margin compression or calendar deadline zone warning limits immediately before thresholds breach target bounds.</p>
+                <div className="p-4 bg-[#fbfbfa] border rounded-xl text-xs">
+                  <span className="font-bold text-black block mb-1">03. Preemptive Shields</span>
+                  <p className="text-gray-400">Flags margin compression leaks or deadline limit alerts proactively before constraints breach.</p>
                 </div>
               </div>
             </div>
@@ -705,25 +410,18 @@ export default function AppCoreArchitecture() {
             <div className="bg-white border rounded-xl p-8 shadow-sm mt-4">
               <h3 className="text-xs font-black uppercase text-center text-gray-400 tracking-widest mb-6">Frequently Answered Strategic Queries</h3>
               <div className="space-y-2">
-                {[
-                  { q: "How are individual micro-tool calculation constraints verified?", a: "The framework type-casts and balances parameters natively inside your active local device frame session before syncing nodes to prevent backend calculation lag traps." },
-                  { q: "What technical automation unlocks inside the $10 premium upgrade setup?", a: "Paid tier tokens map standalone web listener webhooks that link directly to multi-channel communication networks to dispatch system warning alerts." }
-                ].map((faq, index) => (
-                  <div key={index} className="border rounded-lg overflow-hidden">
-                    <button onClick={()=>setOpenFaqIdx(openFaqIdx === index ? null : index)} className="w-full text-left font-bold text-xs p-4 bg-gray-50 flex justify-between focus:outline-none">
-                      <span>{faq.q}</span><span>{openFaqIdx === index ? '▲' : '▼'}</span>
-                    </button>
-                    {openFaqIdx === index && <div className="p-4 text-xs text-gray-500 border-t bg-white leading-relaxed">{faq.a}</div>}
-                  </div>
-                ))}
+                <div className="border rounded p-4 bg-gray-50 text-xs">
+                  <p className="font-bold text-black mb-1">Q: How are individual calculations processed safely?</p>
+                  <p className="text-gray-500">The core stack triggers parameters validation inside local browser layout threads to provide instant latency execution response maps.</p>
+                </div>
               </div>
             </div>
-          </section>
 
+          </div>
         </div>
       )}
 
-      {/* PERSISTENT BRAND GLOBAL NOTION FOOTER DESIGN FOR ALL ROUTE PAGES */}
+      {/* PERSISTENT GLOBAL NOTION FOOTER DESIGN FOR ALL PAGES */}
       <footer className="border-t border-[#eaeaea] bg-[#f7f7f5] py-12 px-8 text-center text-xs text-[#7c7b77] select-none">
         <div className="max-w-[1040px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2 text-black font-bold">
