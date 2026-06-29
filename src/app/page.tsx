@@ -96,7 +96,7 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
     notionHeroSub: "Minimizes throwaway fresh kitchen waste logs, calculates beverage price adjustments instantly, and tracks team slots against peak POS data.",
     tools: [
       { id: 'cafe_waste', shortName: "🗑️ Perishable Waste Auditor", tagline: "Tracks daily kitchen throwaways against production curves." },
-      { id: 'cafe_recipe', textName: "💲 Coffee Costing Ledger", tagline: "Calculates variable ingredient price updates down to cup levels." },
+      { id: 'cafe_recipe', shortName: "💲 Coffee Costing Ledger", tagline: "Calculates variable ingredient price updates down to cup levels." },
       { id: 'cafe_roster', shortName: "👥 Peak Transaction Rosterer", tagline: "Optimizes staff rosters against peak historical POS curves." }
     ]
   },
@@ -124,12 +124,12 @@ interface YieldLogNode {
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('dashboard'); 
+  const [activeTool, setActiveTool] = useState<string>('mfg_yield'); 
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('mfg');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('mfg');
 
-  // Stripe Billing States
+  // Billing Operations State Control
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
   // Raw Material Yield States
@@ -140,7 +140,7 @@ export default function AppCoreArchitecture() {
   const [actualQty, setActualQty] = useState<number>(82);
   const [yieldPremiumLock, setYieldPremiumLock] = useState<boolean>(false);
   
-  // FAQ Accordion State Matrix
+  // Marketing UI Expansion Content States
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
   const [yieldLogs, setYieldLogs] = useState<YieldLogNode[]>([
@@ -166,15 +166,13 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Checkout Secure API: Processing conversion bundle setup tokens.");
+      alert("Stripe Checkout System: Core conversion token established.");
     }, 1100);
   };
 
-  // Yield Calculator Core Functional Logic
   const executeProcessYieldLog = () => {
     if (!batchCodeInput.trim() || !materialInput.trim()) return;
     
-    // Safety cap rule for premium lock limits
     if (yieldLogs.length >= 2) {
       setYieldPremiumLock(true);
       return;
@@ -261,24 +259,20 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* ROUTING CONTROLLER VIEW SWITCHER */}
+      {/* CORE FRAMEWORK SWITCH LAYER */}
       {activeTool === 'dashboard' ? (
-        <div className="p-12 text-center text-sm font-mono">Main Matrix Terminal Active Panel. Select specific tool via solutions menu node.</div>
+        <div className="p-12 text-center text-sm font-mono">Main Matrix Terminal Dashboard Active Panel.</div>
       ) : activeTool === 'mfg_yield' ? (
         
-        /* ---------------------------------------------------------------------
-           RAW MATERIAL YIELD & DEAD-STOCK LEAK DETECTOR ACTIVE SHELL
-           --------------------------------------------------------------------- */
         <div className="bg-[#fafafa]">
           
-          {/* CRITICAL ON-PAGE SEO METADATA TRAP FOR INDEXING BOT CRUISE */}
+          {/* SEARCH ENGINE OPTIMIZATION SEED NODES */}
           <div className="hidden">
             <h1>Raw Material Yield Detector & Inventory Waste Management System</h1>
             <h2>Algorithmic dead-stock leakage auditing for modern factories and MSME manufacturing plants.</h2>
-            <p>Track production shrinkage, calculate variable weight discrepancy variances, evaluate factory floor material drop rates, and optimize batch level raw yields natively.</p>
           </div>
 
-          {/* HERO WORKSPACE BLOCK */}
+          {/* SECTION HERO HEADER INTERACTIVE CORE */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
@@ -307,11 +301,10 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* INTERACTIVE WORKSPACE CORE HOOK */}
+          {/* APPLICATION INTERACTIVE LOG TERMINAL */}
           <section id="yield-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* LOGGING CONTROLLER */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Input Shift Parameters</h3>
                 
@@ -340,7 +333,7 @@ export default function AppCoreArchitecture() {
 
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Input Qty (kg)</label>
+                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Input (kg)</label>
                       <input 
                         type="number" 
                         value={inputQty}
@@ -378,7 +371,7 @@ export default function AppCoreArchitecture() {
                 </button>
               </div>
 
-              {/* LIVE MONITOR PIPELINE VECTOR FEED */}
+              {/* DATA VISUAL LIST RENDERING PIPELINE */}
               <div className="lg:col-span-2 space-y-4">
                 
                 {yieldPremiumLock && (
@@ -429,11 +422,7 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* ===================================================================
-              NEW: ADVANCED DEEP ON-PAGE SEO COPY & CONVERSION ARCHITECTURE LAYER
-              =================================================================== */}
-          
-          {/* VISUAL INFOGRAPHIC LAYOUT: VALUE PROPOSITION SCHEMA */}
+          {/* SEO ARCHITECTURE ENGINE: DEEP INFOGRAPHIC CONTENT MAP */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
@@ -442,9 +431,7 @@ export default function AppCoreArchitecture() {
                 <p className="text-xs text-gray-500 mt-2">Our programmatic pipeline acts as a protective shield between manual logs and complex supply chains.</p>
               </div>
 
-              {/* THREE-STAGE CONVERSATIONAL INFOGRAPHIC FLOW CONTAINER */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-                
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
                   <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
                   <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Raw Log Compilation</h4>
@@ -462,12 +449,11 @@ export default function AppCoreArchitecture() {
                   <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Department Attribution</h4>
                   <p className="text-xs text-gray-500 leading-relaxed">Isolate precisely which specific machinery shift or loading zone is driving wastage to enforce operational discipline instantly.</p>
                 </div>
-
               </div>
             </div>
           </section>
 
-          {/* CORE PRODUCT UNIQUE SELLING PROPOSITIONS (USPs) & REVENUE CODES */}
+          {/* CORE SYSTEM UNIQUE SELLING PROPOSITIONS (USPs) */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -491,7 +477,6 @@ export default function AppCoreArchitecture() {
                   </div>
                 </div>
 
-                {/* GRAPHIC SPECS VISUAL GRID */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
                     <span className="text-2xl block mb-1">⚖</span>
@@ -519,7 +504,7 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DYNAMIC FAQ ACCORDION PATTERN MATRIX BLOCK */}
+          {/* DYNAMIC COMPONENT ACCORDION FAQ BLOCK */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
@@ -539,7 +524,7 @@ export default function AppCoreArchitecture() {
                   },
                   {
                     q: "Can this system integrate directly with local weighting scales?",
-                    a: "Currently, this module works via rapid structured web input terminals optimized for mobile layouts, minimizing software setup hurdles. Full API endpoints for automated industrial hardware hooks are locked inside our upcoming enterprise roadmap pipelines."
+                    a: "Currently, this module works via rapid structured web input terminals optimized for mobile layouts, minimizing software software hurdles. Full API endpoints for automated industrial hardware hooks are locked inside our upcoming enterprise roadmap pipelines."
                   }
                 ].map((faq, index) => (
                   <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
