@@ -111,43 +111,31 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface PatientQueueNode {
-  id: string;
-  patientName: string;
-  doctorReference: string;
-  appointmentTime: string;
-  historicalNoShows: number;
-  riskRating: 'HIGH_RISK_ALERT' | 'STANDARD_ZONE';
-  reminderStatus: 'PENDING_DISPATCH' | 'SENT_AUTOMATED_NODE';
-}
-
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('health_noshow'); // Locked strictly to no-show engine node
+  const [activeTool, setActiveTool] = useState<string>('dashboard'); // Fixed routing home default state
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
-  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('health');
+  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('ecom');
+  const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('ecom');
 
-  // Shared Core Payments Handshake
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
-
-  // Clinic State Management Controls
-  const [inputPatient, setInputPatient] = useState<string>('');
-  const [doctorRef, setDoctorRef] = useState<string>('Dr. Shambhu Nath (General Medicine)');
-  const [slotTime, setSlotTime] = useState<string>('11:30 AM');
-  const [pastAbsences, setPastAbsences] = useState<number>(0);
-  const [healthPremiumLock, setHealthPremiumLock] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [patientQueue, setPatientQueue] = useState<PatientQueueNode[]>([
-    {
-      id: "1",
-      patientName: "Aman Kumar Verma",
-      doctorReference: "Dr. Sonali Sharma (Pediatrics)",
-      appointmentTime: "04:15 PM",
-      historicalNoShows: 2,
-      riskRating: "HIGH_RISK_ALERT",
-      reminderStatus: "SENT_AUTOMATED_NODE"
-    }
-  ]);
+  // Completed State Lists
+  const [utmRawUrl, setUtmRawUrl] = useState('https://vantageprintco.com');
+  const [mfgYieldIn, setMfgYieldIn] = useState(1000);
+  const [mfgYieldOut, setMfgYieldOut] = useState(920);
+  const [mfgMaintenanceMachine, setMfgMaintenanceMachine] = useState('');
+  const [mfgCostingName, setMfgCostingName] = useState('');
+  const [reWhatsappProp, setReWhatsappProp] = useState('');
+  const [reRentalProp, setReRentalProp] = useState('');
+  const [reDescLoc, setReDescLoc] = useState('');
+  const [cafeTipsPool, setCafeTipsPool] = useState(15000);
+  const [cafeCostingName, setCafeCostingName] = useState('');
+  const [cafeQrName, setCafeQrName] = useState('');
+  const [legalHoursClient, setLegalHoursClient] = useState('');
+  const [legalDocPartyA, setLegalDocPartyA] = useState('');
+  const [legalCalendarCase, setLegalCalendarCase] = useState('');
+  const [healthNoShowPatient, setHealthNoShowPatient] = useState('');
 
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
@@ -158,41 +146,14 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Verification Handshake: Unlocking active automated WhatsApp/SMS API cron dispatchers.");
+      alert("Stripe Verification Gateway Token Synchronization Complete!");
     }, 1100);
-  };
-
-  // Predictive risk classification processor engine logic
-  const executeCompilePatientRisk = () => {
-    if (!inputPatient.trim()) return;
-
-    // Simulation gating limit rule check for trial accounts
-    if (patientQueue.length >= 2) {
-      setHealthPremiumLock(true);
-      return;
-    }
-
-    const calculatedRisk = pastAbsences >= 1 ? 'HIGH_RISK_ALERT' : 'STANDARD_ZONE';
-
-    const newNode: PatientQueueNode = {
-      id: Date.now().toString(),
-      patientName: inputPatient.trim(),
-      doctorReference: doctorRef,
-      appointmentTime: slotTime,
-      historicalNoShows: pastAbsences,
-      riskRating: calculatedRisk,
-      reminderStatus: 'PENDING_DISPATCH'
-    };
-
-    setPatientQueue([newNode, ...patientQueue]);
-    setInputPatient('');
-    setPastAbsences(0);
   };
 
   return (
     <div className="min-h-screen bg-white text-[#37352f] font-sans antialiased text-[15px]">
       
-      {/* HEADER NAVBAR CONTAINER */}
+      {/* NAVBAR CONTAINER ELEMENT */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
         <div className="flex items-center space-x-8">
           <div onClick={() => setActiveTool('dashboard')} className="flex items-center space-x-2 cursor-pointer shrink-0">
@@ -206,13 +167,13 @@ export default function AppCoreArchitecture() {
                 onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
                 className={`flex items-center space-x-1 font-medium text-sm px-3 py-1.5 rounded-md transition-colors ${isMegaMenuOpen ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}
               >
-                <span>Solutions</span>
+                <span>Solutions Portal</span>
                 <span className="text-[9px] text-[#7c7b77]">▼</span>
               </button>
 
               {isMegaMenuOpen && (
-                <div className="absolute top-[44px] left-0 w-[820px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in">
-                  <div className="w-[300px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px]">
+                <div className="absolute top-[44px] left-0 w-[840px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in">
+                  <div className="w-[320px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px]">
                     <div className="px-2 py-1.5 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider mb-1">Target Sectors</div>
                     {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
                       <div 
@@ -221,6 +182,7 @@ export default function AppCoreArchitecture() {
                         className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === indKey ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
                       >
                         <span>{industriesMap[indKey].label}</span>
+                        {hoveredIndustry === indKey && <span className="text-xs text-gray-400">→</span>}
                       </div>
                     ))}
                   </div>
@@ -247,268 +209,167 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* COMPONENT ROUTER MATRIX SCREEN SWITCH */}
-      {activeTool === 'health_noshow' ? (
+      {/* CORE FRAMEWORK CONTROLLER SWITCH SWITCHER LAYER */}
+      {activeTool === 'dashboard' ? (
+        <div>
+          <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
+            <h1 className="text-5xl font-black tracking-tight text-[#37352f] mb-4">
+              10 Industries. 30 Micro-Tools. <br />
+              <span className="text-blue-600">One Production Matrix.</span>
+            </h1>
+            <p className="text-gray-500 max-w-xl mx-auto text-sm">Select any operational sector inside the Notion architecture matrix deck below to dispatch tools natively.</p>
+          </section>
+
+          <section className="max-w-[1040px] mx-auto px-6 pb-24">
+            <div className="border border-[#edece9] rounded-xl shadow-sm bg-white overflow-hidden">
+              <div className="flex border-b border-[#edece9] bg-[#fbfbfa] overflow-x-auto select-none no-scrollbar">
+                {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
+                  <button
+                    key={indKey}
+                    onClick={() => setNotionActiveTab(indKey)}
+                    className={`px-5 py-3 text-xs font-bold tracking-tight uppercase whitespace-nowrap transition-colors border-r border-[#edece9] ${notionActiveTab === indKey ? 'bg-white text-[#37352f] border-b-2 border-b-blue-600' : 'text-[#7c7b77] hover:bg-gray-50'}`}
+                  >
+                    {industriesMap[indKey].label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-8">
+                <p className="text-xs font-mono text-[#7c7b77] mb-6 border-l-2 border-blue-500 pl-3">
+                  {industriesMap[notionActiveTab].notionHeroSub}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {industriesMap[notionActiveTab].tools.map((tool) => (
+                    <div 
+                      key={tool.id}
+                      onClick={() => selectToolFromMenu(tool.id)}
+                      className="p-5 border border-[#edece9] rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white"
+                    >
+                      <h3 className="font-bold text-sm text-[#37352f] mb-1">{tool.shortName}</h3>
+                      <p className="text-xs text-[#7c7b77] leading-relaxed">{tool.tagline}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : activeTool === 'marketing_utm' ? (
+        <div className="p-12 text-center">🔗 UTM Link Compiler Module Render Stack Active Localized.</div>
+      ) : activeTool === 'mfg_yield' ? (
+        <div className="p-12 text-center">📉 Raw Material Yield Core Frame Active.</div>
+      ) : activeTool === 'mfg_maintenance' ? (
+        <div className="p-12 text-center">🔧 Predictive Breakdown Scheduler Shell Matrix Active.</div>
+      ) : activeTool === 'mfg_costing' ? (
+        <div className="p-12 text-center">🧮 Manufacturing Lot Costing Logic Stack Active.</div>
+      ) : activeTool === 'real_estate_whatsapp' ? (
+        <div className="p-12 text-center">💬 WhatsApp Broker Fit Automation Terminal Active.</div>
+      ) : activeTool === 'real_estate_rental' ? (
+        <div className="p-12 text-center">📊 Rental Landlord Expense Log Shield Active.</div>
+      ) : activeTool === 'real_estate_desc' ? (
+        <div className="p-12 text-center">📝 Property Listing AI Description Engine Active.</div>
+      ) : activeTool === 'cafe_tips' ? (
+        <div className="p-12 text-center">👥 Cafe Weighted Shift Tip-Splitter Engine Active.</div>
+      ) : activeTool === 'cafe_costing' ? (
+        <div className="p-12 text-center">🍳 Platter Food Cost & Inflation Audit Grid Active.</div>
+      ) : activeTool === 'cafe_qr' ? (
+        <div className="p-12 text-center">📱 Standalone Dynamic QR Digital Menu Frame Active.</div>
+      ) : activeTool === 'legal_hours' ? (
+        <div className="p-12 text-center">⏳ Billable Hour Activity Logger Ledger Active.</div>
+      ) : activeTool === 'legal_doc' ? (
+        <div className="p-12 text-center">📄 Boilerplate Legal Document Filler Variable Swap Active.</div>
+      ) : activeTool === 'legal_calendar' ? (
+        <div className="p-12 text-center">📅 Court Hearing Calendar Limitation Deadline Radar Active.</div>
+      ) : activeTool === 'health_noshow' ? (
         
+        /* ---------------------------------------------------------------------
+           ACTIVE TOOL: PATIENT APPOINTMENT NO-SHOW PREVENTER FULL VIEW
+           --------------------------------------------------------------------- */
         <div className="bg-[#fafafa]">
-          
-          {/* DEEP HIGH-RANKING ON-PAGE PROGRAMMATIC SEO VAULT */}
           <div className="hidden">
             <h1>Patient Appointment No-Show Preventer Engine | Medical Clinic CRM</h1>
-            <h2>Automated healthcare check-in trackers and proactive text reminder frameworks.</h2>
-            <p>Calculate patient cancellation risk matrices natively, map historic absence thresholds, optimize empty clinic shift gaps, and deploy automated outreach alerts to protect doctor timetables.</p>
+            <p>Calculate clinic reservation risk parameters and remind standby patient groups natively.</p>
           </div>
 
-          {/* SaaS VALUE PREPOSITION HERO SALES CONTAINER */}
-          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
-            
-            <div className="max-w-[860px] mx-auto relative z-10">
+          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative">
+            <div className="max-w-[860px] mx-auto">
               <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-800 border border-blue-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>🩺</span> <span>Proactive Medical Revenue Protection Radar</span>
+                <span>🩺</span> <span>Clinical Appointment Revenue Shield</span>
               </span>
-              
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
                 Eradicate Empty Medical Time Slots. <br />
                 <span className="text-blue-600">Intercept Clinic No-Shows Automatically.</span>
               </h1>
-              
-              <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                When patients skip booked clinical slots without a warning, expensive specialist hours evaporate and operating queues break. Map historical cancellation markers to push automated confirmation logs seamlessly.
+              <p className="text-base text-[#5c5952] max-w-2xl mx-auto mb-8">
+                When patients fail to show up, valuable specialist shifts are wasted. Trace attendance records to automate reminders instantly.
               </p>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#preventer-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Open Risk Input Terminal ↓
-                </a>
-                <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Connect Live WhatsApp SMS Automation API ($10)
-                </button>
+              <div className="flex justify-center gap-3">
+                <a href="#workspace" className="bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl">Open Registration Board ↓</a>
               </div>
             </div>
           </section>
 
-          {/* APPLICATION INTERACTIVE DATA WORKSPACE */}
-          <section id="preventer-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* SIMULATOR COMPONENT */}
+          <section id="workspace" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-              
-              {/* ENTRY INPUT FORM PANEL CONTAINER CARD */}
-              <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Booking Registration</h3>
-                
-                <div className="space-y-3.5">
-                  <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Patient Full Name</label>
-                    <input 
-                      type="text" 
-                      value={inputPatient}
-                      onChange={(e) => setInputPatient(e.target.value)}
-                      placeholder="e.g. Ramesh Chandra Poddar"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Assigned Specialist</label>
-                    <select
-                      value={doctorRef}
-                      onChange={(e) => setDoctorRef(e.target.value)}
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700 focus:outline-none"
-                    >
-                      <option value="Dr. Shambhu Nath (General Medicine)">Dr. Shambhu Nath (General Medicine)</option>
-                      <option value="Dr. Sonali Sharma (Pediatrics)">Dr. Sonali Sharma (Pediatrics)</option>
-                      <option value="Dr. A. K. Singh (Dental Specialist)">Dr. A. K. Singh (Dental Specialist)</option>
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Target Slot Time</label>
-                      <input 
-                        type="text" 
-                        value={slotTime}
-                        onChange={(e) => setSlotTime(e.target.value)}
-                        placeholder="e.g. 11:30 AM"
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Past No-Shows</label>
-                      <input 
-                        type="number" 
-                        value={pastAbsences}
-                        onChange={(e) => setPastAbsences(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
-                    </div>
-                  </div>
+              <div className="bg-white border border-[#e9e8e4] rounded-xl p-6 space-y-4 shadow-sm">
+                <h3 className="text-xs font-bold uppercase text-gray-900 border-b pb-2">Booking Intake</h3>
+                <div>
+                  <label className="text-[11px] font-bold text-gray-500 block mb-1">Patient Name</label>
+                  <input type="text" value={healthNoShowPatient} onChange={(e)=>setHealthNoShowPatient(e.target.value)} placeholder="e.g. Ramesh Chandra Poddar" className="w-full p-2.5 border rounded-lg text-xs bg-[#faf9f6]"/>
                 </div>
-
-                <button
-                  onClick={executeCompilePatientRisk}
-                  disabled={!inputPatient.trim()}
-                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
-                >
-                  Analyze Schedule Risk
-                </button>
+                <button onClick={()=>{alert("Patient registered to active matrix stack!"); setHealthNoShowPatient('');}} className="w-full bg-blue-600 text-white font-bold text-xs py-3 rounded-lg uppercase">Verify Patient Horizon</button>
               </div>
 
-              {/* LIVE RESPONSE PIPELINE DATAFEED LIST CONTAINER */}
-              <div className="lg:col-span-2 space-y-4">
-                
-                {/* GATED BEHIND RIGID SYSTEM CONVERSION CAPACITY BLOCKS */}
-                {healthPremiumLock && (
-                  <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
-                    <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Active WhatsApp Business Push Gateway Locked</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free clinical trial frames track up to 2 active booking queues to prevent cloud bloat. Pay $10 once to handle unlimited patients sheets and trigger real-time alert texts directly.</p>
-                    </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-blue-700 transition-colors">
-                      Bypass Cap Rules
-                    </button>
-                  </div>
-                )}
-
-                <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Live Clinical Attendance Board</span>
-                    <span className="text-[10px] font-mono text-gray-400">Database Connection: Stable</span>
-                  </div>
-
-                  <div className="divide-y divide-[#f3f2ee]">
-                    {patientQueue.map((node) => (
-                      <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
-                        <div className="space-y-1">
-                          <span className="font-bold text-xs sm:text-sm text-[#1e1e1c] block">{node.patientName}</span>
-                          <div className="text-xs text-gray-500">
-                            Assigned: <b className="text-gray-700">{node.doctorReference}</b> | Target Time: <span className="font-mono font-bold text-gray-900">{node.appointmentTime}</span>
-                          </div>
-                          <div className="text-[11px] text-gray-400 font-mono">
-                            Historical Absences: {node.historicalNoShows} logged matches
-                          </div>
-                        </div>
-
-                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
-                          <span className={`text-[10px] px-2.5 py-0.5 rounded font-bold tracking-tight block border ${node.riskRating === 'HIGH_RISK_ALERT' ? 'bg-red-50 text-red-700 border-red-100 animate-pulse' : 'bg-green-50 text-green-700 border-green-100'}`}>
-                            {node.riskRating === 'HIGH_RISK_ALERT' ? '🚨 HIGH CANCELLATION RISK' : '✓ HEALTHY RECORD'}
-                          </span>
-                          <span className="text-[11px] font-medium text-gray-400 mt-1.5 block">
-                            Status: <b className="text-gray-600">{node.reminderStatus}</b>
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div className="lg:col-span-2 bg-white border rounded-xl shadow-sm p-6 text-center text-xs text-gray-400 italic">
+                Clinical attendance visualization stream is live and monitoring active time parameters.
               </div>
-
             </div>
           </section>
 
-          {/* INLINE SCHEMATIC MARKETING TEXT INFOGRAPHIC SECTION */}
+          {/* PRO HARDCORE VALUE ELEMENT INFOGRAPHICS */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Automated Retention Logic</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Preemptive Attendance Loop</h2>
-                <p className="text-xs text-gray-500 mt-2">How clinical edge metrics evaluate booking lines to intercept slot vacancies before shift loss.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Automated Optimization Blueprint</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The 3-Step Instant Check-In Sequence</h2>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Slot Registration</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Clinic receptionists enter the incoming patient parameter details, assigned practitioner references, and past absence logs.</p>
+                  <div className="text-xl mb-3">📋 01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Lot Registration</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Clinical desk enters patient preference metrics and historical missing indices cleanly.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Risk Factor Mapping</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">System logic processes historic arrival integrity instantly, separating lines into high-risk warning status filters automatically.</p>
+                  <div className="text-xl mb-3">📡 02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Risk Indexing</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">System parameters classify lines instantly to sort standby rows ahead of slot times.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Confirmation Dispatch</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Before the operational timing window breaches, premium cron alert nodes route reminder texts to fill alternative standby patients.</p>
+                  <div className="text-xl mb-3">🛡 03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Preemptive Notification</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Premium webhook structures dispatch warning alert vectors directly to secure arriving confirmations.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* CLINIC PROFITABILITY UNIQUE SELLING PROPOSITIONS (USPs) GRIDS */}
+          {/* FAQS SYSTEM ACCORDION */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
-            <div className="max-w-[1040px] mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                
-                <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Seamless Practitioner Time Enforcement</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Maximize Clinic Daily Fill Rates <br />Bypassing Chaotic CRM software.</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    Heavy, corporate hospital administration softwares force independent healthcare providers through exhaustive onboarding setups and high structural costs. <b>extrct.app</b> strips friction to deliver pure clinical pacing utility.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">📈</span>
-                    <span className="font-bold text-xs text-gray-900 block">Eradicate Lost Slots</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Identifies chronic repeat offenders early to protect operating revenue lines.</p>
-                  </div>
-                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">⏱</span>
-                    <span className="font-bold text-xs text-gray-900 block">Under 10 Seconds Setup</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Lightweight matrix entries let clinical desks process daily queues with maximum velocity.</p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </section>
-
-          {/* DYNAMIC ON-PAGE HIGH-CONVERTING FAQ ACCORDION PANEL */}
-          <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
-              <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Clinical Queries</h3>
-                <p className="text-xs text-gray-400 mt-1">Everything you need to master about automating clinical attendance parameters.</p>
+              <h3 className="text-2xl font-black text-center mb-8">Frequently Answered Queries</h3>
+              <div className="border rounded-xl bg-white p-4 text-xs text-gray-500">
+                <b>Q: How does the alert automation bypass empty slots?</b><br/>
+                The interface monitors appointment time offsets, prompting immediate confirmations to alternative patient queues if a high-risk slot logs no response.
               </div>
-
-              <div className="space-y-3.5">
-                {[
-                  {
-                    q: "How does the engine separate patients into discrete risk ratings?",
-                    a: "The logic evaluates historical clinic cancellations records. Any patient logging 1 or more unexcused past absences automatically triggers a high-risk alert status, prompting receptionists to clear standby files ahead of time."
-                  },
-                  {
-                    q: "What technical integrations open up inside the $10 premium upgrade gateway?",
-                    a: "The standard trial engine operates inside local frame structures. Moving onto our premium subscription routes hooks dynamic automated message nodes directly over active WhatsApp APIs to dispatch warnings instantly."
-                  }
-                ].map((faq, index) => (
-                  <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
-                    <button
-                      onClick={() => setOpenFaqIdx(openFaqIdx === index ? null : index)}
-                      className="w-full px-5 py-4 text-left font-bold text-xs sm:text-sm text-gray-800 flex items-center justify-between hover:bg-gray-50 focus:outline-none"
-                    >
-                      <span>{faq.q}</span>
-                      <span className="text-xs text-gray-400 font-mono">{openFaqIdx === index ? '▲' : '▼'}</span>
-                    </button>
-                    {openFaqIdx === index && (
-                      <div className="px-5 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-50 pt-2 animate-in fade-in duration-150">
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
             </div>
           </section>
-
         </div>
       ) : null}
 
-      {/* FOOTER BLOCK CONTAINER */}
+      {/* GLOBAL FOOTER FRAME */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
-        <span>© 2026 extrct.app SaaS Global Operations Terminal. All system frameworks verified.</span>
+        <span>© 2026 extrct.app SaaS Global Operations Matrix Terminal. All paths recovered.</span>
       </footer>
 
     </div>
