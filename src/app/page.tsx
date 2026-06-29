@@ -9,11 +9,21 @@ type ToolType =
   | 'mfg_yield' | 'mfg_maintenance' | 'mfg_costing'
   | 'real_estate_whatsapp';
 
-export default function SolopreneurWorkspace() {
-  const [activeTab, setActiveTab] = useState<ToolType>('dashboard');
+type IndustryType = 'ecom' | 'marketing' | 'mfg' | 'real_estate';
+
+export default function SolopreneurMegaMenuPlatform() {
+  const [activeTool, setActiveTool] = useState<ToolType>('dashboard');
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
+  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryType>('ecom');
   const [currentOutput, setCurrentOutput] = useState<MatrixReport | null>(null);
-  const [imageCount, setImageCount] = useState<number>(6); // For Tool 2 limits testing
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [imageCount, setImageCount] = useState<number>(6);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const selectToolFromMenu = (toolId: ToolType) => {
+    setActiveTool(toolId);
+    setCurrentOutput(null);
+    setIsMegaMenuOpen(false); // Close menu on click
+  };
 
   const triggerToolSimulation = (toolId: ToolType, customInput?: any) => {
     setIsProcessing(true);
@@ -24,173 +34,229 @@ export default function SolopreneurWorkspace() {
     }, 300);
   };
 
-  const handleCheckout = () => {
-    alert("Redirecting to $10 Tier Premium Secure Stripe Unlock Node Gateway...");
-  };
-
   return (
-    <div className="flex min-h-screen bg-white text-[#37352f] font-sans antialiased text-[14px]">
+    <div className="min-h-screen bg-[#fafafa] text-[#37352f] font-sans antialiased text-[14px] relative">
       
-      {/* Pixel-Perfect Notion Sidebar */}
-      <aside className="w-[260px] bg-[#fbfbfa] border-r border-[#edece9] flex flex-col justify-between select-none shrink-0 overflow-y-auto">
-        <div className="py-3 px-3">
-          
-          {/* Workspace Switcher Component */}
-          <div onClick={() => { setActiveTab('dashboard'); setCurrentOutput(null); }} className="flex items-center space-x-2 p-1.5 hover:bg-[rgba(55,53,47,0.04)] rounded-md cursor-pointer transition-colors">
-            <div className="w-[20px] h-[20px] bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-[11px]">M</div>
-            <span className="font-semibold text-sm tracking-tight text-[#37352f]">Master Matrix Workspace</span>
+      {/* GLOBAL TOP NAVIGATION BAR */}
+      <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
+        <div className="flex items-center space-x-8">
+          {/* Logo Branding */}
+          <div onClick={() => { setActiveTool('dashboard'); setCurrentOutput(null); }} className="flex items-center space-x-2 cursor-pointer">
+            <div className="w-6 h-6 bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-xs">M</div>
+            <span className="font-bold text-base tracking-tight text-[#37352f]">extrct.app</span>
           </div>
 
-          {/* INDUSTRY CATEGORY 1 */}
-          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">📦 E-Commerce</div>
-          <div className="space-y-[1px]">
-            <div onClick={() => { setActiveTab('ecom_fee'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'ecom_fee' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              📑 Fee & Overcharge Auditor
-            </div>
-            <div onClick={() => { setActiveTab('ecom_img'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'ecom_img' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              Im🗜️ Image WebP Compressor
-            </div>
-            <div onClick={() => { setActiveTab('ecom_radar'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'ecom_radar' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              📡 Competitor Price Radar
-            </div>
-          </div>
+          {/* Navigation Links with Interactive Dropdown Container */}
+          <nav className="relative flex items-center h-full">
+            <button 
+              onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
+              className={`flex items-center space-x-1 font-medium text-sm px-3 py-1.5 rounded-md transition-colors ${isMegaMenuOpen ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}
+            >
+              <span>Solutions</span>
+              <span className={`text-[10px] transform transition-transform duration-200 ${isMegaMenuOpen ? 'rotate-180' : ''}`}>▼</span>
+            </button>
 
-          {/* INDUSTRY CATEGORY 2 */}
-          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">📈 Marketing Agencies</div>
-          <div className="space-y-[1px]">
-            <div onClick={() => { setActiveTab('marketing_burn'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'marketing_burn' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              🚨 Ad-Spend Budget Burn Alert
-            </div>
-            <div onClick={() => { setActiveTab('marketing_portal'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'marketing_portal' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              🌐 Whitelabel Notion Client Portal
-            </div>
-            <div onClick={() => { setActiveTab('marketing_utm'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'marketing_utm' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              🔗 UTM Campaign Link Generator
-            </div>
-          </div>
-
-          {/* INDUSTRY CATEGORY 3 */}
-          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">🏗️ Manufacturing & MSMEs</div>
-          <div className="space-y-[1px]">
-            <div onClick={() => { setActiveTab('mfg_yield'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'mfg_yield' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              📉 Raw Material Yield Detector
-            </div>
-            <div onClick={() => { setActiveTab('mfg_maintenance'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'mfg_maintenance' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              🔧 Maintenance Scheduler Alert
-            </div>
-            <div onClick={() => { setActiveTab('mfg_costing'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'mfg_costing' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              🧮 Production Batch Costing Tool
-            </div>
-          </div>
-
-          {/* INDUSTRY CATEGORY 4 */}
-          <div className="mt-5 px-2 py-1 text-[11px] font-semibold text-[#7c7b77] tracking-wider uppercase">🏡 Real Estate</div>
-          <div className="space-y-[1px]">
-            <div onClick={() => { setActiveTab('real_estate_whatsapp'); setCurrentOutput(null); }} className={`px-2 py-1.5 rounded-md cursor-pointer text-[13px] truncate ${activeTab === 'real_estate_whatsapp' ? 'bg-[rgba(55,53,47,0.06)] font-medium text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}>
-              💬 WhatsApp Bulk Alert Match Engine
-            </div>
-          </div>
-
-        </div>
-      </aside>
-
-      {/* Main Container Content */}
-      <main className="flex-1 bg-white overflow-y-auto">
-        <div className="h-11 px-12 border-b border-[#edece9] flex items-center text-[13px] text-[#7c7b77]">
-          <span>Index</span><span className="mx-2 text-[#edece9]">/</span>
-          <span className="text-[#37352f] uppercase text-xs font-mono tracking-wider">{activeTab.replace('_', ' ')}</span>
-        </div>
-
-        <div className="max-w-[720px] mx-auto px-12 pt-14 pb-28">
-          
-          {/* DASHBOARD HOMEPAGE INTERFACE */}
-          {activeTab === 'dashboard' && (
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-2">Platform Matrix Terminal</h1>
-              <p className="text-[#7c7b77] text-[15px] mb-8">All 10 elite solopreneur utilities compiled dynamically from deployment index profiles.</p>
-              
-              <div className="grid grid-cols-1 gap-2">
-                <div onClick={() => setActiveTab('ecom_fee')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📦 <b>E-Com:</b> Automated Marketplace Overcharge & Fee Auditor</div>
-                <div onClick={() => setActiveTab('ecom_img')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📦 <b>E-Com:</b> Batch Dynamic Image Compressor & WebP Variant Converter</div>
-                <div onClick={() => setActiveTab('ecom_radar')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📦 <b>E-Com:</b> Competitor Price-Drop & Stock-Out Radar</div>
+            {/* THE MEGA MENU DROPDOWN PANEL */}
+            {isMegaMenuOpen && (
+              <div className="absolute top-[52px] left-0 w-[640px] bg-white border border-[#edece9] shadow-xl rounded-xl overflow-hidden flex z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 
-                <div onClick={() => setActiveTab('marketing_burn')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📈 <b>Marketing:</b> Multi-Platform Ad-Spend Budget Burn Alert System</div>
-                <div onClick={() => setActiveTab('marketing_portal')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📈 <b>Marketing:</b> Whitelabel Client Notion/Portal Generator</div>
-                <div onClick={() => setActiveTab('marketing_utm')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">📈 <b>Marketing:</b> UTM Campaign Link Generator Tool</div>
-                
-                <div onClick={() => setActiveTab('mfg_yield')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏗️ <b>Manufacturing:</b> Raw Material Yield & Dead-Stock Leak Detector</div>
-                <div onClick={() => setActiveTab('mfg_maintenance')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏗️ <b>Manufacturing:</b> Machine Breakdown & Preventative Maintenance Scheduler</div>
-                <div onClick={() => setActiveTab('mfg_costing')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏗️ <b>Manufacturing:</b> Production Batch Costing & Dynamic Margin Calculator</div>
-                
-                <div onClick={() => setActiveTab('real_estate_whatsapp')} className="p-3 border rounded-md hover:bg-[rgba(55,53,47,0.02)] cursor-pointer">🏡 <b>Real Estate:</b> WhatsApp Bulk Property Alert & Match Engine</div>
+                {/* Left Columns: Industries Selector Panel */}
+                <div className="w-[220px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[2px]">
+                  <div className="px-2 py-1.5 text-[11px] font-bold text-[#7c7b77] uppercase tracking-wider">Industries</div>
+                  
+                  <div 
+                    onMouseEnter={() => setHoveredIndustry('ecom')}
+                    className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === 'ecom' ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.03)]'}`}
+                  >
+                    <span>📦 E-Commerce</span>
+                    {hoveredIndustry === 'ecom' && <span className="text-[10px] text-[#7c7b77]">→</span>}
+                  </div>
+
+                  <div 
+                    onMouseEnter={() => setHoveredIndustry('marketing')}
+                    className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === 'marketing' ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.03)]'}`}
+                  >
+                    <span>📈 Marketing Agencies</span>
+                    {hoveredIndustry === 'marketing' && <span className="text-[10px] text-[#7c7b77]">→</span>}
+                  </div>
+
+                  <div 
+                    onMouseEnter={() => setHoveredIndustry('mfg')}
+                    className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === 'mfg' ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.03)]'}`}
+                  >
+                    <span>🏗️ Manufacturing & MSMEs</span>
+                    {hoveredIndustry === 'mfg' && <span className="text-[10px] text-[#7c7b77]">→</span>}
+                  </div>
+
+                  <div 
+                    onMouseEnter={() => setHoveredIndustry('real_estate')}
+                    className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === 'real_estate' ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.03)]'}`}
+                  >
+                    <span>🏡 Real Estate</span>
+                    {hoveredIndustry === 'real_estate' && <span className="text-[10px] text-[#7c7b77]">→</span>}
+                  </div>
+                </div>
+
+                {/* Right Columns: Target Micro-Utilities Content Links */}
+                <div className="flex-1 p-4 bg-white space-y-1">
+                  <div className="px-2 pb-2 text-[11px] font-bold text-[#7c7b77] uppercase tracking-wider border-b border-[#f1f0ee] mb-2">Available Operational Tools</div>
+                  
+                  {/* E-Com Target Panel Links */}
+                  {hoveredIndustry === 'ecom' && (
+                    <>
+                      <div onClick={() => selectToolFromMenu('ecom_fee')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">📑 Fee & Overcharge Auditor</div>
+                        <div className="text-[12px] text-[#7c7b77]">Audits structural weight tier discrepancies & claims.</div>
+                      </div>
+                      <div onClick={() => selectToolFromMenu('ecom_img')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">🗜️ Image WebP Compressor</div>
+                        <div className="text-[12px] text-[#7c7b77]">Batch conversion pipeline for rapid asset loads.</div>
+                      </div>
+                      <div onClick={() => selectToolFromMenu('ecom_radar')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">📡 Competitor Price Radar</div>
+                        <div className="text-[12px] text-[#7c7b77]">Automated daily listing scraper and tracking maps.</div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Digital Marketing Target Panel Links */}
+                  {hoveredIndustry === 'marketing' && (
+                    <>
+                      <div onClick={() => selectToolFromMenu('marketing_burn')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">🚨 Ad-Spend Budget Burn Alert</div>
+                        <div className="text-[12px] text-[#7c7b77]">Triggers active pacing alarms across platform networks.</div>
+                      </div>
+                      <div onClick={() => selectToolFromMenu('marketing_portal')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">🌐 Whitelabel Notion Client Portal</div>
+                        <div className="text-[12px] text-[#7c7b77]">One-click clean portfolio statuses sharing hubs.</div>
+                      </div>
+                      <div onClick={() => selectToolFromMenu('marketing_utm')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">🔗 UTM Campaign Link Generator</div>
+                        <div className="text-[12px] text-[#7c7b77]">Structured matrix arrays for clean attribution flow.</div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Manufacturing Target Panel Links */}
+                  {hoveredIndustry === 'mfg' && (
+                    <>
+                      <div onClick={() => selectToolFromMenu('mfg_yield')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">📉 Raw Material Yield Detector</div>
+                        <div className="text-[12px] text-[#7c7b77]">Flags floor drops against standard input logs.</div>
+                      </div>
+                      <div onClick={() => selectToolFromMenu('mfg_maintenance')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">🔧 Maintenance Scheduler Alert</div>
+                        <div className="text-[12px] text-[#7c7b77]">Supabase backend alerts sequence before deadlines.</div>
+                      </div>
+                      <div onClick={() => selectToolFromMenu('mfg_costing')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">🧮 Production Batch Costing Tool</div>
+                        <div className="text-[12px] text-[#7c7b77]">Real-time unit costing margin frameworks calculator.</div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Real Estate Target Panel Links */}
+                  {hoveredIndustry === 'real_estate' && (
+                    <>
+                      <div onClick={() => selectToolFromMenu('real_estate_whatsapp')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
+                        <div className="font-semibold text-sm text-[#37352f]">💬 WhatsApp Bulk Match Engine</div>
+                        <div className="text-[12px] text-[#7c7b77]">Instantly parses spec parameters into bulk client broadcasts.</div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
               </div>
+            )}
+          </nav>
+        </div>
+
+        <div className="text-xs text-[#7c7b77] border border-[#edece9] px-3 py-1 rounded-full bg-[#fbfbfa]">
+          Ecosystem: <b>Active</b>
+        </div>
+      </header>
+
+      {/* BACKGROUND DISMISSER LAYER FOR MEGA MENU OPEN STATE */}
+      {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
+
+      {/* CORE WORKSPACE CONTENT DEPLOYMENT HUB */}
+      <main className="max-w-[760px] mx-auto px-6 pt-16 pb-32">
+        <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-12 min-h-[420px] transition-all duration-300">
+          
+          {/* DASHBOARD ENTRY VIEW ELEMENT */}
+          {activeTool === 'dashboard' && (
+            <div className="text-center pt-8">
+              <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-3">Welcome to Platform Matrix Terminal</h1>
+              <p className="text-[#7c7b77] text-base max-w-md mx-auto mb-8">Click on the <b>Solutions dropdown</b> menu above to launch any of your 10 elite tailored platform utilities instantly.</p>
+              <div className="w-16 h-16 border-2 border-dashed border-[#edece9] rounded-xl flex items-center justify-center text-2xl mx-auto opacity-60">🎛️</div>
             </div>
           )}
 
-          {/* DYNAMIC UTILITY VIEWS RENDERING TARGETS */}
-          {activeTab !== 'dashboard' && (
+          {/* DYNAMIC VIEW FOR SELECTIVE NODE CHANNELS */}
+          {activeTool !== 'dashboard' && (
             <div>
-              <h1 className="text-3xl font-bold tracking-tight mb-2 capitalize text-[#37352f]">
-                {activeTab.split('_').join(' ')}
+              <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-[#7c7b77] mb-2">
+                <span>Active Terminal Node</span>
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight text-[#37352f] mb-4 capitalize">
+                {activeTool.split('_').join(' ')}
               </h1>
               
-              {/* Context Pain-Point Details Rendering Injection */}
-              <div className="text-sm text-[#7c7b77] mb-6">
-                {activeTab === 'ecom_fee' && "Marketplaces miscalculate weight dimensions or referral fee tiers leading to leaked revenue."}
-                {activeTab === 'ecom_img' && "Large product images slow down page load speeds dropping conversion rates and increasing cart abandonment."}
-                {activeTab === 'ecom_radar' && "Checking competing product listings manually to adjust daily pricing models takes hours every morning."}
-                {activeTab === 'marketing_burn' && "Overspending client budgets due to platform notification lags results in agencies paying out of pocket."}
-                {activeTab === 'marketing_portal' && "Building custom dashboards to present links assets and project statuses professionally to clients takes hours."}
-                {activeTab === 'marketing_utm' && "Broken or unorganized UTM parameters ruin analytics tracking wasting thousands in ad spend attribution mistakes."}
-                {activeTab === 'mfg_yield' && "Unexpected waste during production or items expiring in the warehouse burns through factory margins silently."}
-                {activeTab === 'mfg_maintenance' && "Unexpected machinery breakdowns stall production floors costing thousands in idle labor and delayed orders."}
-                {activeTab === 'mfg_costing' && "Wholesale material costs and electricity rates shift constantly causing factory owners to price bulk orders at a loss."}
-                {activeTab === 'real_estate_whatsapp' && "Matching newly listed properties with prospective buyer criteria manually via spreadsheets takes hours leading to missed deals."}
-              </div>
+              <p className="text-sm text-[#605e59] mb-8 leading-relaxed bg-[#fbfbfa] p-4 border border-[#edece9] rounded-lg">
+                {activeTool === 'ecom_fee' && "🚨 Pain Point: Marketplaces miscalculate weight dimensions or referral fee tiers leading to leaked revenue."}
+                {activeTool === 'ecom_img' && "🚨 Pain Point: Large product images slow down page load speeds dropping conversion rates and increasing cart abandonment."}
+                {activeTool === 'ecom_radar' && "🚨 Pain Point: Checking competing product listings manually to adjust daily pricing models takes hours every morning."}
+                {activeTool === 'marketing_burn' && "🚨 Pain Point: Overspending client budgets due to platform notification lags results in agencies paying out of pocket."}
+                {activeTool === 'marketing_portal' && "🚨 Pain Point: Building custom dashboards to present links assets and project statuses professionally to clients takes hours of manual setup."}
+                {activeTool === 'marketing_utm' && "🚨 Pain Point: Broken or unorganized UTM parameters ruin analytics tracking wasting thousands in ad spend attribution mistakes."}
+                {activeTool === 'mfg_yield' && "🚨 Pain Point: Unexpected waste during production or items expiring in the warehouse burns through factory margins silently."}
+                {activeTool === 'mfg_maintenance' && "🚨 Pain Point: Unexpected machinery breakdowns stall production floors costing thousands in idle labor and delayed orders."}
+                {activeTool === 'mfg_costing' && "🚨 Pain Point: Wholesale material costs and electricity rates shift constantly causing factory owners to price bulk orders at a loss."}
+                {activeTool === 'real_estate_whatsapp' && "🚨 Pain Point: Matching newly listed properties with prospective buyer criteria manually via spreadsheets takes hours leading to missed deals."}
+              </p>
 
-              {/* Specific Custom UI Controls Extension for Image Tool Hooks */}
-              {activeTab === 'ecom_img' && (
-                <div className="mb-4 flex items-center space-x-3 bg-[#fbfbfa] border p-3 rounded-md">
-                  <label className="text-xs font-medium text-[#7c7b77]">Test Batch Upload Counter:</label>
+              {activeTool === 'ecom_img' && (
+                <div className="mb-4 flex items-center space-x-3 bg-white border p-3 rounded-lg max-w-xs">
+                  <label className="text-xs font-medium text-[#7c7b77]">Batch Scale Upload Check:</label>
                   <input type="number" value={imageCount} onChange={(e) => setImageCount(Number(e.target.value))} className="w-16 border rounded p-1 text-xs text-center outline-none" />
                 </div>
               )}
 
-              {/* Centralized Standard Drag & Drop File Container Simulation Node */}
+              {/* Centralized Upload Drop Area Node Box */}
               <div 
-                onClick={() => triggerToolSimulation(activeTab, activeTab === 'ecom_img' ? imageCount : null)} 
-                className="border border-dashed border-[#edece9] hover:bg-[rgba(55,53,47,0.01)] rounded-md p-12 text-center cursor-pointer mb-6 transition-all"
+                onClick={() => triggerToolSimulation(activeTool, activeTool === 'ecom_img' ? imageCount : null)} 
+                className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-xl p-14 text-center cursor-pointer mb-8 transition-all bg-[#fbfbfa]"
               >
                 {isProcessing ? (
-                  <span className="text-sm text-[#7c7b77] animate-pulse">Running matrix functional logic checks...</span>
+                  <span className="text-sm font-medium text-[#7c7b77] animate-pulse">Running matrix functional processing arrays...</span>
                 ) : (
-                  <span className="text-sm text-[#37352f]">📄 Drop industry raw data tracking file logs / database dump here</span>
+                  <span className="text-sm font-medium text-[#37352f]">📄 Click to simulate dragging & dropping raw dataset file log matrix</span>
                 )}
               </div>
 
-              {/* Metric Outputs UI Terminal Panel */}
+              {/* Metrics Output Generation Drawer Panel */}
               {currentOutput && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-[#fbfbfa] border rounded-md"><span className="text-xs text-[#7c7b77] block">Telemetry Module A</span><b className="text-md text-[#37352f]">{currentOutput.metricA}</b></div>
-                    <div className="p-3 bg-[#fbfbfa] border rounded-md"><span className="text-xs text-[#7c7b77] block">Telemetry Module B</span><b className="text-md text-red-600">{currentOutput.metricB}</b></div>
+                <div className="space-y-4 border-t border-[#edece9] pt-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Output A</span><b className="text-base text-[#37352f]">{currentOutput.metricA}</b></div>
+                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Output B</span><b className="text-base text-red-600">{currentOutput.metricB}</b></div>
                   </div>
 
                   {currentOutput.isLocked && (
-                    <div className="bg-[#fdebec] border border-[#f5c2c2] rounded-md p-4 text-center">
-                      <p className="text-xs text-[#601a1a] mb-3 font-medium">
-                        {activeTab === 'ecom_fee' && "Highlights exact lines where you overpaid. Pay $10 to unlock pre-filled dispute sheet export."}
-                        {activeTab === 'ecom_img' && "Free tier limits processing to 5 images per batch. Premium unlocks bulk processing of up to 1000 variants instantly."}
-                        {activeTab === 'ecom_radar' && "Free accounts track 1 URL. Paid accounts unlock real-time tracking and automated alerts."}
-                        {activeTab === 'marketing_burn' && "Free tier tracks 1 client account; paid tier scales to support unlimited ad accounts."}
-                        {activeTab === 'marketing_portal' && "Free pages carry your platform's watermark. The $10 tier removes it and unlocks custom subdomains."}
-                        {activeTab === 'mfg_yield' && "Flags exact department leaks. Pay $10 to unlock historical waste trends analytics and export deep logs."}
-                        {activeTab === 'mfg_maintenance' && "Free tier tracks 2 primary machines. Premium unlocks unlimited machine logging and sends automated alerts."}
-                        {activeTab === 'mfg_costing' && "Free tier allows calculation but doesn't save configurations. Premium stores custom templates for up to 50 product categories."}
-                        {activeTab === 'real_estate_whatsapp' && "Paid tier allows automated bulk matching and message broadcasting nodes."}
+                    <div className="bg-[#fdebec] border border-[#f5c2c2] rounded-xl p-6 text-center">
+                      <p className="text-sm text-[#601a1a] mb-4 font-medium">
+                        {activeTool === 'ecom_fee' && "Highlights exact lines where you overpaid. Pay $10 to unlock the pre-filled dispute sheet export to claim refunds."}
+                        {activeTool === 'ecom_img' && "Free tier limits processing to 5 images per batch. Premium unlocks bulk processing of up to 1000 variants instantly."}
+                        {activeTool === 'ecom_radar' && "Free accounts track 1 URL. Paid accounts unlock real-time tracking and automated alerts."}
+                        {activeTool === 'marketing_burn' && "Free tier tracks 1 client account; paid tier scales to support unlimited ad accounts."}
+                        {activeTool === 'marketing_portal' && "Free pages carry your platform's watermark. The $10 tier removes it and unlocks custom subdomains."}
+                        {activeTool === 'mfg_yield' && "Flags exact department leaks. Pay $10 to unlock historical waste trends analytics and export deep logs."}
+                        {activeTool === 'mfg_maintenance' && "Free tier tracks 2 primary machines. Premium unlocks unlimited machine logging and sends automated alerts."}
+                        {activeTool === 'mfg_costing' && "Free tier allows calculation but doesn't save configurations. Premium stores custom templates for up to 50 product categories."}
+                        {activeTool === 'real_estate_whatsapp' && "Paid tier allows automated bulk matching and message broadcasting specs nodes."}
                       </p>
-                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs font-medium py-1.5 px-4 rounded hover:bg-[#2c2a27]">
-                        Trigger $10 Gateway Tier Unlock
+                      <button onClick={handleCheckout} className="bg-[#37352f] text-white text-xs font-semibold py-2 px-5 rounded-lg hover:bg-[#2c2a27] transition-all shadow-sm">
+                        Unlock Premium Operational Node ($10)
                       </button>
                     </div>
                   )}
