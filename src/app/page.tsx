@@ -22,7 +22,7 @@ export default function SolopreneurMegaMenuPlatform() {
   const selectToolFromMenu = (toolId: ToolType) => {
     setActiveTool(toolId);
     setCurrentOutput(null);
-    setIsMegaMenuOpen(false); // Close menu on click
+    setIsMegaMenuOpen(false);
   };
 
   const triggerToolSimulation = (toolId: ToolType, customInput?: any) => {
@@ -34,12 +34,17 @@ export default function SolopreneurMegaMenuPlatform() {
     }, 300);
   };
 
+  const handleCheckout = () => {
+    alert("Redirecting to $10 Tier Premium Secure Stripe Unlock Node Gateway...");
+  };
+
   return (
     <div className="min-h-screen bg-[#fafafa] text-[#37352f] font-sans antialiased text-[14px] relative">
       
       {/* GLOBAL TOP NAVIGATION BAR */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
         <div className="flex items-center space-x-8">
+          
           {/* Logo Branding */}
           <div onClick={() => { setActiveTool('dashboard'); setCurrentOutput(null); }} className="flex items-center space-x-2 cursor-pointer">
             <div className="w-6 h-6 bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-xs">M</div>
@@ -58,7 +63,7 @@ export default function SolopreneurMegaMenuPlatform() {
 
             {/* THE MEGA MENU DROPDOWN PANEL */}
             {isMegaMenuOpen && (
-              <div className="absolute top-[52px] left-0 w-[640px] bg-white border border-[#edece9] shadow-xl rounded-xl overflow-hidden flex z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute top-[52px] left-0 w-[640px] bg-white border border-[#edece9] shadow-xl rounded-xl overflow-hidden flex z-50">
                 
                 {/* Left Columns: Industries Selector Panel */}
                 <div className="w-[220px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[2px]">
@@ -106,7 +111,7 @@ export default function SolopreneurMegaMenuPlatform() {
                     <>
                       <div onClick={() => selectToolFromMenu('ecom_fee')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">📑 Fee & Overcharge Auditor</div>
-                        <div className="text-[12px] text-[#7c7b77]">Audits structural weight tier discrepancies & claims.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Audits structural weight tier discrepancies.</div>
                       </div>
                       <div onClick={() => selectToolFromMenu('ecom_img')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">🗜️ Image WebP Compressor</div>
@@ -114,7 +119,7 @@ export default function SolopreneurMegaMenuPlatform() {
                       </div>
                       <div onClick={() => selectToolFromMenu('ecom_radar')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">📡 Competitor Price Radar</div>
-                        <div className="text-[12px] text-[#7c7b77]">Automated daily listing scraper and tracking maps.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Automated daily listing scraper maps.</div>
                       </div>
                     </>
                   )}
@@ -124,7 +129,7 @@ export default function SolopreneurMegaMenuPlatform() {
                     <>
                       <div onClick={() => selectToolFromMenu('marketing_burn')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">🚨 Ad-Spend Budget Burn Alert</div>
-                        <div className="text-[12px] text-[#7c7b77]">Triggers active pacing alarms across platform networks.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Triggers active pacing alarms across networks.</div>
                       </div>
                       <div onClick={() => selectToolFromMenu('marketing_portal')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">🌐 Whitelabel Notion Client Portal</div>
@@ -132,7 +137,7 @@ export default function SolopreneurMegaMenuPlatform() {
                       </div>
                       <div onClick={() => selectToolFromMenu('marketing_utm')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">🔗 UTM Campaign Link Generator</div>
-                        <div className="text-[12px] text-[#7c7b77]">Structured matrix arrays for clean attribution flow.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Structured matrix arrays for clean attribution.</div>
                       </div>
                     </>
                   )}
@@ -146,11 +151,11 @@ export default function SolopreneurMegaMenuPlatform() {
                       </div>
                       <div onClick={() => selectToolFromMenu('mfg_maintenance')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">🔧 Maintenance Scheduler Alert</div>
-                        <div className="text-[12px] text-[#7c7b77]">Supabase backend alerts sequence before deadlines.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Backend alerts sequence before deadlines.</div>
                       </div>
                       <div onClick={() => selectToolFromMenu('mfg_costing')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">🧮 Production Batch Costing Tool</div>
-                        <div className="text-[12px] text-[#7c7b77]">Real-time unit costing margin frameworks calculator.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Real-time unit costing calculators.</div>
                       </div>
                     </>
                   )}
@@ -160,7 +165,7 @@ export default function SolopreneurMegaMenuPlatform() {
                     <>
                       <div onClick={() => selectToolFromMenu('real_estate_whatsapp')} className="p-2 rounded-lg hover:bg-[rgba(55,53,47,0.04)] cursor-pointer group">
                         <div className="font-semibold text-sm text-[#37352f]">💬 WhatsApp Bulk Match Engine</div>
-                        <div className="text-[12px] text-[#7c7b77]">Instantly parses spec parameters into bulk client broadcasts.</div>
+                        <div className="text-[12px] text-[#7c7b77]">Instantly parses specs into bulk messages.</div>
                       </div>
                     </>
                   )}
@@ -176,12 +181,12 @@ export default function SolopreneurMegaMenuPlatform() {
         </div>
       </header>
 
-      {/* BACKGROUND DISMISSER LAYER FOR MEGA MENU OPEN STATE */}
+      {/* BACKGROUND DISMISSER LAYER */}
       {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
 
       {/* CORE WORKSPACE CONTENT DEPLOYMENT HUB */}
       <main className="max-w-[760px] mx-auto px-6 pt-16 pb-32">
-        <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-12 min-h-[420px] transition-all duration-300">
+        <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-12 min-h-[420px]">
           
           {/* DASHBOARD ENTRY VIEW ELEMENT */}
           {activeTool === 'dashboard' && (
