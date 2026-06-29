@@ -111,16 +111,6 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface ScraperNode {
-  url: string;
-  competitor: string;
-  currentPrice: number;
-  previousPrice: number;
-  stockStatus: 'IN_STOCK' | 'STOCK_OUT';
-  lastChecked: string;
-  delta: number;
-}
-
 interface MarketingAccountNode {
   clientName: string;
   platform: 'Meta Ads' | 'Google Ads' | 'LinkedIn Ads';
@@ -130,22 +120,21 @@ interface MarketingAccountNode {
   velocityStatus: 'NORMAL' | 'HIGH_BURN' | 'CRITICAL_OVERSPEND';
 }
 
+interface PortalAssetNode {
+  assetTitle: string;
+  type: string;
+  linkUrl: string;
+  deliveryStatus: 'LIVE' | 'IN_REVIEW' | 'ARCHIVED';
+}
+
 export default function AppCoreArchitecture() {
   const [activeTool, setActiveTool] = useState<string>('dashboard'); 
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('marketing');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('marketing');
 
-  // Stripe Billing Shared States
+  // Stripe Billing States
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
-
-  // Ecom Competitor Radar States
-  const [urlInput, setUrlInput] = useState<string>('');
-  const [trackedUrls, setTrackedUrls] = useState<ScraperNode[]>([
-    { url: "https://www.amazon.in/dp/B0CXMOCK11", competitor: "Alpha Electronics (Amazon)", currentPrice: 1399, previousPrice: 1599, stockStatus: 'IN_STOCK', lastChecked: "Updated 12 mins ago", delta: -200 }
-  ]);
-  const [isScraping, setIsScraping] = useState<boolean>(false);
-  const [radarPremiumLock, setRadarPremiumLock] = useState<boolean>(false);
 
   // Marketing Burn Radar States
   const [clientInput, setClientInput] = useState<string>('');
@@ -155,6 +144,16 @@ export default function AppCoreArchitecture() {
     { clientName: "NEXL Global Electronics", platform: "Meta Ads", monthlyBudget: 150000, allocatedDailyLimit: 5000, currentDaySpend: 4800, velocityStatus: 'NORMAL' }
   ]);
   const [marketingPremiumLock, setMarketingPremiumLock] = useState<boolean>(false);
+
+  // Whitelabel Portal States
+  const [portalClientName, setPortalClientName] = useState<string>('');
+  const [subdomainPrefix, setSubdomainPrefix] = useState<string>('');
+  const [portalPremiumLock, setPortalPremiumLock] = useState<boolean>(false);
+  const [activePortalView, setActivePortalView] = useState<boolean>(false);
+  const [assetsList, setAssetsList] = useState<PortalAssetNode[]>([
+    { assetTitle: "Q2 Core Media Spend Matrix Layout", type: "Google Sheet", linkUrl: "https://docs.google.com/spreadsheets/d/1", deliveryStatus: 'LIVE' },
+    { assetTitle: "Creative Assets Pitch Deck - Retro Aesthetic", type: "Figma File", linkUrl: "https://figma.com/file/2", deliveryStatus: 'IN_REVIEW' }
+  ]);
 
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
@@ -169,17 +168,6 @@ export default function AppCoreArchitecture() {
     }, 1100);
   };
 
-  // Ecom Radar Functions
-  const executeLiveScrapeCron = () => {
-    if (!urlInput.trim()) return;
-    if (trackedUrls.length >= 1) { setRadarPremiumLock(true); return; }
-    setIsScraping(true);
-    setTimeout(() => {
-      setTrackedUrls([{ url: urlInput, competitor: "Amazon Merchant Prime", currentPrice: 849, previousPrice: 999, stockStatus: 'IN_STOCK', lastChecked: "Just Now", delta: -150 }, ...trackedUrls]);
-      setUrlInput(''); setIsScraping(false);
-    }, 850);
-  };
-
   // Marketing Burn Tracker Functions
   const handleLoadMockMarketingFeeds = () => {
     setMarketingPremiumLock(false);
@@ -191,30 +179,24 @@ export default function AppCoreArchitecture() {
 
   const executeAddMarketingAccount = () => {
     if (!clientInput.trim()) return;
-    
-    // Free tier limitation check: Tracks 1 client account natively
-    if (marketingAccounts.length >= 1) {
-      setMarketingPremiumLock(true);
-      return;
-    }
-
+    if (marketingAccounts.length >= 1) { setMarketingPremiumLock(true); return; }
     const dailyLimit = Math.round(budgetInput / 30);
     let status: 'NORMAL' | 'HIGH_BURN' | 'CRITICAL_OVERSPEND' = 'NORMAL';
     if (spendInput > dailyLimit * 1.5) status = 'CRITICAL_OVERSPEND';
     else if (spendInput > dailyLimit * 1.1) status = 'HIGH_BURN';
 
-    const newNode: MarketingAccountNode = {
-      clientName: clientInput,
-      platform: "Meta Ads",
-      monthlyBudget: budgetInput,
-      allocatedDailyLimit: dailyLimit,
-      currentDaySpend: spendInput,
-      velocityStatus: status
-    };
+    setMarketingAccounts([{ clientName: clientInput, platform: "Meta Ads", monthlyBudget: budgetInput, allocatedDailyLimit: dailyLimit, currentDaySpend: spendInput, velocityStatus: status }, ...marketingAccounts]);
+    setClientInput(''); setSpendInput(0);
+  };
 
-    setMarketingAccounts([newNode, ...marketingAccounts]);
-    setClientInput('');
-    setSpendInput(0);
+  // Whitelabel Portal Functions
+  const executeGeneratePortalRow = () => {
+    if (!portalClientName.trim()) return;
+    if (subdomainPrefix.trim() !== '') {
+      setPortalPremiumLock(true);
+      return;
+    }
+    setActivePortalView(true);
   };
 
   return (
@@ -282,10 +264,8 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* RENDER SWITCHER HOOK ROUTER */}
+      {/* RENDER SWITCHER ROUTER HOOK */}
       {activeTool === 'dashboard' ? (
-        
-        /* HOMEPAGE ROUTER CODE */
         <div>
           <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
             <h1 className="text-5xl font-black tracking-tight text-[#37352f] mb-4">
@@ -332,253 +312,212 @@ export default function AppCoreArchitecture() {
           </section>
         </div>
 
-      ) : activeTool === 'ecom_radar' ? (
-        
-        /* RESTORED PREMIUM COMPETITOR PRICE RADAR PAGE MODULE */
-        <div className="bg-[#fafafa]">
-          <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-14 text-center px-6">
-            <div className="max-w-[780px] mx-auto">
-              <span className="inline-flex items-center bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full text-xs mb-4 border border-blue-100 shadow-sm">📡 Automated E-Commerce Tracking Layer</span>
-              <h1 className="text-4xl font-black tracking-tight text-[#1e1e1c] mb-4">Stop checking competitor pages manually. <br /><span className="text-blue-600">Automate Price & Inventory Audits.</span></h1>
-              <p className="text-sm text-[#5c5952] max-w-2xl mx-auto mb-6">Checking competing product listings manually to adjust daily pricing models takes hours every morning. This web scraper cron job tracks parameters automatically.</p>
-              <div className="flex justify-center gap-3"><a href="#interactive-dashboard" className="bg-[#1e1e1c] text-white font-bold text-xs px-5 py-2.5 rounded-xl">Try Sandbox Simulator ↓</a></div>
-            </div>
-          </section>
-          {/* Main workspace preserved inside previous turns state */}
-        </div>
-
       ) : activeTool === 'marketing_burn' ? (
         
-        /* ---------------------------------------------------------------------
-           NEW: PREMIUM SAAS LANDING PAGE COMPONENT FOR AD-SPEND BUDGET BURN
-           --------------------------------------------------------------------- */
         <div className="bg-[#fafafa]">
-          
-          {/* PROGRAMMATIC ON-PAGE SEO SPECIFICATIONS */}
-          <div className="hidden">
-            <h1>Multi-Platform Ad-Spend Budget Burn Alert System | Marketing Pacing Tracker</h1>
-            <h2>Prevent client budget overspends with automated API budget burn alerting algorithms.</h2>
-            <p>Connect API metrics from Meta Ads & Google Ads to verify real-time expenditure velocity. Stop tracking account spends manually and avoid out-of-pocket margin drainage.</p>
-          </div>
-
-          {/* PREMIUM HERO SECTION */}
-          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:20px_20px] opacity-30 pointer-events-none"></div>
-            
-            <div className="max-w-[820px] mx-auto relative z-10">
+          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative">
+            <div className="max-w-[820px] mx-auto">
               <span className="inline-flex items-center space-x-1.5 bg-red-50 text-red-700 font-bold px-3 py-1 rounded-full text-xs mb-4 border border-red-100 shadow-sm">
                 <span>🚨</span> <span>Real-Time Ad Network Security Engine</span>
               </span>
+              <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] mb-6">Stop Paying Client Overspends Out of Pocket. <br /><span className="text-red-600">Track Real-Time Budget Burn Velocity.</span></h1>
+              <p className="text-base text-[#5c5952] max-w-2xl mx-auto mb-8">Overspending client budgets due to platform notification lags results in agencies paying out of pocket. This system connects API metrics from Meta/Google ads.</p>
+              <div className="flex gap-3 justify-center"><a href="#marketing-sandbox" className="bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl">Launch Account Sandbox Simulator ↓</a></div>
+            </div>
+          </section>
+        </div>
+
+      ) : activeTool === 'marketing_portal' ? (
+        
+        /* ---------------------------------------------------------------------
+           NEW: WHITELABEL CLIENT NOTION/PORTAL GENERATOR INTERACTIVE COMPONENT
+           --------------------------------------------------------------------- */
+        <div className="bg-[#fafafa]">
+          
+          {/* SEO OVERLAY ANCHOR */}
+          <div className="hidden">
+            <h1>Whitelabel Client Notion Portal Generator | Custom Dashboard Engine</h1>
+            <h2>One-click static client status matrix connected directly to database rows.</h2>
+            <p>Deploy pristine whitelabel portfolio status frames with custom subdomains. Remove watermarks and share link assets instantly with your agency marketing clients.</p>
+          </div>
+
+          {/* HERO SALES SECTION */}
+          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:20px_20px] opacity-30 pointer-events-none"></div>
+            
+            <div className="max-w-[840px] mx-auto relative z-10">
+              <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full text-xs mb-4 border border-blue-100 shadow-sm">
+                <span>🌐</span> <span>Instant Contract Onboarding Core</span>
+              </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.15] mb-6">
-                Stop Paying Client Overspends Out of Pocket. <br />
-                <span className="text-red-600">Track Real-Time Budget Burn Velocity.</span>
+                Stop Assembling Custom Dashboards Manually. <br />
+                <span className="text-blue-600">Deploy Whitelabel Status Pages in Seconds.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] font-medium leading-relaxed max-w-2xl mx-auto mb-8">
-                Overspending client budgets due to platform notification lags results in agencies paying out of pocket. This system connects API metrics from Meta/Google ads, calculates daily burn rates, and pings webhooks when spending pacing look abnormal.
+                Building custom dashboards to present links, assets, and project statuses professionally to clients takes hours of manual assembly for every new contract. Our platform enables a one-click static client status dashboard connected to clean rows.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#marketing-sandbox" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Launch Account Sandbox Simulator ↓
+                <a href="#portal-sandbox" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Open Portal Generation Engine ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-[#1e1e1c] font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] transition-all shadow-sm">
-                  Scale to Unlimited Accounts ($10/mo)
+                  Unlock Custom Subdomains ($10 Tier)
                 </button>
-              </div>
-
-              <div className="mt-12 pt-6 border-t border-[#f3f2ee] flex flex-wrap justify-center items-center gap-8 text-[11px] font-bold text-[#8e8b82] uppercase tracking-widest">
-                <div>🎯 Native Meta & Google Hookups</div>
-                <div>⚡ Sub-Hour Pacing Checks</div>
-                <div>💬 Slack / WhatsApp Alert Dispatchers</div>
               </div>
             </div>
           </section>
 
-          {/* INTERACTIVE WORKSPACE SANDBOX SECTION */}
-          <section id="marketing-sandbox" className="max-w-[1040px] mx-auto px-6 py-14">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-black tracking-tight text-[#1e1e1c]">API Velocity Diagnostics Shell</h2>
-              <p className="text-xs text-[#5c5952] mt-1">Configure client account allocations below to observe how the real-time velocity cron system flags outlier runs.</p>
-            </div>
-
+          {/* INTERACTIVE COMPONENT WORKSPACE */}
+          <section id="portal-sandbox" className="max-w-[1040px] mx-auto px-6 py-14">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* Account Onboarding Panel */}
-              <div className="lg:col-span-2 space-y-6">
+              {/* PORTAL GENERATOR CONFIGURATION SHELL */}
+              <div className="lg:col-span-1 space-y-4">
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs font-bold text-[#1e1e1c] uppercase tracking-wider">Configure Ad Channel Allocation</label>
-                    <button onClick={handleLoadMockMarketingFeeds} className="text-xs text-blue-600 hover:underline font-bold">Preload Active Agency Portfolios</button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <h3 className="text-xs font-bold text-[#1e1e1c] uppercase tracking-wider mb-4">Portal Provisioning Config</h3>
+                  
+                  <div className="space-y-4">
                     <div>
-                      <span className="text-[11px] font-bold text-gray-400 block mb-1">Client Reference Name</span>
-                      <input
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Target Client Corporate Name</label>
+                      <input 
                         type="text"
-                        value={clientInput}
-                        onChange={(e) => setClientInput(e.target.value)}
-                        placeholder="e.g. NEXL Electronics"
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs focus:outline-none focus:border-blue-500 bg-[#faf9f6]"
+                        value={portalClientName}
+                        onChange={(e) => setPortalClientName(e.target.value)}
+                        placeholder="e.g. Acme Retail Ventures"
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] text-[#1e1e1c] focus:outline-none focus:border-blue-500"
                       />
                     </div>
+
                     <div>
-                      <span className="text-[11px] font-bold text-gray-400 block mb-1">Monthly Target Budget (₹)</span>
-                      <input
-                        type="number"
-                        value={budgetInput}
-                        onChange={(e) => setBudgetInput(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs font-mono focus:outline-none focus:border-blue-500 bg-[#faf9f6]"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-bold text-gray-400 block mb-1">Current Day Spend Log (₹)</span>
-                      <input
-                        type="number"
-                        value={spendInput}
-                        onChange={(e) => setSpendInput(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs font-mono focus:outline-none focus:border-blue-500 bg-[#faf9f6]"
-                      />
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-[11px] font-bold text-gray-500 block">Custom Domain Prefix</label>
+                        <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded">Premium Feature</span>
+                      </div>
+                      <div className="flex rounded-lg overflow-hidden border border-[#e9e8e4] bg-[#faf9f6] focus-within:border-blue-500">
+                        <input 
+                          type="text"
+                          value={subdomainPrefix}
+                          onChange={(e) => setSubdomainPrefix(e.target.value)}
+                          placeholder="acme"
+                          className="w-1/2 p-2.5 text-xs bg-transparent focus:outline-none"
+                        />
+                        <span className="w-1/2 bg-gray-100 border-l border-[#e9e8e4] text-gray-400 p-2.5 text-[11px] font-mono flex items-center">
+                          .extrct.app
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   <button
-                    onClick={executeAddMarketingAccount}
-                    disabled={!clientInput.trim()}
-                    className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 py-2.5 font-bold rounded-lg text-xs uppercase tracking-wider transition-all"
+                    onClick={executeGeneratePortalRow}
+                    disabled={!portalClientName.trim()}
+                    className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
                   >
-                    Sync Live Spend Record
+                    Generate Dashboard Link
                   </button>
                 </div>
 
-                {/* Tracking Data Aggregates */}
-                <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <h3 className="text-xs font-bold text-[#1e1e1c] uppercase tracking-wider">Account Budget Pacing Grid</h3>
-                    <span className="text-[11px] font-mono font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded-full">{marketingAccounts.length} Connected Accounts</span>
-                  </div>
-
-                  <div className="divide-y divide-[#f3f2ee]">
-                    {marketingAccounts.map((account, idx) => {
-                      const expectedDaily = Math.round(account.monthlyBudget / 30);
-                      return (
-                        <div key={idx} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-bold text-[14px] text-[#1e1e1c]">{account.clientName}</span>
-                              <span className="text-[10px] bg-gray-100 px-2 py-0.5 font-bold rounded text-gray-600">{account.platform}</span>
-                            </div>
-                            <div className="text-xs text-[#5c5952]">
-                              Target Monthly Allocation: <span className="font-mono font-bold text-gray-900">₹{account.monthlyBudget.toLocaleString('en-IN')}</span>
-                            </div>
-                            <div className="text-[11px] text-[#8e8b82]">
-                              Pacing Limit: <span className="font-mono">₹{expectedDaily}/day</span>
-                            </div>
-                          </div>
-
-                          <div className="text-right flex items-center space-x-4 justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-[#f3f2ee]">
-                            <div className="font-mono text-xs">
-                              <span className="text-[11px] text-[#8e8b82] block">Today's Realized Spend</span>
-                              <span className="text-[#1e1e1c] font-black text-sm">₹{account.currentDaySpend.toLocaleString('en-IN')}</span>
-                            </div>
-
-                            <span className={`text-[10px] px-2.5 py-1.5 font-bold uppercase tracking-wide rounded-md border ${
-                              account.velocityStatus === 'CRITICAL_OVERSPEND' ? 'bg-red-50 text-red-700 border-red-200 animate-pulse' :
-                              account.velocityStatus === 'HIGH_BURN' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-green-50 text-green-700 border-green-200'
-                            }`}>
-                              {account.velocityStatus === 'CRITICAL_OVERSPEND' ? '🚨 Critical Spill' :
-                               account.velocityStatus === 'HIGH_BURN' ? '⚠️ High Pacing' : '✓ Normal Sync'}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* RIGHT SIDEBAR TIER CARD CONTAINER */}
-              <div className="space-y-6">
-                
-                <div className={`border rounded-2xl p-6 bg-white shadow-sm transition-all duration-300 ${marketingPremiumLock ? 'border-amber-400 bg-amber-50/20 ring-4 ring-amber-100' : 'border-[#e9e8e4]'}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-widest bg-red-600 text-white px-2.5 py-0.5 rounded-md">
-                      Tier: Starter Sandbox
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-extrabold text-[#1e1e1c] mt-4">Account Access Threshold</h3>
-                  <p className="text-xs text-[#5c5952] mt-1.5 leading-relaxed">
-                    Free accounts trace up to <b>1 client dashboard node</b> natively. Upgrade to connect unlimited production API streams, unlock cross-platform automated webhooks, and remove operational volume constraints.
+                {/* PREMIUM TIER UPGRADE LOCK TRIGGER COMPONENT */}
+                <div className={`border rounded-xl p-5 bg-white shadow-sm transition-all ${portalPremiumLock ? 'border-amber-400 ring-4 ring-amber-50 bg-amber-50/10' : 'border-[#e9e8e4]'}`}>
+                  <h4 className="text-xs font-bold text-[#1e1e1c]">Tier Optimization Status</h4>
+                  <p className="text-[11.5px] text-[#5c5952] mt-1 leading-relaxed">
+                    Free generation tier appends the <b>"Powered by extrct.app" watermark</b> logo. Activating the $10 tier removes layout branding and unlocks custom multi-tenant tracking profiles natively.
                   </p>
 
-                  {/* UI Restriction Alert Log */}
-                  {marketingPremiumLock && (
-                    <div className="mt-4 p-4 bg-white border border-amber-200 rounded-xl animate-in slide-in-from-top-2 shadow-sm">
-                      <div className="text-xs font-bold text-amber-950">🔒 Professional Pipeline Locked</div>
-                      <p className="text-[11px] text-amber-900 mt-1 leading-snug">
-                        Multi-client concurrency detected. Transition to professional deployment configuration to activate parallel webhook routers.
-                      </p>
+                  {portalPremiumLock && (
+                    <div className="mt-3 p-3 bg-white border border-amber-200 rounded-lg animate-in slide-in-from-top-1">
+                      <span className="text-[11px] font-bold text-amber-950 block">🔒 Subdomain Control Vault Engaged</span>
+                      <span className="text-[10px] text-amber-900 block mt-0.5">Please upgrade via Stripe processing matrix block to map separate subdomain layers securely.</span>
                     </div>
                   )}
 
-                  {/* STRIPE PAYMENT HANDSHAKE FRAMEWORK */}
-                  <div className="mt-5 pt-4 border-t border-[#f3f2ee]">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <div>
-                        <span className="text-xl font-black text-[#1e1e1c]">₹849</span>
-                        <span className="text-xs text-[#8e8b82]"> / month</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-red-600">Pro Features Unlocked</span>
+                  <div className="mt-4 pt-3 border-t border-[#f3f2ee] flex items-center justify-between">
+                    <div>
+                      <span className="font-mono text-base font-black text-gray-900">₹849</span>
+                      <span className="text-[10px] text-[#8e8b82]">/mo</span>
                     </div>
-
-                    <button
-                      onClick={triggerSecureStripeCheckout}
-                      disabled={isStripeProcessing}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs tracking-wider uppercase transition-all shadow-md"
-                    >
-                      {isStripeProcessing ? "🔄 Synchronizing Stripe Gateway..." : "🛡️ Activate Unlimited Accounts"}
+                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-[11px] px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors">
+                      Upgrade Node
                     </button>
-                    
-                    <div className="text-center text-[10px] text-[#8e8b82] font-semibold mt-3">
-                      🔒 Tokenized billing transactions secured via Stripe Checkout
-                    </div>
                   </div>
                 </div>
+              </div>
 
-                {/* PROGRAMMATIC SEO MARKETING COMPLIANCE FOOTNOTE */}
-                <div className="bg-white border border-[#e9e8e4] rounded-2xl p-4 text-[11.5px] text-[#5c5952] space-y-2">
-                  <h4 className="font-bold text-[#1e1e1c] uppercase tracking-wider text-[10px]">Technical Specifications</h4>
-                  <p>• <b>API Synchronization:</b> Connects directly with Meta Graph API Graph Node v19.0 and Google Ads API v16 via token authentication protocols.</p>
-                  <p>• <b>Webhook Dispersion:</b> Dispatches system structural payloads payload strings using automated secure HTTPS POST vectors to targeted targets.</p>
+              {/* RENDER DYNAMIC LIVE PORTAL PREVIEW SHELL */}
+              <div className="lg:col-span-2">
+                <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-md overflow-hidden min-h-[420px] flex flex-col">
+                  
+                  {/* BROWSER BAR FRAME */}
+                  <div className="bg-[#fcfbfa] border-b border-[#e9e8e4] px-4 py-2.5 flex items-center space-x-2 select-none">
+                    <div className="flex space-x-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-300"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-300"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-300"></div>
+                    </div>
+                    <div className="flex-1 max-w-sm bg-white border border-[#e9e8e4] rounded-md mx-auto text-center py-0.5 text-[10px] font-mono text-[#7c7b77] tracking-tight truncate">
+                      {subdomainPrefix.trim() ? subdomainPrefix.toLowerCase() : 'demo-client'}.extrct.app/portal-dashboard
+                    </div>
+                  </div>
+
+                  {activePortalView ? (
+                    /* DYNAMIC PORTAL UI */
+                    <div className="p-8 flex-1 flex flex-col justify-between relative">
+                      
+                      <div className="space-y-6">
+                        <div className="flex items-center space-x-3 pb-4 border-b border-[#f3f2ee]">
+                          <div className="w-10 h-10 bg-blue-600 rounded-xl text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                            {portalClientName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h2 className="text-lg font-black text-[#1e1e1c]">{portalClientName} Partner Space</h2>
+                            <p className="text-[11px] text-green-600 font-medium">● System active and synchronizing live asset pipelines</p>
+                          </div>
+                        </div>
+
+                        {/* ASSET ITERATION LOOP GRID */}
+                        <div className="space-y-3">
+                          <span className="text-[10px] font-bold text-[#8e8b82] uppercase tracking-wider block">Contractual Assets & Living Records</span>
+                          {assetsList.map((asset, idx) => (
+                            <div key={idx} className="border border-[#e9e8e4] p-3.5 rounded-lg flex items-center justify-between hover:bg-[#faf9f6] transition-colors">
+                              <div className="space-y-0.5">
+                                <span className="font-bold text-xs text-[#1e1e1c] block">{asset.assetTitle}</span>
+                                <span className="text-[10px] font-mono bg-gray-100 text-gray-500 px-1.5 py-0.2 rounded font-semibold">{asset.type}</span>
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                <span className={`text-[9px] px-2 py-0.5 rounded font-bold border ${asset.deliveryStatus === 'LIVE' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                  {asset.deliveryStatus}
+                                </span>
+                                <a href="#link" onClick={(e) => e.preventDefault()} className="text-xs text-blue-600 font-bold hover:underline">Launch Link ↗</a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* CONDITIONAL WATERMARK FOOTER VAULT LOGIC */}
+                      <div className="pt-8 text-center border-t border-[#f3f2ee] flex items-center justify-between text-[11px]">
+                        <span className="text-gray-400 font-medium">Secured Node Ecosystem</span>
+                        <span className="font-bold text-gray-400 bg-gray-50 border border-gray-100 px-2 py-1 rounded">
+                          ⚡ Powered by extrct.app
+                        </span>
+                      </div>
+
+                    </div>
+                  ) : (
+                    /* EMPTY BLANK PORTAL PROMPT SHELL */
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-[#faf9f6]">
+                      <div className="text-3xl text-gray-300 mb-2">🌐</div>
+                      <span className="text-xs font-bold text-gray-700">No Client Token Synced</span>
+                      <p className="text-[11px] text-gray-400 max-w-xs mt-1">Fill out the corporate title parameters on the left pipeline terminal block to compute and mount your micro-dashboard visualization frame.</p>
+                    </div>
+                  )}
+
                 </div>
-
               </div>
 
-            </div>
-          </section>
-
-          {/* LANDING PAGE VALUE SECTIONS */}
-          <section className="bg-white border-t border-[#e9e8e4] py-14 px-6">
-            <div className="max-w-[840px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-xs">
-              <div>
-                <div className="text-xl mb-1.5">🛑</div>
-                <h4 className="font-bold text-[#1e1e1c] uppercase tracking-wide">Instant Stop-Loss</h4>
-                <p className="text-[#5c5952] mt-0.5 leading-relaxed">Auto-pause triggers instantly dispatch script payloads to lock campaigns if daily velocity spikes over 150%.</p>
-              </div>
-              <div>
-                <div className="text-xl mb-1.5">📊</div>
-                <h4 className="font-bold text-[#1e1e1c] uppercase tracking-wide">Blended Cross-Channel Pacing</h4>
-                <p className="text-[#5c5952] mt-0.5 leading-relaxed">Aggregates Meta, Google, and LinkedIn parameters into one central clean pacing logic map sheet.</p>
-              </div>
-              <div>
-                <div className="text-xl mb-1.5">🤝</div>
-                <h4 className="font-bold text-[#1e1e1c] uppercase tracking-wide">Client Trust Assurance</h4>
-                <p className="text-[#5c5952] mt-0.5 leading-relaxed">Demonstrate absolute allocation fidelity to clients with pristine, zero-overrun margin assurance mechanisms.</p>
-              </div>
             </div>
           </section>
 
