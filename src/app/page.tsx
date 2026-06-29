@@ -111,39 +111,35 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface RentalExpenseNode {
+interface GeneratedDescNode {
   id: string;
-  propertyName: string;
-  expenseCategory: string;
-  amount: number;
-  taxDeductible: boolean;
-  loggedAt: string;
+  title: string;
+  descriptionText: string;
+  keyFeatures: string[];
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('real_estate_rental'); // Reset to correct rental ledger tool
+  const [activeTool, setActiveTool] = useState<string>('real_estate_desc'); // Locked to third real estate tool
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('real_estate');
 
-  // Shared Core Payments Configuration
+  // Shared Gateway Telemetry States
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Rental Ledger State Controls
-  const [targetProperty, setTargetProperty] = useState<string>('');
-  const [expenseType, setExpenseType] = useState<string>('Plumbing Fix');
-  const [costAmount, setCostAmount] = useState<number>(4500);
-  const [isDeductible, setIsDeductible] = useState<boolean>(true);
-  const [rentalPremiumLock, setRentalPremiumLock] = useState<boolean>(false);
+  // Engine Input States
+  const [locationInput, setLocationInput] = useState<string>('');
+  const [sqftInput, setSqftInput] = useState<number>(1800);
+  const [amenitiesInput, setAmenitiesInput] = useState<string>('Clubhouse, Modular Kitchen, Lift, 24x7 Security');
+  const [bhkConfig, setBHKConfig] = useState<string>('3 BHK');
+  const [descPremiumLock, setDescPremiumLock] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [expenseLedger, setExpenseLedger] = useState<RentalExpenseNode[]>([
+  const [generatedItems, setGeneratedItems] = useState<GeneratedDescNode[]>([
     {
       id: "1",
-      propertyName: "Greenwood Residency Apt 4C",
-      expenseCategory: "Electrical Overhaul",
-      amount: 12500,
-      taxDeductible: true,
-      loggedAt: "2026-06-29"
+      title: "🔥 Premium 3 BHK Luxury Apartment at Mithanpura, Muzaffarpur",
+      descriptionText: "Presenting a spacious, meticulously designed 1800 Sq.Ft. residential layout situated in the premium hub of Mithanpura. Impeccably optimized for modern family lifestyle with superior airflow profiles and high-end fitments throughout. Perfect connectivity vectors to local retail hotspots.",
+      keyFeatures: ["1800 Sq.Ft. Living Space", "Exclusive Clubhouse Access", "Fully-Equipped Modular Kitchen", "Secure Gated Compound"]
     }
   ]);
 
@@ -156,32 +152,35 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Checkout System: Unlocking infinite property portfolio logging capacity token.");
+      alert("Stripe Checkout Secure API: Removing description limits generation cap tokens successfully.");
     }, 1100);
   };
 
-  // Ledger calculation processor block
-  const executeLogRentalExpense = () => {
-    if (!targetProperty.trim() || costAmount <= 0) return;
+  // Description Builder Copy Compiler Engine
+  const executeCompileListingDescription = () => {
+    if (!locationInput.trim() || sqftInput <= 0 || !amenitiesInput.trim()) return;
 
-    // Strict Free limits check: Capped at 1 property tracker
-    const alternateProperties = expenseLedger.filter(item => item.propertyName.toLowerCase() !== targetProperty.trim().toLowerCase());
-    if (alternateProperties.length >= 1) {
-      setRentalPremiumLock(true);
+    // Rigid limit threshold rule check for conversion locks
+    if (generatedItems.length >= 2) {
+      setDescPremiumLock(true);
       return;
     }
 
-    const newNode: RentalExpenseNode = {
+    const cleanLocation = locationInput.trim();
+    const cleanAmenities = amenitiesInput.split(',').map(a => a.trim()).filter(Boolean);
+
+    const generatedTitle = `✨ Beautiful ${bhkConfig} Residential Layout (${sqftInput} Sq.Ft.) — ${cleanLocation}`;
+    const generatedCopy = `Stunning, high-utility ${bhkConfig} real estate asset tracking a total space of ${sqftInput} Sq.Ft. nested cleanly right inside the highly sought-after block of ${cleanLocation}. Complete with premium architecture specifications and premium integrations like ${amenitiesInput.trim()}. Secure a private consultation loop today.`;
+
+    const newNode: GeneratedDescNode = {
       id: Date.now().toString(),
-      propertyName: targetProperty.trim(),
-      expenseCategory: expenseType,
-      amount: costAmount,
-      taxDeductible: isDeductible,
-      loggedAt: new Date().toISOString().split('T')[0]
+      title: generatedTitle,
+      descriptionText: generatedCopy,
+      keyFeatures: [`${sqftInput} Sq.Ft. Verified Plot`, `${bhkConfig} Modern Split Layout`, ...cleanAmenities.slice(0, 2)]
     };
 
-    setExpenseLedger([newNode, ...expenseLedger]);
-    setTargetProperty('');
+    setGeneratedItems([newNode, ...generatedItems]);
+    setLocationInput('');
   };
 
   return (
@@ -242,155 +241,167 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* CORE SCHEMAS TERMINAL INTERACTIVE SPLIT */}
-      {activeTool === 'real_estate_rental' ? (
+      {/* RENDER LAYER CONTROL VIEW SWITCHER */}
+      {activeTool === 'real_estate_desc' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* SEARCH ATTRIBUTION BOT TRACKING MAP */}
+          {/* DEEP HIGH-RANKING BOT TRAFFICS TRACK METADATA */}
           <div className="hidden">
-            <h1>Rental Maintenance Log & Expense Categorizer Ledger</h1>
-            <h2>Mobile-first property portfolio tax deduction optimization systems.</h2>
-            <p>Log residential asset repair bills, organize property maintenance overhead receipts, group immediate tax deductible asset items, and control cash flows natively under ten seconds.</p>
+            <h1>Property Listing Feature Description Engine | Real Estate AI Copywriter</h1>
+            <h2>Automated high-converting real estate text copy generation grids for property agents.</h2>
+            <p>Input raw dimensional metrics, square footage location criteria, and housing key amenities tags to instantly execute portal optimized description strings that trigger fast lead responses.</p>
           </div>
 
-          {/* SaaS VALUE HERO HEADER */}
+          {/* DYNAMIC HIGH-CONVERTING HERO HEADER */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-800 border border-blue-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>📊</span> <span>Mobile-First Portfolio Profit Protection</span>
+              <span className="inline-flex items-center space-x-1.5 bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>📝</span> <span>High-Conversion Portal Copy Optimization</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Log Property Repairs Under 10 Seconds. <br />
-                <span className="text-blue-600">Secure Your Tax Write-Offs Instantly.</span>
+                Stop Writing Property Ads Manually. <br />
+                <span className="text-indigo-600">Compile Portal-Optimized Descriptions Instantly.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Scattered structural upkeep notes and forgotten repair receipts cost property solopreneurs thousands in missing write-offs during tax filing seasons. Use this micro-ledger app to snap and sort costs on the go.
+                Drafting listing pitches for real estate apps whenever an asset list expands creates operational friction. Drop in your square footage variables and key amenities to structure premium, optimized buyer texts.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#ledger-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Open Mobile Input Console ↓
+                <a href="#engine-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Launch Copy Generator Terminal ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Unlock Unlimited Portfolio Portals ($10)
+                  Bypass Generation Limits Group ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* APPLICATION RUNTIME TERMINAL CONSOLE */}
-          <section id="ledger-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* INTERACTIVE WORKSPACE SECTION APPLICATION ENGINE */}
+          <section id="engine-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* ENTRY WIDGET CONTROLLER CARD */}
+              {/* PROPERTY SPEC CONTROLLER ENTRY INPUT */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Rapid Expense Log</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Property Metrics</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Property Name / Address Ref</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Micro-Location / Neighborhood</label>
                     <input 
                       type="text" 
-                      value={targetProperty}
-                      onChange={(e) => setTargetProperty(e.target.value)}
-                      placeholder="e.g. Greenwood Residency Apt 4C"
+                      value={locationInput}
+                      onChange={(e) => setLocationInput(e.target.value)}
+                      placeholder="e.g. Mithanpura, Muzaffarpur"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
                   </div>
 
-                  <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Maintenance Scope</label>
-                    <select
-                      value={expenseType}
-                      onChange={(e) => setExpenseType(e.target.value)}
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700"
-                    >
-                      <option value="Plumbing Leak Fix">Plumbing Maintenance</option>
-                      <option value="Electrical Repair">Electrical / Appliance Overhaul</option>
-                      <option value="Structural Painting">Wall Painting & Patchwork</option>
-                      <option value="Elevator Desk Fee">Association / Lift Charges</option>
-                    </select>
-                  </div>
-
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Amount Incurred (₹)</label>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Total Space (Sq.Ft.)</label>
                       <input 
                         type="number" 
-                        value={costAmount}
-                        onChange={(e) => setCostAmount(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
+                        value={sqftInput}
+                        onChange={(e) => setSqftInput(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Tax Write-Off?</label>
-                      <div className="flex items-center space-x-2 h-[38px] bg-[#faf9f6] border border-[#e9e8e4] rounded-lg px-3">
-                        <input 
-                          type="checkbox" 
-                          checked={isDeductible}
-                          onChange={(e) => setIsDeductible(e.target.checked)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-xs font-bold text-gray-600">Deductible</span>
-                      </div>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Configuration Type</label>
+                      <select
+                        value={bhkConfig}
+                        onChange={(e) => setBHKConfig(e.target.value)}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700 focus:outline-none"
+                      >
+                        <option value="1 BHK">1 BHK Flat</option>
+                        <option value="2 BHK">2 BHK Flat</option>
+                        <option value="3 BHK">3 BHK Luxury</option>
+                        <option value="4 BHK">4 BHK Penthouse</option>
+                      </select>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Amenities Tags (Comma Separated)</label>
+                    <textarea 
+                      value={amenitiesInput}
+                      onChange={(e) => setAmenitiesInput(e.target.value)}
+                      rows={3}
+                      placeholder="Modular Kitchen, Security, Lift"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] resize-none focus:outline-none"
+                    />
                   </div>
                 </div>
 
                 <button
-                  onClick={executeLogRentalExpense}
-                  disabled={!targetProperty.trim() || costAmount <= 0}
-                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileListingDescription}
+                  disabled={!locationInput.trim() || sqftInput <= 0}
+                  className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Commit Log Node
+                  Compile Optimized Listing Copy
                 </button>
               </div>
 
-              {/* STREAM MATRIX TRACKING FRAME OUTPUT CONTAINER */}
+              {/* DYNAMIC LAYOUT ENGINE GENERATION FEEDS */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {/* STRICT HARD CONVERSION BARRIER CAP */}
-                {rentalPremiumLock && (
+                {/* GATED BEHIND FREE GENERATION LIMIT BARRIER */}
+                {descPremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Single Property Cap Active (Free Tier Rules)</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free solopreneur terminal accounts map exactly 1 property record to avoid cloud bloat. Remit $10 tier tokens to open infinite multi-apartment dashboard stacks.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 Free Daily Allocation Token Cap Encountered</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free execution nodes allocate 2 sample listing generation batches. Remit $10 tier subscription tokens to clear capacity blockages completely.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-blue-700 transition-colors">
-                      Unlock Portfolio Matrix
+                    <button onClick={triggerSecureStripeCheckout} className="bg-indigo-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-indigo-700 transition-colors">
+                      Clear Generation Cap
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Real Estate Ledger Stream</span>
-                    <span className="text-[10px] font-mono text-gray-400">Total Statements: {expenseLedger.length}</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">High-Converting Real Estate Copy Feed</span>
+                    <span className="text-[10px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">SEO Optimizer Layer Active</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {expenseLedger.map((item) => (
-                      <div key={item.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
-                        <div className="space-y-1">
-                          <span className="font-bold text-xs sm:text-sm text-[#1e1e1c] block">{item.propertyName}</span>
-                          <div className="text-[11.5px] text-gray-400">
-                            Category: <b className="text-gray-600">{item.expenseCategory}</b> | Log Date: <span className="font-mono">{item.loggedAt}</span>
-                          </div>
+                    {generatedItems.map((item) => (
+                      <div key={item.id} className="p-6 space-y-3.5 hover:bg-[#faf9f6] transition-colors">
+                        
+                        <div>
+                          <span className="text-xs sm:text-sm font-black text-gray-900 block leading-snug">{item.title}</span>
                         </div>
 
-                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
-                          <span className={`text-[10px] px-2 py-0.5 rounded font-bold tracking-tight block border ${item.taxDeductible ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-gray-50 text-gray-500 border-gray-200'}`}>
-                            {item.taxDeductible ? 'TAX WRITE-OFF' : 'PERSONAL'}
-                          </span>
-                          <span className="font-mono text-xs font-black text-gray-900 mt-1.5 block">
-                            ₹{item.amount.toLocaleString('en-IN')}
-                          </span>
+                        <p className="text-xs text-gray-600 leading-relaxed bg-[#fcfbfa] p-3 border border-[#edece9] rounded-xl font-sans italic">
+                          "{item.descriptionText}"
+                        </p>
+
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {item.keyFeatures.map((f, i) => (
+                            <span key={i} className="text-[10px] font-mono bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-gray-200">
+                              🎯 {f}
+                            </span>
+                          ))}
                         </div>
+
+                        <div className="pt-2 flex justify-end">
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${item.title}\n\n${item.descriptionText}`);
+                              alert("Full property title and optimized description string copied securely!");
+                            }}
+                            className="bg-white border text-indigo-600 hover:text-indigo-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors"
+                          >
+                            Copy Asset Copy Stacks
+                          </button>
+                        </div>
+
                       </div>
                     ))}
                   </div>
@@ -400,58 +411,58 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* PROGRAMMATIC SEO VALUE PROPOSITION SCHEMA CARD GRIDS */}
+          {/* SYSTEM ARCHITECTURE MAP INFOGRAPHICS DESIGN SECTION */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Automated Portfolio Control</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The 10-Second Expense Shield</h2>
-                <p className="text-xs text-gray-500 mt-2">How our mobile terminal saves maintenance receipts from slip-ups before tax evaluation windows arrive.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">Automated Optimization Blueprint</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The 3-Stage Listing Conversion Pipeline</h2>
+                <p className="text-xs text-gray-500 mt-2">How raw space variables convert instantly into compelling market-ready copy scripts.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">🛠 01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">On-Site Injection</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Property managers drop maintenance parameters and bills directly into the application layout panel while physically at the apartment site.</p>
+                  <div className="text-xl mb-3">🖊 01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Variable Injection</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Agent enters specific sub-locality matrices, exact plot square foot values, and core structural asset amenities into the layout console.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">🗂 02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Deduction Categorization</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">System parameters isolate operational repairs against personal upgrades, tagging write-off elements cleanly for rapid filtering outputs.</p>
+                  <div className="text-xl mb-3">🗜 02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Syntactic Optimization</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">The internal linguistic background worker sanitizes data anomalies, formatting highly indexable headings tailored directly for property portals.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">🛡 03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Statement Protection</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Wipes out reliance on chaotic paper stacks. Instantly exports optimized cash ledger structures for painless tax compliance filings.</p>
+                  <div className="text-xl mb-3">🚀 03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Lead Capture Deployment</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Outputs crisp headline variants and comprehensive bullet specifications blocks ready for clipboard capture and listing syndication loops.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* EXCLUSIVE UNIQUE SELLING PROPOSITIONS (USPs) SYSTEM CARDS */}
+          {/* EXCLUSIVE REVENUE DRIVING SUITE USPs COMPONENT SECTION */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block">Optimized For Landlords & Property Solopreneurs</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">No Massive Property SaaS Account Needed. <br />Govern Cashflow with Complete Speed.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Engineered for Rapid Multi-Portal Syndication</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Maximize Inbound Lead Velocity <br />With Captivating Descriptions.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Heavy enterprise landlord property software tools demand rigorous tenant tracking setups, bank integration workflows, and complex license tiers. <b>extrct.app</b> provides a fast mobile alternative built for pure utility.
+                    Boring, single-line real estate posts fail to capture premium buyers on competitive application platforms. <b>extrct.app</b> injects immediate structured clarity across your inventory layouts to accelerate sales.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">📉</span>
-                    <span className="font-bold text-xs text-gray-900 block">Deduction Leak Intercept</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Ensures minor maintenance expenditures are logged instantly before they vanish from your mind.</p>
+                    <span className="text-xl block mb-1">🎯</span>
+                    <span className="font-bold text-xs text-gray-900 block">Portal Friendly Hooks</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Highlights structural square foot variables cleanly to maximize app organic search hits.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">📱</span>
-                    <span className="font-bold text-xs text-gray-900 block">True Mobile-First Shape</span>
-                    <p className="text-[11px] text-gray-400 mt-1">No complicated dashboard clicks — opens inside seconds right on the property floor.</p>
+                    <span className="text-xl block mb-1">⏱</span>
+                    <span className="font-bold text-xs text-gray-900 block">Extreme Production Boost</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Generates comprehensive descriptions in seconds, saving hours of typing fatigue.</p>
                   </div>
                 </div>
 
@@ -459,23 +470,23 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DYNAMIC HIGH-CONVERTING ACCORDION FAQ BLOCK */}
+          {/* RIGID COMPONENT LAYER ACCORDION FAQs */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
                 <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Queries</h3>
-                <p className="text-xs text-gray-400 mt-1">Answers to common structural tracking questions about rental maintenance assets.</p>
+                <p className="text-xs text-gray-400 mt-1">Everything you need to master about automating property listing writeups.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "What defines a rental repair item as a direct tax deduction write-off?",
-                    a: "Under standard tax rules, routine maintenance costs like fixing plumbing breaches or electrical defects preserve the rental property asset value and are completely deductible. Capital renovations that expand property scale follow alternate depreciation timelines."
+                    q: "Why are standardized structural descriptions critical for digital real estate channels?",
+                    a: "Digital real estate discovery relies heavily on data query tags. When your copy structured elements highlight exact square footage boundaries and key neighborhood parameters, app algorithm crawlers pick up and prioritize your property listing."
                   },
                   {
-                    q: "How does the $10 portfolio tier license unlock multi-unit tracking?",
-                    a: "The basic free terminal maps 1 isolated address ref to keep client operations simple. The upgraded premium network tier removes all system capacity locks, opening clean multi-apartment logs and spreadsheet downloads."
+                    q: "How does the $10 generation tier unlock alter my workspace matrix?",
+                    a: "The standard trial allocation includes a 2-batch copy limit. Moving to our premium tier bypasses validation caps completely, giving you infinite description output access for heavy localized portfolios."
                   }
                 ].map((faq, index) => (
                   <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
@@ -501,9 +512,9 @@ export default function AppCoreArchitecture() {
         </div>
       ) : null}
 
-      {/* FOOTER LAYER BLOCK */}
+      {/* FOOTER BLOCK ANCHOR */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
-        <span>© 2026 extrct.app SaaS Global Operations Terminal. All system nodes synchronized.</span>
+        <span>© 2026 extrct.app SaaS Global Operations Terminal. All system frameworks verified.</span>
       </footer>
 
     </div>
