@@ -111,49 +111,39 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface CostingBatchNode {
+interface BroadcastQueueNode {
   id: string;
-  batchName: string;
-  rawMaterialCost: number;
-  laborOverhead: number;
-  unitsProduced: number;
-  targetWholesalePrice: number;
-  costPerUnit: number;
-  grossMarginPercentage: number;
-  profitRiskStatus: 'HEALTHY_MARGIN' | 'COMPRESSED_WARN' | 'LOSS_BLEED';
+  propertyName: string;
+  locality: string;
+  matchedBuyersCount: number;
+  compiledMessage: string;
+  status: 'READY' | 'DISPATCHED';
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('mfg_costing'); // Dynamic routing lock
+  const [activeTool, setActiveTool] = useState<string>('real_estate_whatsapp'); // Locked to active tool
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
-  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('mfg');
-  const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('mfg');
+  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('real_estate');
 
-  // Shared Core Gateway Payments Telemetry
+  // Shared Core Gateway Payments
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Batch Costing State Matrices
-  const [batchName, setBatchName] = useState<string>('');
-  const [rawCost, setRawCost] = useState<number>(35000);
-  const [laborCost, setLaborCost] = useState<number>(8000);
-  const [unitsQty, setUnitsQty] = useState<number>(1000);
-  const [wholesaleTarget, setWholesaleTarget] = useState<number>(55);
-  const [costingPremiumLock, setCostingPremiumLock] = useState<boolean>(false);
-  
-  // Accordion Controller State
+  // Real Estate Dashboard States
+  const [propertyName, setPropertyName] = useState<string>('');
+  const [locality, setLocality] = useState<string>('');
+  const [configType, setConfigType] = useState<string>('3 BHK');
+  const [targetBudget, setTargetBudget] = useState<number>(15000000); // 1.5 Cr default
+  const [whatsappPremiumLock, setWhatsappPremiumLock] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [costingBatches, setCostingBatches] = useState<CostingBatchNode[]>([
+  const [broadcastQueue, setBroadcastQueue] = useState<BroadcastQueueNode[]>([
     {
       id: "1",
-      batchName: "Premium Fried Snacks Batch #22",
-      rawMaterialCost: 45000,
-      laborOverhead: 12000,
-      unitsProduced: 1500,
-      targetWholesalePrice: 48,
-      costPerUnit: 38.0,
-      grossMarginPercentage: 20.8,
-      profitRiskStatus: 'COMPRESSED_WARN'
+      propertyName: "Skyline Altura Phase 2",
+      locality: "Gurgaon Sector 62",
+      matchedBuyersCount: 42,
+      compiledMessage: "🔥 New Launch Alert: Luxury 3 BHK apartment at Skyline Altura Phase 2, Gurgaon Sector 62 starting at 1.5 Cr. Direct access to NH-8.",
+      status: "READY"
     }
   ]);
 
@@ -166,41 +156,36 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Verification Gateway: Connected node validation complete.");
+      alert("Stripe Checkout System: Initializing API endpoints for premium automated webhook loops.");
     }, 1100);
   };
 
-  // Production batch margin calculation processor framework
-  const executeCompileBatchCosting = () => {
-    if (!batchName.trim() || rawCost <= 0 || unitsQty <= 0 || wholesaleTarget <= 0) return;
+  // Property Parsing Core Logic Engine
+  const executeCompileBroadcastNode = () => {
+    if (!propertyName.trim() || !locality.trim()) return;
 
-    if (costingBatches.length >= 2) {
-      setCostingPremiumLock(true);
+    if (broadcastQueue.length >= 2) {
+      setWhatsappPremiumLock(true);
       return;
     }
 
-    const totalExpense = rawCost + laborCost;
-    const computedUnitCost = parseFloat((totalExpense / unitsQty).toFixed(2));
-    const marginPercentage = parseFloat((((wholesaleTarget - computedUnitCost) / wholesaleTarget) * 100).toFixed(1));
+    const mockMatches = Math.floor(Math.random() * 80) + 15;
+    const formattedBudget = targetBudget >= 10000000 ? `${(targetBudget / 10000000).toFixed(1)} Cr` : `${(targetBudget / 100000).toFixed(0)} Lakhs`;
+    
+    const compiled = `🎯 Premium Match discovered: ${configType} listing at ${propertyName}, ${locality}. Priced competitively at ${formattedBudget}. Tap here to inspect blueprints instantly.`;
 
-    let riskStatus: 'HEALTHY_MARGIN' | 'COMPRESSED_WARN' | 'LOSS_BLEED' = 'HEALTHY_MARGIN';
-    if (marginPercentage < 10) riskStatus = 'LOSS_BLEED';
-    else if (marginPercentage < 25) riskStatus = 'COMPRESSED_WARN';
-
-    const newBatch: CostingBatchNode = {
+    const newNode: BroadcastQueueNode = {
       id: Date.now().toString(),
-      batchName: batchName.trim(),
-      rawMaterialCost: rawCost,
-      laborOverhead: laborCost,
-      unitsProduced: unitsQty,
-      targetWholesalePrice: wholesaleTarget,
-      costPerUnit: computedUnitCost,
-      grossMarginPercentage: marginPercentage,
-      profitRiskStatus: riskStatus
+      propertyName: propertyName.trim(),
+      locality: locality.trim(),
+      matchedBuyersCount: mockMatches,
+      compiledMessage: compiled,
+      status: 'READY'
     };
 
-    setCostingBatches([newBatch, ...costingBatches]);
-    setBatchName('');
+    setBroadcastQueue([newNode, ...broadcastQueue]);
+    setPropertyName('');
+    setLocality('');
   };
 
   return (
@@ -261,162 +246,160 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* COMPONENT INTERACTIVE SWITCHER SCREEN BLOCK */}
-      {activeTool === 'dashboard' ? (
-        <div className="p-12 text-center text-xs font-mono text-gray-400">Main State Matrix Controller Shell.</div>
-      ) : activeTool === 'mfg_costing' ? (
+      {/* COMPONENT ROUTER DISPATCH MULTIPLEXER */}
+      {activeTool === 'real_estate_whatsapp' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* CRITICAL ATTRIBUTION DATA ON-PAGE SEO VAULT */}
+          {/* DEEP ON-PAGE PROGRAMMATIC SEO VAULT SYSTEM */}
           <div className="hidden">
-            <h1>Production Batch Costing & Profit Margin Framework Tool | MSME Cost Matrix</h1>
-            <h2>Algorithmic batch pricing logic models for variable factory components and scaling manufacturers.</h2>
-            <p>Calculate unit level gross cost matrices, isolate raw material scaling spikes, trace labor resource drain coefficients, and preserve wholesale net realization percentages metrics natively.</p>
+            <h1>WhatsApp Bulk Property Match & Client Broadcast Engine | Real Estate Marketing</h1>
+            <h2>Automated lead configuration matrices and transaction workflows for independent property brokers.</h2>
+            <p>Parse inventory datasets natively, match active customer requirement sheets, filter micro-location leads, and route instant structured parameter texts to buyers directly without CRM manual bloat.</p>
           </div>
 
-          {/* DYNAMIC SALES HERO SECTION */}
+          {/* SaaS HERO SALES HEADER BLOCK */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>🧮</span> <span>Granular Unit-Level Margin Armor</span>
+              <span className="inline-flex items-center space-x-1.5 bg-green-50 text-green-800 border border-green-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>💬</span> <span>High-Velocity Real Estate Direct Broadcasts</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Stop Underestimating Production Costs. <br />
-                <span className="text-emerald-600">Lock In Real Batch Gross Profit Margins.</span>
+                Stop Matching Listings Manually. <br />
+                <span className="text-green-600">Broadcast Perfect Property Fits Instantly.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Volatile ingredient quotes and hidden labor leakages destroy batch profit targets completely. Calculate precise real-time cost boundaries before shipping inventory lots to external distributors.
+                Checking spreadsheets for buyer parameters whenever a new plot or apartment arrives takes hours of manual effort. Use this engine to sort budget matrix boundaries and deploy automated WhatsApp outreach copies.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#costing-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Launch Costing Analyzer Console ↓
+                <a href="#broadcast-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Open Target Broadcast Console ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Export Deep Margin Data Ledger ($10)
+                  Unlock API Cloud Webhook Routing ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* APPLICATION INTERACTIVE TELEMETRY CONSOLE */}
-          <section id="costing-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* APPLICATION CONSOLE WORKSPACE SECTION */}
+          <section id="broadcast-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* COST CONFIGURATOR TERMINAL CARD */}
+              {/* PROPERTY INPUT FORM COMPONENT */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Batch Cost Metrics</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Inventory Configuration</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Production Lot / Item Reference</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Project / Township Name</label>
                     <input 
                       type="text" 
-                      value={batchName}
-                      onChange={(e) => setBatchName(e.target.value)}
-                      placeholder="e.g. Potato Chips Lot #45"
+                      value={propertyName}
+                      onChange={(e) => setPropertyName(e.target.value)}
+                      placeholder="e.g. Godrej Woods Phase 1"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Specific Locality / Sector</label>
+                    <input 
+                      type="text" 
+                      value={locality}
+                      onChange={(e) => setLocality(e.target.value)}
+                      placeholder="e.g. Noida Sector 150"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Raw Materials (₹)</label>
-                      <input 
-                        type="number" 
-                        value={rawCost}
-                        onChange={(e) => setRawCost(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Layout Blueprint</label>
+                      <select
+                        value={configType}
+                        onChange={(e) => setConfigType(e.target.value)}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700 focus:outline-none"
+                      >
+                        <option value="2 BHK">2 BHK Flat</option>
+                        <option value="3 BHK">3 BHK Flat</option>
+                        <option value="4 BHK">4 BHK Luxury</option>
+                        <option value="Villa Penthouse">Independent Villa</option>
+                      </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Labor & Power (₹)</label>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Target Valuation (₹)</label>
                       <input 
                         type="number" 
-                        value={laborCost}
-                        onChange={(e) => setLaborCost(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Units Produced Qty</label>
-                      <input 
-                        type="number" 
-                        value={unitsQty}
-                        onChange={(e) => setUnitsQty(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Target Price / Unit (₹)</label>
-                      <input 
-                        type="number" 
-                        value={wholesaleTarget}
-                        onChange={(e) => setWholesaleTarget(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                        value={targetBudget}
+                        onChange={(e) => setTargetBudget(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
                       />
                     </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={executeCompileBatchCosting}
-                  disabled={!batchName.trim() || rawCost <= 0 || unitsQty <= 0}
-                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileBroadcastNode}
+                  disabled={!propertyName.trim() || !locality.trim()}
+                  className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Analyze Cost Architecture
+                  Parse & Match Leads
                 </button>
               </div>
 
-              {/* LIVE MARGIN LEDGER REAL-TIME MONITOR GRID */}
+              {/* STREAMS LIST ACTIVE OUTPUT PIPELINE GRID */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {costingPremiumLock && (
+                {whatsappPremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 CSV Costing Data Ledger Locked</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free analytical frame caps at 2 parallel items logs. Transition to our professional module package to map macro historical trends and unpack structural yield reports.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 API Bulk Cloud Dispatch Gateway Locked</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free execution sandbox simulates output string copies only. Pay $10 to securely interface directly with Meta business WhatsApp APIs and fire text packets to entire list records instantly.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-emerald-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-emerald-700 transition-colors">
-                      Activate Tier Setup
+                    <button onClick={triggerSecureStripeCheckout} className="bg-green-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-green-700 transition-colors">
+                      Unlock Bulk Dispatch
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Granular Batch Diagnostics Feed</span>
-                    <span className="text-[10px] font-mono text-gray-400">Status: Real-Time Active</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Generated Outreach Matrix</span>
+                    <span className="text-[10px] font-mono text-gray-400">Match Accuracy Level: Strict</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {costingBatches.map((node) => (
-                      <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
-                        <div className="space-y-1.5">
-                          <span className="font-bold text-sm text-[#1e1e1c] block">{node.batchName}</span>
-                          <div className="text-xs text-gray-500">
-                            Volume: <b>{node.unitsProduced} items</b> | Cost/Unit: <span className="font-mono font-bold text-gray-900">₹{node.costPerUnit}</span>
+                    {broadcastQueue.map((node) => (
+                      <div key={node.id} className="p-5 space-y-3 hover:bg-[#faf9f6] transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-bold text-sm text-[#1e1e1c]">{node.propertyName}</span>
+                            <span className="text-xs text-gray-400 font-mono block">{node.locality}</span>
                           </div>
-                          <div className="text-[11px] text-gray-400 font-mono">
-                            Materials Matrix: ₹{node.rawMaterialCost.toLocaleString('en-IN')} + Overhead: ₹{node.laborOverhead.toLocaleString('en-IN')}
-                          </div>
+                          <span className="text-[11px] font-bold bg-green-50 text-green-700 border border-green-100 px-2.5 py-1 rounded-full">
+                            🎯 Matches {node.matchedBuyersCount} Buyers
+                          </span>
                         </div>
 
-                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
-                          <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold tracking-tight block border ${node.profitRiskStatus === 'LOSS_BLEED' ? 'bg-red-50 text-red-700 border-red-100' : node.profitRiskStatus === 'COMPRESSED_WARN' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
-                            {node.profitRiskStatus === 'LOSS_BLEED' ? '🚨 MARGIN LEAK' : node.profitRiskStatus === 'COMPRESSED_WARN' ? '⚠️ RISK SPIKE' : '✓ HEALTHY CUT'}
-                          </span>
-                          <span className={`font-mono text-xs font-black mt-1.5 block ${node.grossMarginPercentage < 10 ? 'text-red-600' : 'text-emerald-600'}`}>
-                            {node.grossMarginPercentage}% Net Cut
-                          </span>
+                        <div className="bg-gray-50 border border-gray-100 p-3 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <p className="text-xs text-gray-600 italic leading-relaxed flex-1 pr-4">
+                            "{node.compiledMessage}"
+                          </p>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(node.compiledMessage);
+                              alert("Outreach text string copied to active clipboard vault!");
+                            }}
+                            className="bg-white border text-gray-700 hover:text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm whitespace-nowrap"
+                          >
+                            Copy String
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -427,58 +410,58 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* SYSTEM VALUE VISUAL REVENUE FLOW BLUEPRINT INFOGRAPHICS */}
+          {/* VALUE PROPOSITION MARKETING COMPONENT SECTIONS */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block mb-2">Attribution Workflow Mapping</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Unit-Level Margin Recovery Loop</h2>
-                <p className="text-xs text-gray-500 mt-2">How structured data isolation blocks out hidden losses before wholesale contracts execute.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 block mb-2">Programmatic Data Pipeline</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The 3-Step Instant Deal Validation System</h2>
+                <p className="text-xs text-gray-500 mt-2">How we clean parameter variations and transform inventory columns into runnable marketing streams.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">🧮 01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Expense Aggregation</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">System compiles direct source raw inventory prices nested cleanly alongside shift metrics, wiping out manual ledger mistakes.</p>
+                  <div className="w-8 h-8 rounded-lg bg-green-100 text-green-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Property Indexing</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Agent logs the layout configuration metrics, sub-locality variables, and expected budget matrices into the terminal interface.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">📊 02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Lot Variable Splitting</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Instantly parses total investments across production volume lots, mapping exact real-time component costs to single piece targets.</p>
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Automated Match Scanning</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">System instantly extracts buyer target parameters from your list database, dropping out mismatched configurations to avoid churn strings.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="text-xl mb-3">🛡 03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Profit Boundary Lock</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Alert codes instantly surface margins falling underneath custom thresholds, signaling managers to re-negotiate quotes before shipments.</p>
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">WhatsApp Ready Compilation</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Auto-generates clean, localized marketing ad copy strings containing conversion nodes, ready for clipboard capture or API cloud routing loops.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* PRODUCT UNIQUE SELLING PROPOSITIONS (USPs) MARKETING CONTENT */}
+          {/* HIGHLIGHTED SAAS PLATFORM REVENUE UNIQUE SELLING PROPOSITIONS (USPs) */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">MSME Financial Guard Suite</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Ditch Chaotic Spreadsheets. <br />Govern Factory Profitability.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">Built For High-Velocity Independent Brokers</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Close Property Transactions <br />Before Competitors Even Dial.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Messy offline tables obscure true conversion spend details, making products look profitable when they are bleeding cash. <b>extrct.app</b> forces complete structural mathematical clarity across fast-moving workflows.
+                    Heavy, traditional enterprise real estate CRM softwares demand complex customer profiling, tag setups, and subscription steps. <b>extrct.app</b> forces maximum speed-to-outreach via lightweight analytical grids.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">📈</span>
-                    <span className="font-bold text-xs text-gray-900 block">Leak Eradication</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Isolates exactly which product batches drop under target thresholds.</p>
+                    <span className="text-xl block mb-1">⚡</span>
+                    <span className="font-bold text-xs text-gray-900 block">Instant Cross-Matching</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Locks target budget boundaries to prevent sending mismatched deals to premium clients.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-2xl block mb-1">⚡</span>
-                    <span className="font-bold text-xs text-gray-900 block">Instant Pricing Audits</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Re-calculate pricing frameworks on the fly when input supplier quotes change.</p>
+                    <span className="text-xl block mb-1">🛑</span>
+                    <span className="font-bold text-xs text-gray-900 block">Zero Lead Burn Rate</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Clean personalized strings dramatically outperform cold phone loops.</p>
                   </div>
                 </div>
 
@@ -486,23 +469,23 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DEEP ON-PAGE SEO ACCORDION FAQ SYSTEM BLOCK */}
+          {/* DYNAMIC ON-PAGE HIGH-CONVERTING FAQ ACCORDION PATTERN */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Framework Queries</h3>
-                <p className="text-xs text-gray-400 mt-1">Everything you need to map about local production gross margins.</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Asked Questions</h3>
+                <p className="text-xs text-gray-400 mt-1">Everything you need to master about matching property listing data structures.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "How exactly do hidden operational parameters corrupt single unit calculations?",
-                    a: "Most local business operators track basic ingredient bills but overlook baseline shifting variables like factory power spikes, machine setup wear, and product wastage rates. Bundling labor splits isolates true product costs down to the package level."
+                    q: "How does the matching logic parse unstructured locality parameters?",
+                    a: "The framework utilizes simple token matching filters to cross-reference input sub-localities against buyer preference arrays. It guarantees that a Gurgaon developer launch only matches buyers targeting that specific regional cell."
                   },
                   {
-                    q: "Can I leverage this matrix to model wholesale distribution tier discounts?",
-                    a: "Absolutely. By establishing the firm floor production cost per unit, you can safely map out the exact range for distributor commission cuts without slipping into structural cash flow losses."
+                    q: "What properties execute natively on the $10 cloud webhook upgrade tier?",
+                    a: "The starter console generates copyable manual message strings to use directly inside your device apps. The professional tier connects an active webhook link directly to Meta Cloud APIs to blast the entire filtered buyer list simultaneously in one click."
                   }
                 ].map((faq, index) => (
                   <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
@@ -528,9 +511,9 @@ export default function AppCoreArchitecture() {
         </div>
       ) : null}
 
-      {/* FOOTER LAYER */}
+      {/* FOOTER BLOCK CONTAINER */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
-        <span>© 2026 extrct.app SaaS Global Operations Terminal. All system nodes synchronized.</span>
+        <span>© 2026 extrct.app SaaS Global Operations Terminal. All system frameworks verified.</span>
       </footer>
 
     </div>
