@@ -111,137 +111,79 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface MockFile {
-  name: string;
-  originalSize: number;
-  compressedSize: number;
-  reduction: number;
-  altText: string;
-  status: 'PENDING' | 'COMPRESSED';
+interface AuditRow { orderId: string; sku: string; chargedFee: number; expectedFee: number; variance: number; status: string; }
+interface MockFile { name: string; originalSize: number; compressedSize: number; reduction: number; altText: string; status: string; }
+
+interface ScraperNode {
+  url: string;
+  competitor: string;
+  currentPrice: number;
+  previousPrice: number;
+  stockStatus: 'IN_STOCK' | 'STOCK_OUT';
+  lastChecked: string;
+  delta: number;
 }
 
-interface AuditRow {
-  orderId: string;
-  sku: string;
-  chargedFee: number;
-  expectedFee: number;
-  variance: number;
-  status: 'OVERCHARGED' | 'CORRECT';
-}
-
-export default function MasterSaaSApplicationGrid() {
+export default function AppCoreEcomArchitecture() {
   const [activeTool, setActiveTool] = useState<string>('dashboard');
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('ecom');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('ecom');
 
-  // Tool 1: Auditor States
+  // Tool 1 & 2 Static Backing States
   const [csvInput, setCsvInput] = useState<string>('');
-  const [auditResults, setAuditResults] = useState<AuditRow[] | null>(null);
-  const [totalLeakage, setTotalLeakage] = useState<number>(0);
-  const [isAuditing, setIsAuditing] = useState<boolean>(false);
-
-  // Tool 2: Compressor States
   const [batchFiles, setBatchFiles] = useState<MockFile[]>([]);
-  const [isCompressing, setIsCompressing] = useState<boolean>(false);
-  const [premiumPayloadTriggered, setPremiumPayloadTriggered] = useState<boolean>(false);
+
+  // Tool 3: Radar Interface States
+  const [urlInput, setUrlInput] = useState<string>('');
+  const [trackedUrls, setTrackedUrls] = useState<ScraperNode[]>([]);
+  const [isScraping, setIsScraping] = useState<boolean>(false);
+  const [radarPremiumLock, setRadarPremiumLock] = useState<boolean>(false);
 
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
     setIsMegaMenuOpen(false);
   };
 
-  // Tool 1 Logic
-  const handleSampleLoad = () => {
-    setCsvInput("ORDER_ID,SKU,CHARGED_FEE\nOD8237482,NEXL-WIRELESS-HEADPHONE,180\nOD8237483,NEXL-DATA-CABLE,95\nOD8237484,NEXL-WIRELESS-HEADPHONE,210");
+  // Tool 3 Radar Methods
+  const handleLoadMockRadarUrls = () => {
+    setRadarPremiumLock(false);
+    setTrackedUrls([
+      { url: "https://flipkart.com/mock-competitor-electronics-1", competitor: "Alpha Electronics", currentPrice: 1399, previousPrice: 1599, stockStatus: 'IN_STOCK', lastChecked: "Just Now", delta: -200 },
+      { url: "https://amazon.in/mock-competitor-cables-2", competitor: "Vecto Retail Node", currentPrice: 449, previousPrice: 449, stockStatus: 'STOCK_OUT', lastChecked: "5 mins ago", delta: 0 }
+    ]);
   };
 
-  const runFeeAuditLogic = () => {
-    if (!csvInput.trim()) return;
-    setIsAuditing(true);
-    setTimeout(() => {
-      const rows = csvInput.split('\n').slice(1);
-      let cumulativeLeak = 0;
-      const compiled: AuditRow[] = rows.map((rowStr) => {
-        const parts = rowStr.split(',');
-        if (parts.length < 3) return null;
-        const orderId = parts[0];
-        const sku = parts[1];
-        const chargedFee = parseFloat(parts[2]) || 0;
-        let expectedFee = sku.includes('WIRELESS-HEADPHONE') ? 145 : 55;
-        const variance = chargedFee - expectedFee;
-        if (variance > 0) cumulativeLeak += variance;
-        return { orderId, sku, chargedFee, expectedFee, variance: variance > 0 ? variance : 0, status: variance > 0 ? 'OVERCHARGED' : 'CORRECT' };
-      }).filter(Boolean) as AuditRow[];
-      setAuditResults(compiled);
-      setTotalLeakage(cumulativeLeak);
-      setIsAuditing(false);
-    }, 600);
-  };
-
-  // Tool 2 Compressor Logic
-  const handleBatchSimulationInsert = (count: number) => {
-    setPremiumPayloadTriggered(false);
-    if (count > 5) {
-      setPremiumPayloadTriggered(true);
-    }
+  const executeLiveScrapeCron = () => {
+    if (!urlInput.trim()) return;
     
-    const mockTemplates = [
-      { name: "product_front_alpha.png", size: 2450 },
-      { name: "variant_angle_blue.jpg", size: 1820 },
-      { name: "lifestyle_model_hd.png", size: 4120 },
-      { name: "packaging_box_flat.jpg", size: 1150 },
-      { name: "texture_close_up.png", size: 3100 },
-      { name: "extra_dimensions_view.png", size: 2890 },
-      { name: "unboxing_thumbnail_raw.jpg", size: 3900 }
-    ];
-
-    const targetCount = Math.min(count, mockTemplates.length);
-    const generation: MockFile[] = [];
-    
-    for (let i = 0; i < targetCount; i++) {
-      generation.push({
-        name: mockTemplates[i].name,
-        originalSize: mockTemplates[i].size,
-        compressedSize: 0,
-        reduction: 0,
-        altText: '',
-        status: 'PENDING'
-      });
+    // Premium Lock Check: Free accounts track 1 URL natively
+    if (trackedUrls.length >= 1) {
+      setRadarPremiumLock(true);
+      return;
     }
-    setBatchFiles(generation);
-  };
 
-  const processImagesToWebP = () => {
-    if (batchFiles.length === 0) return;
-    setIsCompressing(true);
-
+    setIsScraping(true);
     setTimeout(() => {
-      const processed = batchFiles.map((f) => {
-        const targetRatio = 0.18; // ~82% reduction rate parameters
-        const comp = Math.round(f.originalSize * targetRatio);
-        
-        // Autogenerate standard clean alt-text descriptive labels
-        let cleanLabel = f.name.replace(/_|-/g, ' ').replace(/\.jpg|\.png/g, '');
-        let generatedAlt = `E-commerce listing asset showing item details for ${cleanLabel}`;
-
-        return {
-          ...f,
-          compressedSize: comp,
-          reduction: 82,
-          altText: generatedAlt,
-          status: 'COMPRESSED' as const
-        };
-      });
-      setBatchFiles(processed);
-      setIsCompressing(false);
-    }, 900);
+      const newNode: ScraperNode = {
+        url: urlInput,
+        competitor: urlInput.includes('amazon') ? "Amazon Merchant Prime" : "Flipkart Marketplace Vendor",
+        currentPrice: 849,
+        previousPrice: 999,
+        stockStatus: 'IN_STOCK',
+        lastChecked: "Just Now",
+        delta: -150
+      };
+      setTrackedUrls([newNode, ...trackedUrls]);
+      setUrlInput('');
+      setIsScraping(false);
+    }, 850);
   };
 
   return (
     <div className="min-h-screen bg-white text-[#37352f] font-sans antialiased text-[15px] relative">
       
-      {/* HEADER NAVBAR LINKS CONTAINER */}
+      {/* HEADER NAVBAR CONTAINER */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
         <div className="flex items-center space-x-8">
           <div onClick={() => setActiveTool('dashboard')} className="flex items-center space-x-2 cursor-pointer shrink-0">
@@ -311,124 +253,110 @@ export default function MasterSaaSApplicationGrid() {
 
       {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
 
-      {/* RENDER BRANCH ROUTER */}
+      {/* DASHBOARD ROUTER DECODING NODES */}
       {activeTool === 'dashboard' ? (
         
         <div>
-          {/* Main Notion style homepage dashboard anchor links trigger */}
           <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
-            <h1 className="text-5xl font-bold tracking-tight text-[#37352f] mb-4">Run E-Commerce Asset Toolsets</h1>
-            <p className="text-sm text-[#7c7b77] mb-6">Select specific tools from the top Solutions bar to view internal parameters.</p>
-            <div className="flex justify-center space-x-4">
-              <button onClick={() => selectToolFromMenu('ecom_fee')} className="border px-4 py-2 rounded-xl text-xs font-semibold">1. Fee Auditor</button>
-              <button onClick={() => selectToolFromMenu('ecom_img')} className="bg-[#37352f] text-white px-4 py-2 rounded-xl text-xs font-bold">2. Image Compressor →</button>
+            <h1 className="text-5xl font-bold tracking-tight text-[#37352f] mb-4">Run E-Commerce Competitor Radars</h1>
+            <p className="text-sm text-[#7c7b77] mb-6">Select specific tool nodes to verify system layout frameworks.</p>
+            <div className="flex justify-center space-x-2">
+              <button onClick={() => selectToolFromMenu('ecom_radar')} className="bg-[#37352f] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm">Launch Competitor Radar Hub →</button>
             </div>
           </section>
         </div>
 
       ) : activeTool === 'ecom_fee' ? (
-        
-        /* TOOL 1 VIEW */
-        <div className="max-w-[960px] mx-auto px-6 py-12">
-          <h1 className="text-2xl font-bold">Automated Marketplace Overcharge & Fee Auditor</h1>
-          <button onClick={handleSampleLoad} className="text-xs text-blue-600 underline block mt-2">Load Data</button>
-          <textarea value={csvInput} onChange={(e) => setCsvInput(e.target.value)} className="w-full border h-32 mt-2 font-mono p-2 text-xs" />
-          <button onClick={runFeeAuditLogic} className="bg-blue-600 text-white text-xs px-4 py-2 mt-2 rounded">Run Audit</button>
-        </div>
-
+        <div className="p-8">Fee Auditor Shell</div>
       ) : activeTool === 'ecom_img' ? (
+        <div className="p-8">Image Compressor Shell</div>
+      ) : activeTool === 'ecom_radar' ? (
         
-        /* -------------------------------------------------------------
-           COMPLETE INDEPENDENT PAGE COMPONENT: IMAGE WEBP COMPRESSOR
-           ------------------------------------------------------------- */
+        /* ---------------------------------------------------------------------
+           COMPLETE INDEPENDENT PAGE COMPONENT: COMPETITOR PRICE & STOCK RADAR
+           --------------------------------------------------------------------- */
         <div className="bg-[#fafafa] min-h-[calc(100vh-64px)] py-12">
           <main className="max-w-[960px] mx-auto px-6">
             
-            {/* Spec Heading Node */}
+            {/* Context Heading Title */}
             <div className="mb-8">
-              <div className="flex items-center space-x-2 text-xs text-emerald-600 font-bold uppercase tracking-wide mb-1">
-                <span>🗜️ Asset Optimization Layer</span>
+              <div className="flex items-center space-x-2 text-xs text-blue-600 font-bold uppercase tracking-wide mb-1">
+                <span>📡 Automated Web Scraper Cron Matrix</span>
               </div>
               <h1 className="text-3xl font-bold tracking-tight text-[#37352f]">
-                Batch Dynamic Image Compressor & WebP Variant Converter
+                Competitor Price-Drop & Stock-Out Radar
               </h1>
               <p className="text-[#5a5750] text-sm mt-1 max-w-2xl">
-                Large product images slow down page load speeds dropping conversion rates. Drag-and-drop batch tools convert product images into web-optimized WebP formats and auto-generate clean structured standard alt-text logs.
+                Checking competing product listings manually to adjust daily pricing models takes hours every morning. This automated dashboard tracks specific competitor product page parameters natively.
               </p>
             </div>
 
-            {/* Layout Processing Workstations */}
+            {/* Computational Workspace Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
               
-              {/* Left Sandbox Column: Batch Triggers */}
+              {/* Left Column: Link Pipeline Manager */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-6 text-center">
-                  <div className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-xl p-8 bg-[#fbfbfa] transition-all">
-                    <span className="text-2xl block mb-2">📸</span>
-                    <div className="text-xs font-bold text-[#37352f] uppercase tracking-wider mb-2">Select Simulation Batch Variant</div>
-                    
-                    <div className="flex items-center justify-center space-x-2">
-                      <button 
-                        onClick={() => handleBatchSimulationInsert(4)}
-                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#37352f] text-xs font-semibold rounded-lg transition-colors"
-                      >
-                        Insert 4 Standard Assets (Free Tier)
-                      </button>
-                      <button 
-                        onClick={() => handleBatchSimulationInsert(7)}
-                        className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold rounded-lg transition-colors"
-                      >
-                        Insert 7 Heavy Assets (Triggers Alert)
-                      </button>
-                    </div>
+                <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-[#37352f] uppercase tracking-wider">
+                      Add New Competitor Listing URL
+                    </label>
+                    <button 
+                      onClick={handleLoadMockRadarUrls}
+                      className="text-xs text-blue-600 hover:underline font-medium"
+                    >
+                      Preload Benchmark Mock Feeds
+                    </button>
                   </div>
 
-                  {batchFiles.length > 0 && (
+                  <div className="flex space-x-2">
+                    <input
+                      type="url"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      placeholder="https://www.flipkart.com/product-item-reference-node..."
+                      className="flex-1 p-2.5 border border-[#edece9] rounded-lg text-xs font-mono focus:outline-none focus:border-[#37352f] bg-[#fafafa]"
+                    />
                     <button
-                      onClick={processImagesToWebP}
-                      disabled={isCompressing}
-                      className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs transition-all tracking-wide uppercase shadow-sm"
+                      onClick={executeLiveScrapeCron}
+                      disabled={isScraping || !urlInput.trim()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 px-4 font-bold rounded-lg text-xs transition-all uppercase tracking-wide shrink-0"
                     >
-                      {isCompressing ? "Executing Compression Matrix Engine..." : "Optimize Batch Payload"}
+                      {isScraping ? "Scraping..." : "Inject Target"}
                     </button>
-                  )}
+                  </div>
                 </div>
 
-                {/* Processing Monitor Spreadsheet Layer */}
-                {batchFiles.length > 0 && (
+                {/* Tracking Metrics Ledger Sheet */}
+                {trackedUrls.length > 0 && (
                   <div className="bg-white border border-[#edece9] rounded-xl shadow-sm overflow-hidden animate-in fade-in">
-                    <div className="px-6 py-3.5 bg-[#fbfbfa] border-b border-[#edece9] flex justify-between items-center">
-                      <h3 className="text-xs font-bold text-[#37352f] uppercase tracking-wider">Asset Operations Logs</h3>
-                      <span className="text-[11px] font-mono text-gray-500">{batchFiles.length} files targeted</span>
+                    <div className="px-6 py-3.5 bg-[#fbfbfa] border-b border-[#edece9]">
+                      <h3 className="text-xs font-bold text-[#37352f] uppercase tracking-wider">Active Competitor Monitor Matrix</h3>
                     </div>
 
                     <div className="divide-y divide-[#f1f0ee]">
-                      {batchFiles.map((file, idx) => (
-                        <div key={idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50">
-                          <div>
-                            <div className="font-mono text-xs font-bold text-[#37352f] flex items-center space-x-2">
-                              <span>{file.name}</span>
-                              {file.status === 'COMPRESSED' && (
-                                <span className="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded uppercase font-bold font-sans">WebP Active</span>
-                              )}
+                      {trackedUrls.map((node, idx) => (
+                        <div key={idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50">
+                          <div className="space-y-0.5">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-bold text-xs text-[#37352f]">{node.competitor}</span>
+                              <span className={`text-[9px] px-1.5 py-0.5 font-bold uppercase tracking-wider rounded ${node.stockStatus === 'IN_STOCK' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {node.stockStatus === 'IN_STOCK' ? 'Active In Stock' : 'Stock Out'}
+                              </span>
                             </div>
-                            <div className="text-[11.5px] text-[#7c7b77] mt-0.5 font-sans italic">
-                              {file.status === 'COMPRESSED' ? `Alt: "${file.altText}"` : "Awaiting compression vector sequence..."}
-                            </div>
+                            <div className="text-xs font-mono text-gray-400 truncate max-w-[380px]">{node.url}</div>
+                            <div className="text-[11px] text-gray-400">Sync Frequency: {node.lastChecked}</div>
                           </div>
 
-                          <div className="text-right shrink-0 flex items-center space-x-4">
-                            <div className="font-mono text-xs text-gray-500">
-                              <div>{(file.originalSize / 1020).toFixed(1)} MB</div>
-                              {file.status === 'COMPRESSED' && (
-                                <div className="text-emerald-600 font-bold">→ {(file.compressedSize / 1020).toFixed(1)} MB</div>
-                              )}
+                          <div className="text-right shrink-0 flex items-center space-x-4 justify-between sm:justify-end">
+                            <div className="font-mono text-xs">
+                              <div className="text-gray-400 line-through">₹{node.previousPrice}</div>
+                              <div className="text-[#37352f] font-bold text-sm">₹{node.currentPrice}</div>
                             </div>
-                            {file.status === 'COMPRESSED' && (
-                              <div className="bg-emerald-50 text-emerald-700 font-bold font-mono text-xs px-2 py-1 rounded">
-                                -{file.reduction}%
-                              </div>
-                            )}
+                            
+                            <div className={`px-2.5 py-1 rounded font-mono text-xs font-bold ${node.delta < 0 ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {node.delta < 0 ? `Drop ₹${Math.abs(node.delta)}` : 'Stable'}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -437,45 +365,41 @@ export default function MasterSaaSApplicationGrid() {
                 )}
               </div>
 
-              {/* Right Sidebar SaaS Paywall Lock Block */}
+              {/* Right Sidebar: Premium Alerts Payload Trigger */}
               <div className="space-y-4">
                 
-                {/* 10-to-1000 Hook Validation Box */}
-                <div className={`border rounded-xl p-6 shadow-sm transition-all duration-300 ${premiumPayloadTriggered ? 'border-amber-300 bg-amber-50/40 shadow-md' : 'border-[#edece9] bg-white'}`}>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
-                    SaaS Limit Shield
+                {/* Real-time Tracking Lock Gate */}
+                <div className={`border rounded-xl p-6 shadow-sm transition-all ${radarPremiumLock ? 'border-amber-300 bg-amber-50/40 shadow-md scale-[1.01]' : 'bg-white border-[#edece9]'}`}>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                    Operational Limit Guard
                   </span>
-                  <h3 className="text-base font-bold text-[#37352f] mt-3">Free Tier Limitation Nodes</h3>
+                  <h3 className="text-base font-bold text-[#37352f] mt-3">The 10-to-1000 Alert Conversion Hook</h3>
                   <p className="text-xs text-[#7c7b77] mt-1 leading-relaxed">
-                    Free tier limits processing to <b>5 images per batch</b>. Premium tiers unlock bulk processing configurations for up to 1000 items instantly.
+                    Free tier tracking parameters limit data lookups to <b>1 active URL node</b>. Premium tiers unlock automated Supabase background fetch alerts and multi-channel notification routings.
                   </p>
 
-                  {premiumPayloadTriggered && (
-                    <div className="mt-4 p-3 bg-white border border-amber-200 rounded-lg animate-in slide-in-from-top-2">
-                      <div className="text-xs font-bold text-amber-900 flex items-center space-x-1">
-                        <span>⚠️ Processing Limit Overage</span>
-                      </div>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">
-                        You have queued <b>{batchFiles.length} variants</b>. Free tier will drop assets beyond index 5. Unlock premium dashboard to clean entire directories.
+                  {radarPremiumLock && (
+                    <div className="mt-4 p-3 bg-white border border-amber-200 rounded-lg animate-in fade-in">
+                      <div className="text-xs font-bold text-amber-950">⚠️ Limit Reached (Free Account Threshold)</div>
+                      <p className="text-[11px] text-amber-900 mt-1">
+                        You have hit the individual domain track threshold. Upgrade to execute parallel 10-channel price alerts every morning.
                       </p>
                       <button
-                        onClick={() => alert("Redirecting to premium tier subscription sequence portal...")}
-                        className="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-xs tracking-wide uppercase transition-all"
+                        onClick={() => alert("Launching premium subscription workflow trigger...")}
+                        className="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-wide transition-all shadow-sm"
                       >
-                        Unlock Instant Bulk Processing
+                        Unlock Instant Live Alert Routings ($10)
                       </button>
                     </div>
                   )}
                 </div>
 
-                {/* Meta Parameters Spec Cards */}
-                <div className="bg-white border border-[#edece9] rounded-xl p-4 text-xs">
-                  <div className="font-bold uppercase tracking-wider text-[10px] text-gray-400 mb-2">Technical Matrix Spec</div>
-                  <div className="text-gray-600 leading-relaxed space-y-1">
-                    <div>• Format: <code>image/webp</code> lossy profile</div>
-                    <div>• Meta Strip: Auto-scrub EXIF geo coordinates</div>
-                    <div>• Resolution Limits: Bound to 2048px maximum width</div>
-                  </div>
+                {/* System Diagnostics Info Panel */}
+                <div className="bg-white border border-[#edece9] rounded-xl p-4 text-xs space-y-1 text-gray-500">
+                  <div className="font-bold text-[#37352f] uppercase text-[9px] tracking-wider mb-1">Scraper Matrix Target Specifications</div>
+                  <div>• Cron Schedule: Daily at 06:00 AM IST</div>
+                  <div>• Engine Node: Headless Chromium instances</div>
+                  <div>• Notification Target: Webhooks / SMS logs</div>
                 </div>
 
               </div>
@@ -483,12 +407,11 @@ export default function MasterSaaSApplicationGrid() {
             </div>
           </main>
         </div>
-
       ) : (
-        <div className="p-12 text-center text-xs font-mono text-gray-400">Endpoint active</div>
+        <div className="p-4 text-center">Active node</div>
       )}
 
-      {/* FOOTER SYSTEM SYSTEM */}
+      {/* FOOTER ANCHOR BLOCK */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] pt-16 pb-12 select-none">
         <div className="max-w-[900px] mx-auto px-6 text-center text-xs text-[#7c7b77]">
           <span>© 2026 extrct.app Terminal Technologies Inc. All parameters synced.</span>
