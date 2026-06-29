@@ -77,7 +77,9 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
     label: "🩺 Independent Healthcare Clinics",
     notionHeroSub: "Prevents appointment no-shows via automated text nodes, structures digital consent forms, and tracks stock levels.",
     tools: [
-      { id: 'health_noshow', shortName: "🗓️ Patient Appointment No-Show Preventer", tagline: "Sends velocity reminder alerts to secure slot retention." }
+      { id: 'health_noshow', shortName: "🗓️ Patient Appointment No-Show Preventer", tagline: "Sends velocity reminder alerts to secure slot retention." },
+      { id: 'health_consent', shortName: "📋 Medical Consent Form Generator", tagline: "Stitches responsive client check-boxes into clean PDFs." },
+      { id: 'health_stock', shortName: "📦 In-Clinic Consumable Stock Alert", tagline: "Flags critical needle, gauze, or medicine inventory dips." }
     ]
   },
   finance: { label: "💳 Fintech & Finance Teams", notionHeroSub: "Audits transaction leaks.", tools: [] },
@@ -93,71 +95,39 @@ export default function AppCoreArchitecture() {
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  // 1. UTM Generator States
-  const [utmUrl, setUtmUrl] = useState('https://vantageprintco.com');
-  const [utmSource, setUtmSource] = useState('facebook');
-  const [utmMedium, setUtmMedium] = useState('cpc');
-  const [utmCampaign, setUtmCampaign] = useState('retro_realities_apparel');
-  const [utmResult, setUtmResult] = useState('');
-
-  // 2. Manufacturing Yield States
-  const [mfgIn, setMfgIn] = useState<number>(1200);
-  const [mfgOut, setMfgOut] = useState<number>(1110);
-  const [mfgYieldResult, setMfgYieldResult] = useState<string>('');
-
-  // 3. Maintenance Scheduler States
+  // States for All Tools
+  const [mfgIn, setMfgIn] = useState<number>(1000);
+  const [mfgOut, setMfgOut] = useState<number>(910);
   const [mfgMachine, setMfgMachine] = useState<string>('');
-  const [mfgComponent, setMfgComponent] = useState<string>('');
-
-  // 4. Batch Costing States
-  const [mfgBatchName, setMfgBatchName] = useState<string>('');
-  const [mfgRawCost, setMfgRawCost] = useState<number>(45000);
-  const [mfgQty, setMfgQty] = useState<number>(1500);
-  const [mfgCostResult, setMfgCostResult] = useState<string>('');
-
-  // 5. WhatsApp Broadcast States
+  const [mfgRawCost, setMfgRawCost] = useState<number>(50000);
+  const [mfgQty, setMfgQty] = useState<number>(2000);
   const [reProject, setReProject] = useState<string>('');
-  const [reLocality, setReLocality] = useState<string>('');
-
-  // 6. Rental Log States
   const [reRentalAddr, setReRentalAddr] = useState<string>('');
-  const [reRentalCost, setReRentalCost] = useState<number>(3500);
-
-  // 7. Property Description States
+  const [reRentalCost, setReRentalCost] = useState<number>(4000);
   const [reDescLoc, setReDescLoc] = useState<string>('');
-  const [reDescSqft, setReDescSqft] = useState<number>(1650);
-
-  // 8. Tip Pooling States
-  const [cafeTipPool, setCafeTipPool] = useState<number>(24000);
+  const [reDescSqft, setReDescSqft] = useState<number>(1500);
+  const [cafeTipPool, setCafeTipPool] = useState<number>(12000);
   const [cafeWaitHours, setCafeWaitHours] = useState<number>(14);
   const [cafeKitHours, setCafeKitHours] = useState<number>(10);
-
-  // 9. Recipe Costing States
   const [cafeRecipeName, setCafeRecipeName] = useState<string>('');
-  const [cafeIngCost, setCafeIngCost] = useState<number>(160);
-  const [cafeCardPrice, setCafeCardPrice] = useState<number>(490);
-
-  // 10. QR Menu States
+  const [cafeIngCost, setCafeIngCost] = useState<number>(150);
+  const [cafeCardPrice, setCafeCardPrice] = useState<number>(450);
   const [cafeQrDish, setCafeQrDish] = useState<string>('');
-  const [cafeQrPrice, setCafeQrPrice] = useState<number>(290);
-  const [menuItems, setMenuItems] = useState<any[]>([{ id: '1', name: 'Spicy Paneer Tikka Wrap', price: 180, category: 'Quick Bites' }]);
-
-  // 11. Legal Hours States
+  const [cafeQrPrice, setCafeQrPrice] = useState<number>(220);
   const [legalClient, setLegalClient] = useState<string>('');
   const [legalHours, setLegalHours] = useState<number>(2.5);
   const [legalRate, setLegalRate] = useState<number>(4000);
-
-  // 12. Legal Doc Filler States
   const [legalPartyA, setLegalPartyA] = useState<string>('');
   const [legalPartyB, setLegalPartyB] = useState<string>('');
-
-  // 13. Court Deadline States
   const [legalCaseRef, setLegalCaseRef] = useState<string>('');
-  const [legalDeadlineDate, setLegalDeadlineDate] = useState<string>('2026-07-20');
-
-  // 14. Patient No Show States
   const [healthPatientName, setHealthPatientName] = useState<string>('');
-  const [healthAbsences, setHealthAbsences] = useState<number>(0);
+  const [utmUrl, setUtmUrl] = useState<string>('https://vantageprintco.com');
+  const [utmSource, setUtmSource] = useState<string>('google');
+  const [utmMedium, setUtmMedium] = useState<string>('cpc');
+  const [utmResult, setUtmResult] = useState<string>('');
+  const [mfgYieldResult, setMfgYieldResult] = useState<string>('');
+  const [mfgCostResult, setMfgCostResult] = useState<string>('');
+  const [menuItems, setMenuItems] = useState<any[]>([{ id: '1', name: 'Spicy Paneer Tikka Wrap', price: 180, category: 'Quick Bites' }]);
 
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
@@ -165,10 +135,20 @@ export default function AppCoreArchitecture() {
     setOpenFaqIdx(null);
   };
 
+  const triggerSecureStripeCheckout = () => {
+    setIsStripeProcessing(true);
+    setTimeout(() => {
+      setIsStripeProcessing(false);
+      alert("Stripe Checkout Framework: Initializing $10 premium feature access tokens.");
+    }, 1100);
+  };
+
   return (
-    <div className="min-h-screen bg-white text-[#1a1a1a] font-sans antialiased text-[15px]">
+    <div className="min-h-screen bg-white text-[#1a1a1a] font-sans antialiased text-[14px] sm:text-[15px]">
       
-      {/* FIXED EXACT NAV BAR DESIGN AS REQUESTED */}
+      {/* ---------------------------------------------------------------------
+         NOTION-BLUEPRINT EXACT NAVIGATION LAYOUT FIXED
+         --------------------------------------------------------------------- */}
       <header className="h-14 bg-white border-b border-[#eaeaea] sticky top-0 z-50 px-6 flex items-center justify-between select-none">
         
         {/* Left: Logo */}
@@ -177,7 +157,7 @@ export default function AppCoreArchitecture() {
           <span className="font-bold text-[15px] tracking-tight text-black">extrct.app</span>
         </div>
 
-        {/* Middle: Menu Bar Links */}
+        {/* Center: Menu Bar Links */}
         <nav className="hidden md:flex items-center space-x-1">
           <div className="relative">
             <button 
@@ -216,59 +196,69 @@ export default function AppCoreArchitecture() {
             )}
           </div>
 
-          <button onClick={() => alert("Resources Portal Hub")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Resources</button>
-          <button onClick={() => alert("SaaS Pricing Engine Framework")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Pricing</button>
-          <button onClick={() => alert("Request Active Workspace System Demo")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Demo</button>
+          <button onClick={() => alert("Resources Management Dashboard Hub")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Resources</button>
+          <button onClick={() => alert("SaaS Pricing Matrix Tier Configuration")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Pricing</button>
+          <button onClick={() => alert("Request Dedicated Operations Sandbox Demo")} className="font-medium text-[14px] px-3 py-1 rounded-md text-[#4a4a4a] hover:bg-[#efefef]">Demo</button>
         </nav>
 
-        {/* Right: Two Distinct Buttons */}
+        {/* Right-Aligned Authentication Split Buttons */}
         <div className="flex items-center space-x-2.5 shrink-0">
-          <button onClick={() => alert("Sign In Interface Window")} className="text-[14px] font-medium text-[#4a4a4a] hover:bg-[#efefef] px-3 py-1.5 rounded-md transition-colors">
+          <button onClick={() => alert("Sign In Interface Session Token")} className="text-[14px] font-medium text-[#4a4a4a] hover:bg-[#efefef] px-3 py-1.5 rounded-md transition-colors">
             Sign In
           </button>
-          <button onClick={() => alert("Free Account Registration Gateway")} className="bg-black hover:bg-[#333] text-white font-bold text-[13px] px-3.5 py-1.5 rounded-md transition-colors shadow-sm">
+          <button onClick={() => alert("Free Account Registration Terminal")} className="bg-black hover:bg-[#333] text-white font-bold text-[13px] px-3.5 py-1.5 rounded-md transition-colors shadow-sm">
             Get Started for Free
           </button>
         </div>
       </header>
 
       {/* ---------------------------------------------------------------------
-         EXACT NOTION.COM HOMEPAGE ARCHITECTURE
+         GLOBAL MUX STATE SYSTEM ROUTER SWITCH
          --------------------------------------------------------------------- */}
       {activeTool === 'dashboard' ? (
+        
+        /* EXACT NOTION LANDING LAYOUT MAPPED TO PRODUCT SPEC */
         <div className="bg-white">
           <section className="max-w-[1020px] mx-auto px-6 pt-24 pb-16 text-center">
             <h1 className="text-5xl sm:text-6xl font-black text-black tracking-tight leading-[1.05] mb-6 max-w-3xl mx-auto">
               Write, plan, share. <br />With micro-tool execution.
             </h1>
             <p className="text-lg sm:text-xl text-[#4a4a4a] font-medium max-w-2xl mx-auto leading-relaxed mb-8">
-              extrct.app is the modular knowledge hub where 10 industry matrices align. Secure profit bounds, filter margin leaks, and eliminate task tracking fatigue natively.
+              extrct.app transforms fragmented data parameters into high-performing solo operations terminal layers. Secure profit bounds, block leakage splits, and audit operations natively.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
-              <button onClick={() => alert("Free Registration Launch")} className="w-full sm:w-auto bg-black text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#333] shadow-md transition-all">
+              <button onClick={() => alert("Registration Initialized")} className="w-full sm:w-auto bg-black text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#333] shadow-md transition-all">
                 Get extrct.app free →
               </button>
-              <button onClick={() => alert("Custom Demo Hooks")} className="w-full sm:w-auto border text-black font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#f7f7f5] transition-all">
+              <button onClick={() => alert("Demo Initialized")} className="w-full sm:w-auto border text-black font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#f7f7f5] transition-all">
                 Request custom enterprise demo
               </button>
             </div>
 
-            {/* NOTION INTERACTIVE REPLICATION GRID GRAPHIC */}
+            {/* NOTION GRAPHIC FRAME ELEMENT */}
             <div className="border border-[#eaeaea] shadow-2xl rounded-2xl bg-white p-2 max-w-[920px] mx-auto overflow-hidden">
-              <div className="bg-[#f7f7f5] border rounded-xl p-8 text-left min-h-[340px]">
-                <h3 className="text-sm font-bold text-black tracking-tight mb-4">Click a sector tab element below to pop dynamic inner calculator interfaces instantly:</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {['UTM Attribution Linker', 'Factory Floor Yield Monitor', 'WhatsApp Lead Fit Matrix', 'Rental Maintenance Logs', 'Proportional Tip Splitter', 'Billable Hour Logger'].map((box, idx) => (
-                    <div key={idx} className="p-4 bg-white border rounded-xl shadow-sm text-xs font-bold text-center hover:border-black transition-colors cursor-pointer">
-                      {box}
-                    </div>
-                  ))}
+              <div className="bg-[#f7f7f5] border rounded-xl p-8 text-left min-h-[340px] flex flex-col justify-between">
+                <div className="flex items-center space-x-2 border-b pb-3 mb-4 select-none">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                  <span className="text-xs text-gray-400 font-mono ml-4">https://extrct.app/operational/notion_matrix_hub</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-bold text-black tracking-tight mb-4">Click a category tier to pop itemized standalone workspaces instantly:</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {['UTM Attribution Linker', 'Raw Material Yield Detector', 'WhatsApp Property Alert Engine', 'Rental Upkeep Expense Categorizer', 'Shift Tip-Pooling Ledger', 'Billable Hour Activity Logger'].map((box, idx) => (
+                      <div key={idx} className="p-4 bg-white border rounded-xl shadow-sm text-xs font-bold hover:border-black transition-colors cursor-pointer text-center">
+                        {box}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* NOTION TAB INTERFACE SYSTEM COMPONENT */}
+          {/* NOTION TAB-DECK NAVIGATION BLOCK CONTAINER */}
           <section className="max-w-[1040px] mx-auto px-6 py-16 border-t border-[#eaeaea]">
             <div className="border border-[#eaeaea] rounded-xl shadow-sm bg-white overflow-hidden">
               <div className="flex border-b border-[#eaeaea] bg-[#f7f7f5] overflow-x-auto select-none no-scrollbar">
@@ -282,13 +272,18 @@ export default function AppCoreArchitecture() {
                   </button>
                 ))}
               </div>
+
               <div className="p-8">
                 <p className="text-xs font-mono text-gray-400 mb-6 border-l-2 border-black pl-3 italic">
                   {industriesMap[notionActiveTab].notionHeroSub}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {industriesMap[notionActiveTab].tools.map((tool) => (
-                    <div key={tool.id} onClick={() => selectToolFromMenu(tool.id)} className="p-5 border border-[#eaeaea] rounded-xl hover:border-black hover:shadow-md cursor-pointer transition-all bg-white">
+                    <div 
+                      key={tool.id}
+                      onClick={() => selectToolFromMenu(tool.id)}
+                      className="p-5 border border-[#eaeaea] rounded-xl hover:border-black hover:shadow-md cursor-pointer transition-all bg-white"
+                    >
                       <h3 className="font-bold text-sm text-black mb-1">{tool.shortName}</h3>
                       <p className="text-xs text-gray-400 leading-relaxed">{tool.tagline}</p>
                     </div>
@@ -300,18 +295,16 @@ export default function AppCoreArchitecture() {
         </div>
       ) : (
         
-        /* ---------------------------------------------------------------------
-           INDIVIDUAL LANDING DESIGNS INTACT FOR ALL COMPLATED TOOLS
-           --------------------------------------------------------------------- */
+        /* INDIVIDUAL COMPLETED LANDING INTERFACES DETAILED VIEWS */
         <div className="bg-[#fafafa]">
           
           <div className="max-w-[1040px] mx-auto pt-6 px-6">
             <button onClick={() => setActiveTool('dashboard')} className="text-xs font-bold text-gray-400 hover:text-black focus:outline-none">
-              ← Back To Notion Home Matrix Hub
+              <span>← Back To Notion Home Matrix Hub</span>
             </button>
           </div>
 
-          {/* 1. MARKETING UTM GENERATOR */}
+          {/* 1. MARKETING UTM LINK GENERATOR */}
           {activeTool === 'marketing_utm' && (
             <div>
               <section className="bg-white border-b border-[#e9e8e4] pt-16 pb-12 text-center px-6">
