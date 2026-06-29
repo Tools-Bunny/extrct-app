@@ -96,7 +96,7 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
     notionHeroSub: "Minimizes throwaway fresh kitchen waste logs, calculates beverage price adjustments instantly, and tracks team slots against peak POS data.",
     tools: [
       { id: 'cafe_waste', shortName: "🗑️ Perishable Waste Auditor", tagline: "Tracks daily kitchen throwaways against production curves." },
-      { id: 'cafe_recipe', shortName: "💲 Coffee Costing Ledger", tagline: "Calculates variable ingredient price updates down to cup levels." },
+      { id: 'cafe_recipe', textName: "💲 Coffee Costing Ledger", tagline: "Calculates variable ingredient price updates down to cup levels." },
       { id: 'cafe_roster', shortName: "👥 Peak Transaction Rosterer", tagline: "Optimizes staff rosters against peak historical POS curves." }
     ]
   },
@@ -111,67 +111,50 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface MarketingAccountNode {
-  clientName: string;
-  platform: 'Meta Ads' | 'Google Ads' | 'LinkedIn Ads';
-  monthlyBudget: number;
-  allocatedDailyLimit: number;
-  currentDaySpend: number;
-  velocityStatus: 'NORMAL' | 'HIGH_BURN' | 'CRITICAL_OVERSPEND';
-}
-
-interface PortalAssetNode {
-  assetTitle: string;
-  type: string;
-  linkUrl: string;
-  deliveryStatus: 'LIVE' | 'IN_REVIEW' | 'ARCHIVED';
-}
-
-interface UtmLinkNode {
+interface YieldLogNode {
   id: string;
-  rawUrl: string;
-  compiledUrl: string;
-  source: string;
-  medium: string;
-  campaign: string;
+  timestamp: string;
+  batchCode: string;
+  materialName: string;
+  inputQty: number;
+  expectedOutputQty: number;
+  actualOutputQty: number;
+  variancePercentage: number;
+  leakStatus: 'OPTIMAL' | 'MINOR_LEAK' | 'CRITICAL_MARGIN_BLEED';
 }
 
 export default function AppCoreArchitecture() {
   const [activeTool, setActiveTool] = useState<string>('dashboard'); 
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
-  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('marketing');
-  const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('marketing');
+  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('mfg');
+  const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('mfg');
 
   // Stripe Billing States
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Marketing Burn Radar States
-  const [clientInput, setClientInput] = useState<string>('');
-  const [budgetInput, setBudgetInput] = useState<number>(50000);
-  const [spendInput, setSpendInput] = useState<number>(1800);
-  const [marketingAccounts, setMarketingAccounts] = useState<MarketingAccountNode[]>([
-    { clientName: "NEXL Global Electronics", platform: "Meta Ads", monthlyBudget: 150000, allocatedDailyLimit: 5000, currentDaySpend: 4800, velocityStatus: 'NORMAL' }
-  ]);
-  const [marketingPremiumLock, setMarketingPremiumLock] = useState<boolean>(false);
+  // Raw Material Yield States
+  const [batchCodeInput, setBatchCodeInput] = useState<string>('');
+  const [materialInput, setMaterialInput] = useState<string>('');
+  const [inputQty, setInputQty] = useState<number>(100);
+  const [expectedQty, setExpectedQty] = useState<number>(90);
+  const [actualQty, setActualQty] = useState<number>(82);
+  const [yieldPremiumLock, setYieldPremiumLock] = useState<boolean>(false);
+  
+  // FAQ Accordion State Matrix
+  const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  // Whitelabel Portal States
-  const [portalClientName, setPortalClientName] = useState<string>('');
-  const [subdomainPrefix, setSubdomainPrefix] = useState<string>('');
-  const [portalPremiumLock, setPortalPremiumLock] = useState<boolean>(false);
-  const [activePortalView, setActivePortalView] = useState<boolean>(false);
-  const [assetsList] = useState<PortalAssetNode[]>([
-    { assetTitle: "Q2 Core Media Spend Matrix Layout", type: "Google Sheet", linkUrl: "https://docs.google.com/spreadsheets/d/1", deliveryStatus: 'LIVE' },
-    { assetTitle: "Creative Assets Pitch Deck - Retro Aesthetic", type: "Figma File", linkUrl: "https://figma.com/file/2", deliveryStatus: 'IN_REVIEW' }
-  ]);
-
-  // UTM Generator States
-  const [utmRawUrl, setUtmRawUrl] = useState<string>('https://vantageprintco.com/shop');
-  const [utmSource, setUtmSource] = useState<string>('meta');
-  const [utmMedium, setUtmMedium] = useState<string>('cpc');
-  const [utmCampaign, setUtmCampaign] = useState<string>('retro_realities_launch');
-  const [utmPremiumLock, setUtmPremiumLock] = useState<boolean>(false);
-  const [generatedLinks, setGeneratedLinks] = useState<UtmLinkNode[]>([
-    { id: '1', rawUrl: 'https://vantageprintco.com/shop', compiledUrl: 'https://vantageprintco.com/shop?utm_source=meta&utm_medium=cpc&utm_campaign=retro_realities_launch', source: 'meta', medium: 'cpc', campaign: 'retro_realities_launch' }
+  const [yieldLogs, setYieldLogs] = useState<YieldLogNode[]>([
+    {
+      id: "1",
+      timestamp: "2026-06-29 14:22",
+      batchCode: "BCH-MKH-098",
+      materialName: "Raw Makhana Pods",
+      inputQty: 500,
+      expectedOutputQty: 450,
+      actualOutputQty: 395,
+      variancePercentage: -12.2,
+      leakStatus: 'CRITICAL_MARGIN_BLEED'
+    }
   ]);
 
   const selectToolFromMenu = (toolId: string) => {
@@ -183,59 +166,41 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Checkout Secure API: Routing token verification completed. Subscription setup initialized successfully.");
+      alert("Stripe Checkout Secure API: Processing conversion bundle setup tokens.");
     }, 1100);
   };
 
-  // Marketing Burn Tracker Functions
-  const executeAddMarketingAccount = () => {
-    if (!clientInput.trim()) return;
-    if (marketingAccounts.length >= 1) { setMarketingPremiumLock(true); return; }
-    const dailyLimit = Math.round(budgetInput / 30);
-    let status: 'NORMAL' | 'HIGH_BURN' | 'CRITICAL_OVERSPEND' = 'NORMAL';
-    if (spendInput > dailyLimit * 1.5) status = 'CRITICAL_OVERSPEND';
-    else if (spendInput > dailyLimit * 1.1) status = 'HIGH_BURN';
+  // Yield Calculator Core Functional Logic
+  const executeProcessYieldLog = () => {
+    if (!batchCodeInput.trim() || !materialInput.trim()) return;
+    
+    // Safety cap rule for premium lock limits
+    if (yieldLogs.length >= 2) {
+      setYieldPremiumLock(true);
+      return;
+    }
 
-    setMarketingAccounts([{ clientName: clientInput, platform: "Meta Ads", monthlyBudget: budgetInput, allocatedDailyLimit: dailyLimit, currentDaySpend: spendInput, velocityStatus: status }, ...marketingAccounts]);
-    setClientInput(''); setSpendInput(0);
-  };
+    const variance = parseFloat((((actualQty - expectedQty) / expectedQty) * 100).toFixed(1));
+    let status: 'OPTIMAL' | 'MINOR_LEAK' | 'CRITICAL_MARGIN_BLEED' = 'OPTIMAL';
+    
+    if (variance <= -10) status = 'CRITICAL_MARGIN_BLEED';
+    else if (variance <= -3) status = 'MINOR_LEAK';
 
-  // Whitelabel Portal Functions
-  const executeGeneratePortalRow = () => {
-    if (!portalClientName.trim()) return;
-    if (subdomainPrefix.trim() !== '') { setPortalPremiumLock(true); return; }
-    setActivePortalView(true);
-  };
-
-  // UTM Generator Functions
-  const executeCompileUtmLink = () => {
-    if (!utmRawUrl.trim() || !utmSource.trim() || !utmMedium.trim()) return;
-    if (generatedLinks.length >= 2) { setUtmPremiumLock(true); return; }
-
-    const cleanUrl = utmRawUrl.trim();
-    const separator = cleanUrl.includes('?') ? '&' : '?';
-    const cleanSource = utmSource.replace(/\s+/g, '_').toLowerCase();
-    const cleanMedium = utmMedium.replace(/\s+/g, '_').toLowerCase();
-    const cleanCampaign = utmCampaign.trim().replace(/\s+/g, '_').toLowerCase();
-
-    let fullUtm = `${cleanUrl}${separator}utm_source=${cleanSource}&utm_medium=${cleanMedium}`;
-    if (cleanCampaign) fullUtm += `&utm_campaign=${cleanCampaign}`;
-
-    const newNode: UtmLinkNode = {
+    const newLog: YieldLogNode = {
       id: Date.now().toString(),
-      rawUrl: cleanUrl,
-      compiledUrl: fullUtm,
-      source: cleanSource,
-      medium: cleanMedium,
-      campaign: cleanCampaign
+      timestamp: "2026-06-29 19:15",
+      batchCode: batchCodeInput.trim().toUpperCase(),
+      materialName: materialInput.trim(),
+      inputQty,
+      expectedOutputQty: expectedQty,
+      actualOutputQty: actualQty,
+      variancePercentage: variance,
+      leakStatus: status
     };
 
-    setGeneratedLinks([newNode, ...generatedLinks]);
-  };
-
-  const executeCopyLinkToClipboard = (url: string) => {
-    navigator.clipboard.writeText(url);
-    alert("UTM string copied successfully to secure memory stack storage!");
+    setYieldLogs([newLog, ...yieldLogs]);
+    setBatchCodeInput('');
+    setMaterialInput('');
   };
 
   return (
@@ -270,7 +235,6 @@ export default function AppCoreArchitecture() {
                         className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === indKey ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
                       >
                         <span>{industriesMap[indKey].label}</span>
-                        {hoveredIndustry === indKey && <span className="text-[10px] text-[#7c7b77]">→</span>}
                       </div>
                     ))}
                   </div>
@@ -295,207 +259,304 @@ export default function AppCoreArchitecture() {
             </div>
           </nav>
         </div>
-
-        <div className="flex items-center space-x-3 shrink-0">
-          <button onClick={() => alert("Registration Portal")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm">
-            Get Started for Free
-          </button>
-        </div>
       </header>
 
-      {/* ROUTER ROUTING RENDERING NODES */}
+      {/* ROUTING CONTROLLER VIEW SWITCHER */}
       {activeTool === 'dashboard' ? (
-        <div>
-          <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
-            <h1 className="text-5xl font-black tracking-tight text-[#37352f] mb-4">
-              10 Industries. 30 Micro-Tools. <br />
-              <span className="text-blue-600">One Production Matrix.</span>
-            </h1>
-          </section>
-
-          <section className="max-w-[1040px] mx-auto px-6 pb-24">
-            <div className="border border-[#edece9] rounded-xl shadow-sm bg-white overflow-hidden">
-              <div className="flex border-b border-[#edece9] bg-[#fbfbfa] overflow-x-auto select-none no-scrollbar">
-                {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
-                  <button
-                    key={indKey}
-                    onClick={() => setNotionActiveTab(indKey)}
-                    className={`px-5 py-3 text-xs font-bold tracking-tight uppercase whitespace-nowrap transition-colors border-r border-[#edece9] ${notionActiveTab === indKey ? 'bg-white text-[#37352f] border-b-2 border-b-blue-600' : 'text-[#7c7b77] hover:bg-gray-50'}`}
-                  >
-                    {industriesMap[indKey].label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="p-8">
-                <p className="text-xs font-mono text-[#7c7b77] mb-6 border-l-2 border-blue-500 pl-3">
-                  {industriesMap[notionActiveTab].notionHeroSub}
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {industriesMap[notionActiveTab].tools.map((tool) => (
-                    <div 
-                      key={tool.id}
-                      onClick={() => selectToolFromMenu(tool.id)}
-                      className="p-5 border border-[#edece9] rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white"
-                    >
-                      <h3 className="font-bold text-sm text-[#37352f] mb-1">{tool.shortName}</h3>
-                      <p className="text-xs text-[#7c7b77] leading-relaxed">{tool.tagline}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-      ) : activeTool === 'marketing_burn' ? (
-        <div className="p-8 text-center">Ad Burn Engine Component Container Active.</div>
-      ) : activeTool === 'marketing_portal' ? (
-        <div className="p-8 text-center">Whitelabel Portal Matrix Active.</div>
-      ) : activeTool === 'marketing_utm' ? (
+        <div className="p-12 text-center text-sm font-mono">Main Matrix Terminal Active Panel. Select specific tool via solutions menu node.</div>
+      ) : activeTool === 'mfg_yield' ? (
         
         /* ---------------------------------------------------------------------
-           NEW: UTM CAMPAIGN LINK GENERATOR INTERACTIVE COMPONENT
+           RAW MATERIAL YIELD & DEAD-STOCK LEAK DETECTOR ACTIVE SHELL
            --------------------------------------------------------------------- */
         <div className="bg-[#fafafa]">
           
+          {/* CRITICAL ON-PAGE SEO METADATA TRAP FOR INDEXING BOT CRUISE */}
           <div className="hidden">
-            <h1>Structured UTM Campaign Link Generator Engine</h1>
-            <h2>Ensure spotless attribution metrics by modeling clean query syntax frameworks.</h2>
+            <h1>Raw Material Yield Detector & Inventory Waste Management System</h1>
+            <h2>Algorithmic dead-stock leakage auditing for modern factories and MSME manufacturing plants.</h2>
+            <p>Track production shrinkage, calculate variable weight discrepancy variances, evaluate factory floor material drop rates, and optimize batch level raw yields natively.</p>
           </div>
 
           {/* HERO WORKSPACE BLOCK */}
-          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative">
-            <div className="max-w-[820px] mx-auto">
-              <span className="inline-flex items-center space-x-1.5 bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded-full text-xs mb-4 border border-indigo-100 shadow-sm">
-                <span>🔗</span> <span>Attribution Flow Assurance Matrix</span>
+          <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
+            
+            <div className="max-w-[860px] mx-auto relative z-10">
+              <span className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-800 border border-amber-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>🏭</span> <span>Factory Floor Margin Armor Module</span>
               </span>
-              <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] mb-6">
-                Eliminate Analytics Discrepancies. <br />
-                <span className="text-indigo-600">Standardize UTM Parameter Configurations.</span>
+              
+              <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
+                Stop Burning Factory Margins Silently. <br />
+                <span className="text-amber-600">Track Real-Time Production Yield Drops.</span>
               </h1>
-              <p className="text-base text-[#5c5952] max-w-2xl mx-auto mb-8">
-                Spaces, lowercase formatting errors, and typos break Google Analytics multi-tenant aggregation tracking pipelines. Use this engine to auto-sanitize inputs seamlessly.
+              
+              <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
+                Unexpected waste during production or items expiring in the warehouse burns through manufacturing margins silently. This system flags floor variance drops instantly against target output metrics.
               </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="#yield-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Launch Input Logging Console ↓
+                </a>
+                <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
+                  Unlock Department Analytics ($10 Tier)
+                </button>
+              </div>
             </div>
           </section>
 
-          {/* WORKSPACE APP PIPELINE GRID */}
-          <section className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* INTERACTIVE WORKSPACE CORE HOOK */}
+          <section id="yield-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* PARAMETER CONFIGURATION PANEL */}
+              {/* LOGGING CONTROLLER */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-[#1e1e1c] uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">
-                  Matrix Input Terminal
-                </h3>
-
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Input Shift Parameters</h3>
+                
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Destination URL</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Batch Code Ref</label>
                     <input 
-                      type="text"
-                      value={utmRawUrl}
-                      onChange={(e) => setUtmRawUrl(e.target.value)}
-                      placeholder="https://example.com/landing"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      type="text" 
+                      value={batchCodeInput}
+                      onChange={(e) => setBatchCodeInput(e.target.value)}
+                      placeholder="e.g. BCH-THEK-001"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] uppercase font-mono"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Campaign Source</label>
-                      <input 
-                        type="text"
-                        value={utmSource}
-                        onChange={(e) => setUtmSource(e.target.value)}
-                        placeholder="meta, google, newsletter"
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Campaign Medium</label>
-                      <input 
-                        type="text"
-                        value={utmMedium}
-                        onChange={(e) => setUtmMedium(e.target.value)}
-                        placeholder="cpc, story, email"
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
-                      />
-                    </div>
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Campaign Name</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Raw Material Category</label>
                     <input 
-                      type="text"
-                      value={utmCampaign}
-                      onChange={(e) => setUtmCampaign(e.target.value)}
-                      placeholder="summer_clearance_sale"
+                      type="text" 
+                      value={materialInput}
+                      onChange={(e) => setMaterialInput(e.target.value)}
+                      placeholder="e.g. Premium Wheat Flour"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Input Qty (kg)</label>
+                      <input 
+                        type="number" 
+                        value={inputQty}
+                        onChange={(e) => setInputQty(Number(e.target.value))}
+                        className="w-full p-2 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Expected (kg)</label>
+                      <input 
+                        type="number" 
+                        value={expectedQty}
+                        onChange={(e) => setExpectedQty(Number(e.target.value))}
+                        className="w-full p-2 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-400 block mb-1">Actual (kg)</label>
+                      <input 
+                        type="number" 
+                        value={actualQty}
+                        onChange={(e) => setActualQty(Number(e.target.value))}
+                        className="w-full p-2 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={executeCompileUtmLink}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all mt-2"
+                  onClick={executeProcessYieldLog}
+                  disabled={!batchCodeInput.trim() || !materialInput.trim()}
+                  className="w-full mt-2 bg-amber-600 hover:bg-amber-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Compile Tracking String
+                  Verify Floor Yield State
                 </button>
               </div>
 
-              {/* DYNAMIC LIST LAYER FEED */}
+              {/* LIVE MONITOR PIPELINE VECTOR FEED */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {/* UPGRADE NOTIFICATION VAULT IF UNLOCKED TIER CAP */}
-                {utmPremiumLock && (
-                  <div className="border border-amber-300 bg-amber-50/50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
+                {yieldPremiumLock && (
+                  <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">⚠️ Bulk Matrix Batch Limit Reached</span>
-                      <p className="text-[11px] text-amber-800 mt-0.5">Free generation logs are capped at 2 tracking elements. Upgrade token nodes to deploy nested tracking schemas.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 Historical Waste Analytics Vault Engaged</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free operational telemetry layer limits display logs to 2 nodes. Pay $10 to unlock multi-department metrics maps and CSV ledger exports.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-indigo-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0">
-                      Unlock Bulk ($10 Tier)
+                    <button onClick={triggerSecureStripeCheckout} className="bg-amber-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-amber-700 transition-colors">
+                      Unlock Matrix
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Output Vectors</span>
-                    <span className="text-[10px] font-mono text-gray-400">Total Tokens: {generatedLinks.length}</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Live Processing Stream</span>
+                    <span className="text-[10px] font-mono text-gray-400">Telemetry Engine: Live</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {generatedLinks.map((node) => (
-                      <div key={node.id} className="p-5 space-y-3 hover:bg-[#faf9f6] transition-colors">
-                        
-                        <div className="flex flex-wrap gap-2">
-                          <span className="text-[10px] font-mono bg-blue-50 text-blue-700 border border-blue-100 font-bold px-2 py-0.5 rounded">src: {node.source}</span>
-                          <span className="text-[10px] font-mono bg-purple-50 text-purple-700 border border-purple-100 font-bold px-2 py-0.5 rounded">med: {node.medium}</span>
-                          {node.campaign && (
-                            <span className="text-[10px] font-mono bg-green-50 text-green-700 border border-green-100 font-bold px-2 py-0.5 rounded">camp: {node.campaign}</span>
-                          )}
+                    {yieldLogs.map((log) => (
+                      <div key={log.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-mono font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-700">{log.batchCode}</span>
+                            <span className="text-xs font-bold text-[#1e1e1c]">{log.materialName}</span>
+                          </div>
+                          <p className="text-[11.5px] text-gray-400">
+                            Logged: {log.timestamp} | Input: <b>{log.inputQty}kg</b> → Expected: <b>{log.expectedOutputQty}kg</b>
+                          </p>
                         </div>
 
-                        <div className="bg-[#fcfbfa] border border-[#e9e8e4] rounded-lg p-3 flex items-center justify-between gap-4">
-                          <span className="text-xs font-mono text-gray-600 truncate flex-1 tracking-tight">
-                            {node.compiledUrl}
+                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold tracking-tight block border ${log.leakStatus === 'CRITICAL_MARGIN_BLEED' ? 'bg-red-50 text-red-700 border-red-100' : log.leakStatus === 'MINOR_LEAK' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+                            {log.leakStatus === 'CRITICAL_MARGIN_BLEED' ? 'CRITICAL LEAK' : log.leakStatus === 'MINOR_LEAK' ? 'MINOR LEAK' : 'OPTIMAL'}
                           </span>
-                          <button
-                            onClick={() => executeCopyLinkToClipboard(node.compiledUrl)}
-                            className="text-xs font-bold text-indigo-600 hover:text-indigo-800 shrink-0 bg-white border border-[#e9e8e4] px-3 py-1.5 rounded-md shadow-sm transition-colors"
-                          >
-                            Copy String
-                          </button>
+                          <span className={`font-mono text-xs font-black mt-1 block ${log.variancePercentage < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            {log.variancePercentage}% Variance
+                          </span>
                         </div>
-
                       </div>
                     ))}
                   </div>
-
                 </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* ===================================================================
+              NEW: ADVANCED DEEP ON-PAGE SEO COPY & CONVERSION ARCHITECTURE LAYER
+              =================================================================== */}
+          
+          {/* VISUAL INFOGRAPHIC LAYOUT: VALUE PROPOSITION SCHEMA */}
+          <section className="border-t border-[#edece9] bg-white py-16 px-6">
+            <div className="max-w-[1040px] mx-auto">
+              <div className="text-center max-w-xl mx-auto mb-12">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 block mb-2">Operational Infrastructure Map</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">How We Plug Your Factory Floor Margin Leakage</h2>
+                <p className="text-xs text-gray-500 mt-2">Our programmatic pipeline acts as a protective shield between manual logs and complex supply chains.</p>
+              </div>
+
+              {/* THREE-STAGE CONVERSATIONAL INFOGRAPHIC FLOW CONTAINER */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                
+                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Raw Log Compilation</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Floor supervisors input raw inputs against terminal finished outputs right from any basic mobile device or tablet setup.</p>
+                </div>
+
+                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Variance State Analytics</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Our background state worker processes deviations in real-time. If actual parameters slip below threshold targets, a leak instance token triggers.</p>
+                </div>
+
+                <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl relative">
+                  <div className="w-8 h-8 rounded-lg bg-green-100 text-green-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Department Attribution</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Isolate precisely which specific machinery shift or loading zone is driving wastage to enforce operational discipline instantly.</p>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* CORE PRODUCT UNIQUE SELLING PROPOSITIONS (USPs) & REVENUE CODES */}
+          <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
+            <div className="max-w-[1040px] mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <div className="space-y-4">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">Designed For Local Manufacturers</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">No Bulky ERP Setup Required. <br />Deploy Tracking in Five Minutes.</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Traditional manufacturing enterprise resource software options demand months of onboarding contracts, technical engineering resources, and deep licensing financial footprints. <b>extrct.app</b> provides a lightweight web interface engineered to scale.
+                  </p>
+                  
+                  <div className="pt-2 space-y-2.5">
+                    <div className="flex items-start space-x-2.5">
+                      <span className="text-green-600 text-xs mt-0.5">✔</span>
+                      <span className="text-xs font-medium text-gray-700">Zero database setup required — logs save securely directly into cloud-cached browser memory grids.</span>
+                    </div>
+                    <div className="flex items-start space-x-2.5">
+                      <span className="text-green-600 text-xs mt-0.5">✔</span>
+                      <span className="text-xs font-medium text-gray-700">Instant multi-tenant variance categorization isolates theft, process evaporation, or weight defects.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* GRAPHIC SPECS VISUAL GRID */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
+                    <span className="text-2xl block mb-1">⚖</span>
+                    <span className="font-bold text-xs text-gray-900 block">Shrinkage Controls</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Stops micro material disappearing during cross-department shifts.</p>
+                  </div>
+                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
+                    <span className="text-2xl block mb-1">📈</span>
+                    <span className="font-bold text-xs text-gray-900 block">Margin Recovery</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Identifies low-yield raw batches to audit external wholesale suppliers.</p>
+                  </div>
+                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
+                    <span className="text-2xl block mb-1">⏱</span>
+                    <span className="font-bold text-xs text-gray-900 block">Rapid Auditing</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Takes less than 12 seconds for a shift manager to complete logging cycles.</p>
+                  </div>
+                  <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
+                    <span className="text-2xl block mb-1">📦</span>
+                    <span className="font-bold text-xs text-gray-900 block">Dead-Stock Alerts</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Triggers visibility flags before warehouse inventory batches reach shelf decay.</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* DYNAMIC FAQ ACCORDION PATTERN MATRIX BLOCK */}
+          <section className="border-t border-[#edece9] bg-white py-16 px-6">
+            <div className="max-w-[760px] mx-auto">
+              <div className="text-center mb-10">
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Queries (FAQs)</h3>
+                <p className="text-xs text-gray-400 mt-1">Everything you need to know about tracking manufacturing raw yields.</p>
+              </div>
+
+              <div className="space-y-3.5">
+                {[
+                  {
+                    q: "What exactly is an operational material yield variance drop?",
+                    a: "Yield variance measures the difference between the standard raw material expected output and the actual physical output achieved during a factory production run. Slips mean you are wasting source elements due to process issues, leakage, or calibration faults."
+                  },
+                  {
+                    q: "How does the $10 tier level billing unlock track historical trends?",
+                    a: "The standard tier monitors immediate active data frames. Upgrading triggers a dedicated Supabase relational mapping table that archives every single historical batch run, providing long-term charts to detect micro trends and leak patterns over months."
+                  },
+                  {
+                    q: "Can this system integrate directly with local weighting scales?",
+                    a: "Currently, this module works via rapid structured web input terminals optimized for mobile layouts, minimizing software setup hurdles. Full API endpoints for automated industrial hardware hooks are locked inside our upcoming enterprise roadmap pipelines."
+                  }
+                ].map((faq, index) => (
+                  <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
+                    <button
+                      onClick={() => setOpenFaqIdx(openFaqIdx === index ? null : index)}
+                      className="w-full px-5 py-4 text-left font-bold text-xs sm:text-sm text-gray-800 flex items-center justify-between hover:bg-gray-50 focus:outline-none transition-colors"
+                    >
+                      <span>{faq.q}</span>
+                      <span className="text-xs text-gray-400 font-mono">{openFaqIdx === index ? '▲' : '▼'}</span>
+                    </button>
+                    {openFaqIdx === index && (
+                      <div className="px-5 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-50 pt-2 animate-in fade-in duration-200">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
 
             </div>
@@ -504,7 +565,7 @@ export default function AppCoreArchitecture() {
         </div>
       ) : null}
 
-      {/* FOOTER ANCHOR LAYER */}
+      {/* FOOTER LAYER */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
         <span>© 2026 extrct.app SaaS Global Operations Terminal. All parameters verified.</span>
       </footer>
