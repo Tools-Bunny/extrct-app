@@ -106,44 +106,44 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
     tools: [
       { id: 'hotel_overbook', shortName: "🗓️ Overbooking Prevention Sync Matrix", tagline: "Lightweight central clearing hub for channel managers." },
       { id: 'hotel_compendium', shortName: "📖 Guest Digital Compendium Builder", tagline: "Compiles mobile room guides behind custom QR links." },
-      { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Automator", tagline: "Sends departure upsell nodes directly to guest pipelines." }
+      { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Upsell Automator", tagline: "Deploys departure extension upsell strings to guest chats." }
     ]
   }
 };
 
-interface PopulatedDocNode {
+interface HearingDeadlineNode {
   id: string;
-  templateType: string;
-  partyAName: string;
-  partyBName: string;
-  compiledContent: string;
-  generatedDate: string;
+  caseRef: string;
+  forumName: string;
+  taskType: string;
+  targetDate: string;
+  urgencyLevel: 'CRITICAL_BREACH' | 'WARNING_ZONE' | 'SAFE_HORIZON';
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('legal_doc'); // View locked to variable doc filler tool node
+  const [activeTool, setActiveTool] = useState<string>('legal_calendar'); // Locked strictly to calendar tracker tool
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('legal');
 
-  // Shared Core Payments handshakes 
+  // Shared Core Payments handshakes
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Variable Document Filler Dashboard States
-  const [templateType, setTemplateType] = useState<string>('Non-Disclosure Agreement (NDA)');
-  const [partyA, setPartyA] = useState<string>('');
-  const [partyB, setPartyB] = useState<string>('');
-  const [governingLaw, setGoverningLaw] = useState<string>('Delhi Jurisdiction');
-  const [docPremiumLock, setDocPremiumLock] = useState<boolean>(false);
+  // Calendar Tracker State Parameters
+  const [caseTitle, setCaseTitle] = useState<string>('');
+  const [courtForum, setCourtForum] = useState<string>('High Court of Delhi');
+  const [deadlineAction, setDeadlineAction] = useState<string>('Written Statement Filing');
+  const [inputDate, setInputDate] = useState<string>('2026-07-15');
+  const [calendarPremiumLock, setCalendarPremiumLock] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [populatedDocs, setPopulatedDocs] = useState<PopulatedDocNode[]>([
+  const [deadlineRecords, setDeadlineRecords] = useState<HearingDeadlineNode[]>([
     {
       id: "1",
-      templateType: "Non-Disclosure Agreement (NDA)",
-      partyAName: "Vantage Print Co.",
-      partyBName: "Sonali Technical Institutes",
-      compiledContent: "This Non-Disclosure Agreement is executed between Vantage Print Co. (Party A) and Sonali Technical Institutes (Party B). Both entities agree that proprietary computational designs and structural frameworks shared shall remain highly confidential under the absolute jurisdiction of Delhi Courts.",
-      generatedDate: "2026-06-29"
+      caseRef: "Sonali Industries vs State Capital Corp",
+      forumName: "National Company Law Tribunal (NCLT)",
+      taskType: "Rejoinder Affidavit Submission",
+      targetDate: "2026-07-02",
+      urgencyLevel: "CRITICAL_BREACH"
     }
   ]);
 
@@ -156,34 +156,40 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Verification Gateway: Unlocking infinite document templates metadata parsing vaults token.");
+      alert("Stripe Verification Gateway: Initializing multi-device active push notifications API endpoint tokens.");
     }, 1100);
   };
 
-  // Variable replacement script generation execution node
-  const executeCompileDocumentFiller = () => {
-    if (!partyA.trim() || !partyB.trim()) return;
+  // Timeline risk rating processor engine
+  const executeCompileDeadlineAlert = () => {
+    if (!caseTitle.trim() || !inputDate) return;
 
-    // Simulation cap threshold checking for free users
-    if (populatedDocs.length >= 2) {
-      setDocPremiumLock(true);
+    // Rigid limit cap checking rules for trial tier accounts
+    if (deadlineRecords.length >= 2) {
+      setCalendarPremiumLock(true);
       return;
     }
 
-    const compiledTemplate = `This legal instrument (${templateType}) establishes an absolute bounding covenant between ${partyA.trim()} (designated as Party A) and ${partyB.trim()} (designated as Party B). All proprietary configurations, core telemetry systems, and data logs transferred between the signature windows shall be strictly protected. This relationship is strictly governed under the laws of ${governingLaw}.`;
+    const currentAnchor = new Date("2026-06-29");
+    const parsedTarget = new Date(inputDate);
+    const timeDiff = parsedTarget.getTime() - currentAnchor.getTime();
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-    const newNode: PopulatedDocNode = {
+    let level: 'CRITICAL_BREACH' | 'WARNING_ZONE' | 'SAFE_HORIZON' = 'SAFE_HORIZON';
+    if (daysRemaining <= 5) level = 'CRITICAL_BREACH';
+    else if (daysRemaining <= 15) level = 'WARNING_ZONE';
+
+    const newDeadline: HearingDeadlineNode = {
       id: Date.now().toString(),
-      templateType,
-      partyAName: partyA.trim(),
-      partyBName: partyB.trim(),
-      compiledContent: compiledTemplate,
-      generatedDate: new Date().toISOString().split('T')[0]
+      caseRef: caseTitle.trim(),
+      forumName: courtForum,
+      taskType: deadlineAction,
+      targetDate: inputDate,
+      urgencyLevel: level
     };
 
-    setPopulatedDocs([newNode, ...populatedDocs]);
-    setPartyA('');
-    setPartyB('');
+    setDeadlineRecords([newDeadline, ...deadlineRecords]);
+    setCaseTitle('');
   };
 
   return (
@@ -244,165 +250,155 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* COMPONENT SWITCH LOG VIEW CODES */}
-      {activeTool === 'legal_doc' ? (
+      {/* CORE FRAMEWORK TERMINAL SWITCH SPLIT VIEW */}
+      {activeTool === 'legal_calendar' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* SEARCH ATTRIBUTION BOT TRACK METADATA DEEP SEO */}
+          {/* BOT SEARCH CRAWLER TRACK DEEP ON-PAGE SEO SPEC */}
           <div className="hidden">
-            <h1>Boilerplate Legal Document Filler & Variable Replacer Engine | Attorney Automation</h1>
-            <h2>Automated legal agreement template managers and contract placeholder replacements builders.</h2>
-            <p>Inject personalized client details natively, replace contract boilerplate variable parameters, populate liability waivers data, and compile compliant corporate agreements under ten seconds.</p>
+            <h1>Court Hearing Calendar & Deadline Tracker Engine | Litigation Defense</h1>
+            <h2>Automated statutory compliance tracking frameworks and legal date monitors for independent attorneys.</h2>
+            <p>Track critical written statement filings dead-lines natively, audit NCLT hearing dates matrices, map evidentiary timeline parameters, and eliminate procedural dismissal risks entirely.</p>
           </div>
 
-          {/* SaaS BRAND Sales HERO HEADER */}
+          {/* SaaS VALUE PROPOSITION HERO SALES CARD */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>📄</span> <span>Error-Proof Agreement Metadata Auto-Population</span>
+              <span className="inline-flex items-center space-x-1.5 bg-red-50 text-red-800 border border-red-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>📅</span> <span>Procedural Case Dismissal Prevention Radar</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Stop Re-Typing Legal Templates. <br />
-                <span className="text-indigo-600">Populate Boilerplate Variables Instantly.</span>
+                Never Miss a Court Filing Deadline. <br />
+                <span className="text-red-600">Track Critical Litigation Milestones Proactively.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Manually searching through contract rows to replace client names, company details, or court jurisdictions invites massive liability exposure. Drop raw parameters here to generate clean, finalized drafting stacks.
+                Slipping a statutory limitation date or missing an affidavit submission window instantly breaks legal defense viability. Use this edge logging terminal to classify case weights and monitor compliance horizons.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#filler-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Open Contract Filler Terminal ↓
+                <a href="#calendar-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Open Docket Tracker Console ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Unlock Infinite Bulk Document Templates ($10)
+                  Enable SMS & Push Notification Triggers ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* INTERACTIVE COMPONENT WORKSPACE APPLICATION CONSOLE */}
-          <section id="filler-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* APPLICATION INTERACTIVE DATA WORKSPACE */}
+          <section id="calendar-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* VARIABLE METADATA INJECTION PANEL FORM CARD */}
+              {/* ENTRY FORMS PANEL CONTROL COMPONENT CARD */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Variable Parameters</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Docket Entry Terminal</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Contract Type Model</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Case Matter Reference Title</label>
+                    <input 
+                      type="text" 
+                      value={caseTitle}
+                      onChange={(e) => setCaseTitle(e.target.value)}
+                      placeholder="e.g. Acme Corp vs Director of Income Tax"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Judicial Forum / Court</label>
+                    <input 
+                      type="text" 
+                      value={courtForum}
+                      onChange={(e) => setCourtForum(e.target.value)}
+                      placeholder="e.g. High Court of Bombay"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Required Compliance Target</label>
                     <select
-                      value={templateType}
-                      onChange={(e) => setTemplateType(e.target.value)}
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700"
+                      value={deadlineAction}
+                      onChange={(e) => setDeadlineAction(e.target.value)}
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700 focus:outline-none"
                     >
-                      <option value="Non-Disclosure Agreement (NDA)">Non-Disclosure Agreement (NDA)</option>
-                      <option value="Commercial Lease Deed">Commercial Lease Deed</option>
-                      <option value="Freelancer Retainer Agreement">Freelancer Retainer Contract</option>
-                      <option value="Mutual Settlement Deed">Mutual Settlement Deed</option>
+                      <option value="Written Statement Filing">Written Statement Submission</option>
+                      <option value="Evidence Cross-Examination Ready">Evidence Processing Deadline</option>
+                      <option value="Statutory Limitation Limitation End">Statutory Appeals Breach Limit</option>
+                      <option value="Main Oral Arguments Hearing">Main Oral Arguments Hearing</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Party A Name (Discloser / Lessor)</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Target Compliance Date</label>
                     <input 
-                      type="text" 
-                      value={partyA}
-                      onChange={(e) => setPartyA(e.target.value)}
-                      placeholder="e.g. Acme Corporations Inc"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Party B Name (Recipient / Lessee)</label>
-                    <input 
-                      type="text" 
-                      value={partyB}
-                      onChange={(e) => setPartyB(e.target.value)}
-                      placeholder="e.g. John Doe Consulting"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Governing Jurisdiction / Law</label>
-                    <input 
-                      type="text" 
-                      value={governingLaw}
-                      onChange={(e) => setGoverningLaw(e.target.value)}
-                      placeholder="e.g. Mumbai High Court Limits"
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
+                      type="date" 
+                      value={inputDate}
+                      onChange={(e) => setInputDate(e.target.value)}
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <button
-                  onClick={executeCompileDocumentFiller}
-                  disabled={!partyA.trim() || !partyB.trim()}
-                  className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileDeadlineAlert}
+                  disabled={!caseTitle.trim() || !inputDate}
+                  className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Populate Template Fields
+                  Analyze Timeline Risk
                 </button>
               </div>
 
-              {/* STREAMS LIST DIGITAL OUTPUT GENERATOR PIPELINES */}
+              {/* LIVE RADAR RESPONSE SCREEN CONTAINER FEEDS */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {/* STRICT DAILY ACCOUNT ALLOCATION CEILING LIMIT BARRIERS */}
-                {docPremiumLock && (
+                {/* GATED BEHIND RIGID HARD SYSTEM CEILING LIMIT RULES */}
+                {calendarPremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Free Document Template Allocation Cap Hit</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free local configurations generate up to 2 customized document logs concurrently. Remit $10 to fully unlock persistent cloud saving, multi-user presets, and native PDF extraction downloads.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 Active Cron Listener Infrastructure Locked</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free local sandboxes track up to 2 active litigation rows concurrently. Remit $10 to deploy active multi-channel alert scripts that send SMS warning tags directly to counsel before breach points happen.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-indigo-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-indigo-700 transition-colors">
-                      Bypass Drafting Cap
+                    <button onClick={triggerSecureStripeCheckout} className="bg-red-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-red-700 transition-colors">
+                      Activate Pro Alerts
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Compiled Document Registry</span>
-                    <span className="text-[10px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">Metadata Synthesizer Active</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Litigation Timeline Command Control</span>
+                    <span className="text-[10px] font-mono text-gray-400">Current Base Date Reference: June 29, 2026</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {populatedDocs.map((node) => (
-                      <div key={node.id} className="p-6 space-y-3.5 hover:bg-[#faf9f6] transition-colors">
-                        
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                          <div>
-                            <span className="text-xs font-black text-gray-900 block leading-tight">{node.templateType}</span>
-                            <span className="text-[11px] text-gray-400 font-mono mt-0.5 block">Generated Date Stamp: {node.generatedDate}</span>
+                    {deadlineRecords.map((node) => (
+                      <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
+                        <div className="space-y-1.5">
+                          <span className="font-bold text-xs sm:text-sm text-[#1e1e1c] block leading-tight">{node.caseRef}</span>
+                          <div className="text-xs text-gray-500">
+                            Forum: <b className="text-gray-700">{node.forumName}</b>
                           </div>
-                          <span className="text-[10px] font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">
-                            Party A: {node.partyAName} | Party B: {node.partyBName}
+                          <div className="text-[11px] text-gray-400 font-mono">
+                            Compliance Vector Required: <span className="font-medium text-gray-600">{node.taskType}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
+                          <span className={`text-[10px] px-2.5 py-0.5 rounded font-bold tracking-tight block border ${node.urgencyLevel === 'CRITICAL_BREACH' ? 'bg-red-50 text-red-700 border-red-100 animate-pulse' : node.urgencyLevel === 'WARNING_ZONE' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+                            {node.urgencyLevel === 'CRITICAL_BREACH' ? '🚨 BREACH CRITICAL' : node.urgencyLevel === 'WARNING_ZONE' ? '⚠️ ZONE WARNING' : '✓ HORIZON SAFE'}
+                          </span>
+                          <span className="font-mono text-xs font-black text-gray-900 mt-2 block">
+                            Target: {node.targetDate}
                           </span>
                         </div>
-
-                        <p className="text-xs text-gray-600 leading-relaxed bg-[#fcfbfa] p-3 border border-[#edece9] rounded-xl font-sans italic">
-                          "{node.compiledContent}"
-                        </p>
-
-                        <div className="pt-1 flex justify-end">
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(node.compiledContent);
-                              alert("Populated legal agreement content string copied securely to active device memory stack!");
-                            }}
-                            className="bg-white border text-indigo-600 hover:text-indigo-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors"
-                          >
-                            Copy Draft Agreement
-                          </button>
-                        </div>
-
                       </div>
                     ))}
                   </div>
@@ -412,58 +408,58 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* PROGRAMMATIC SEO INFOGRAPHIC VALUE COMPONENT PIPELINES */}
+          {/* VALUE PROPOSITION DIAGRAM BLUEPRINT SYSTEMS ON-PAGE SEO */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">Automated Document Workflows</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Variable Replacement Framework</h2>
-                <p className="text-xs text-gray-500 mt-2">How our edge text worker injects client parameters across boilerplate contract rows instantly.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 block mb-2">Statutory Risk Containment Blueprint</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Preemptive Compliance Safeguard Loop</h2>
+                <p className="text-xs text-gray-500 mt-2">How our timeline logic monitors remaining operational days to protect firm defense positioning.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Parameter Definition</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">The drafting user inputs raw company names, signatory parameters, and local governing jurisdiction nodes cleanly inside the interface panel.</p>
+                  <div className="text-xl mb-3">📋 01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Docket Mapping</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Attorneys log variable court targets, judicial forum reference details, and fixed response deadlines inside the terminal dashboard.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Placeholder Swap Loop</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Internal algorithm functions traverse boilerplate matrix strings, swapping out system delimiters natively to eliminate typing omissions.</p>
+                  <div className="text-xl mb-3">📡 02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Horizon Evaluation</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Internal background calculation nodes calculate calendar distances, instantly classifying targets under color-coded urgency parameters.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Final Draft Deployment</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Outputs error-free, legally synchronized document blocks instantly ready for active client signature execution loops or storage stacks.</p>
+                  <div className="text-xl mb-3">🚨 03</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1">Preemptive Warning Dispatch</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Before statutory limitations contract safety bands, premium background alert nodes route warning text blocks directly to advocacy teams.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* BRAND VALUE CORE PLATFORM UNIQUE SELLING PROPOSITIONS (USPs) */}
+          {/* BRAND SUITE VALUE PROPOSITIONS AND SELLING MARGINS (USPs) */}
           <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Rugged Operational Contract Security</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Mitigate Legal Compliance Hazards <br />In Under Ten Seconds.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block">Boutique Case Flow Infrastructure</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Defend Your Practice Integrity. <br />Eliminate Omission Overage Risks.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Heavy, traditional document management softwares demand manual field tagging, clunky workspace integrations, and high multi-seat subscription barriers. <b>extrct.app</b> provides a blazing fast alternative for solo practitioners.
+                    Heavy enterprise court software portals force legal solopreneurs through lengthy account configurations, manual filing loops, and high overhead commitments. <b>extrct.app</b> provides a clean, ultra-responsive grid designed for speed.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">🛡️</span>
-                    <span className="font-bold text-xs text-gray-900 block">Compliance Defense</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Ensures critical details are swapped uniformly across all paragraphs to avoid leakage gaps.</p>
+                    <span className="text-xl block mb-1">🛑</span>
+                    <span className="font-bold text-xs text-gray-900 block">Zero Default Risks</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Isolates exactly which client files require urgent affidavit submissions inside 5 days.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">⚡</span>
-                    <span className="font-bold text-xs text-gray-900 block">High Production Splits</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Ditch manual templates copying fatigue; deploy polished contract outputs instantly on demand.</p>
+                    <span className="text-xl block mb-1">⏳</span>
+                    <span className="font-bold text-xs text-gray-900 block">Blazing Fast Audits</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Review your entire active case calendar outlook at a single glance during busy mornings.</p>
                   </div>
                 </div>
 
@@ -471,23 +467,23 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DYNAMIC ACCORDION FAQS SYSTEM CARD MODULE */}
+          {/* HIGH-CONVERTING ACCORDION FAQ BLOCK LAYER */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Legal Mappings</h3>
-                <p className="text-xs text-gray-400 mt-1">Answers to common structural tracking queries about boilerplate macro document systems.</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Practice Queries</h3>
+                <p className="text-xs text-gray-400 mt-1">Answers to common structural tracking questions about statutory court timelines.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "Why is a template variable replacement engine superior to manual 'Find and Replace' methods?",
-                    a: "Standard text application 'Find & Replace' workflows frequently fail to detect placeholder variations due to formatting discrepancies, hidden character splits, or syntax caps. A tokenized replacement matrix completely prevents accidental text omissions."
+                    q: "How does the timeline matrix evaluate variable urgency thresholds?",
+                    a: "The tracking code measures the calendar distance between the fixed user deadline input and the modern live base date. Remaining limits falling under 5 days trigger critical breach statuses to safeguard case viability."
                   },
                   {
-                    q: "What functions activate inside the $10 persistent cloud template upgrade package?",
-                    a: "The starter terminal sandbox manages text generations within local states. Upgrading locks in a permanent repository framework to store custom template blueprints, multi-user clauses, and downloadable PDF assets."
+                    q: "What features activate when routing token payments to the $10 premium upgrade tier?",
+                    a: "The standard trial console logs timeline variables within active session frames. Upgrading links background worker servers to send automatic SMS notifications straight to associated legal advocates before deadlines strike."
                   }
                 ].map((faq, index) => (
                   <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
@@ -513,7 +509,7 @@ export default function AppCoreArchitecture() {
         </div>
       ) : null}
 
-      {/* FOOTER BLOCK CONTAINER ANCHOR */}
+      {/* FOOTER BLOCK ANCHOR LAYER */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
         <span>© 2026 extrct.app SaaS Global Operations Terminal. All system frameworks verified.</span>
       </footer>
