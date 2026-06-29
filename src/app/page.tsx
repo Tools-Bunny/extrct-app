@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { matrixData, processMatrixTool, MatrixReport } from '../modules/matrixProcessor';
 
-type IndustryKey = 'ecom' | 'marketing' | 'mfg' | 'real_estate' | 'content' | 'hotels';
+type IndustryKey = 'ecom' | 'marketing' | 'mfg' | 'real_estate' | 'content' | 'hotels' | 'gym' | 'freelance' | 'cafe' | 'dtc';
 
 interface IndustryConfig {
   label: string;
@@ -36,23 +36,59 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
     ]
   },
   real_estate: {
-    label: "🏡 Real Estate",
+    label: "🏡 Real Estate Agents",
     tools: [
-      { id: 'real_estate_whatsapp', shortName: "💬 WhatsApp Bulk Match Engine" }
+      { id: 'real_estate_whatsapp', shortName: "💬 WhatsApp Bulk Match Engine" },
+      { id: 'real_estate_commission', shortName: "📊 Split-Commission Calculator" },
+      { id: 'real_estate_flyer', shortName: "🖼️ Instant Social Flyer Maker" }
     ]
   },
   content: {
     label: "🎬 Content Creators",
     tools: [
-      { id: 'content_repurpose', shortName: "🎞️ Video Hook Repurpose Framework" }
+      { id: 'content_repurpose', shortName: "🎞️ Video Hook Repurpose Tool" },
+      { id: 'content_sponsor', shortName: "💰 Sponsorship Price Estimator" },
+      { id: 'content_script', shortName: "📝 Script Structure Engine" }
     ]
   },
   hotels: {
     label: "🏨 Boutique Hotels & Guesthouses",
     tools: [
       { id: 'hotel_overbook', shortName: "🗓️ Overbooking Sync Matrix" },
-      { id: 'hotel_compendium', shortName: "📖 Guest In-Room Compendium" },
+      { id: 'hotel_compendium', shortName: "📖 Guest Digital Compendium" },
       { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Automator" }
+    ]
+  },
+  gym: {
+    label: "💪 Gyms & Fitness Studios",
+    tools: [
+      { id: 'gym_churn', shortName: "📉 Member Churn Predictor" },
+      { id: 'gym_class', shortName: "📅 Class Capacity Optimizer" },
+      { id: 'gym_trainer', shortName: "🧮 Trainer Split Ledger" }
+    ]
+  },
+  freelance: {
+    label: "✒️ Freelance Designers & Writers",
+    tools: [
+      { id: 'freelance_scope', shortName: "🛡️ Scope Creep Guard" },
+      { id: 'freelance_retainer', shortName: "📊 Retainer Hours Tracker" },
+      { id: 'freelance_proposal', shortName: "📋 Dynamic Project Proposal Engine" }
+    ]
+  },
+  cafe: {
+    label: "☕ Cafes & Coffee Shops",
+    tools: [
+      { id: 'cafe_waste', shortName: "🗑️ Perishable Waste Auditor" },
+      { id: 'cafe_recipe', shortName: "💲 Coffee Costing Ledger" },
+      { id: 'cafe_roster', shortName: "👥 Peak Transaction Rosterer" }
+    ]
+  },
+  dtc: {
+    label: "🛍️ Direct-to-Consumer Brands",
+    tools: [
+      { id: 'dtc_cac', shortName: "📊 Multi-Channel CAC Tracker" },
+      { id: 'dtc_refund', shortName: "🔄 Return Rate Margin Bleed Auditor" },
+      { id: 'dtc_cohort', shortName: "👥 Customer LTV Cohort Matrix" }
     ]
   }
 };
@@ -85,7 +121,7 @@ export default function SolopreneurMasterMegaMenu() {
   return (
     <div className="min-h-screen bg-[#fafafa] text-[#37352f] font-sans antialiased text-[14px] relative">
       
-      {/* SaaS Premium Header Menu bar */}
+      {/* Top Header menu navigation bar */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
         <div className="flex items-center space-x-8">
           
@@ -103,28 +139,28 @@ export default function SolopreneurMasterMegaMenu() {
               <span className="text-[9px] text-[#7c7b77]">▼</span>
             </button>
 
-            {/* FULL COMPREHENSIVE MEGA MENU SYSTEM */}
+            {/* EXPANDED 10-INDUSTRY MEGA MENU COMPONENT */}
             {isMegaMenuOpen && (
-              <div className="absolute top-[52px] left-0 w-[720px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute top-[52px] left-0 w-[780px] bg-white border border-[#edece9] shadow-2xl rounded-xl overflow-hidden flex z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 
-                {/* Left Panel: All Industries from Excel Matrix */}
-                <div className="w-[260px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px]">
-                  <div className="px-2 py-1.5 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider">Industries Ecosystem</div>
+                {/* Left Side: All 10 Matrix Industries Listed */}
+                <div className="w-[280px] bg-[#fbfbfa] border-r border-[#edece9] p-3 space-y-[1px] overflow-y-auto max-h-[450px]">
+                  <div className="px-2 py-1.5 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider">Industries (10)</div>
                   
                   {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
                     <div 
                       key={indKey}
                       onMouseEnter={() => setHoveredIndustry(indKey)}
-                      className={`px-3 py-2 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === indKey ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
+                      className={`px-3 py-1.5 rounded-lg cursor-pointer text-[13px] font-medium flex items-center justify-between transition-colors ${hoveredIndustry === indKey ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
                     >
-                      <span>{industriesMap[indKey].label}</span>
-                      {hoveredIndustry === indKey && <span className="text-[10px] text-[#7c7b77]">→</span>}
+                      <span className="truncate">{industriesMap[indKey].label}</span>
+                      {hoveredIndustry === indKey && <span className="text-[10px] text-[#7c7b77] shrink-0">→</span>}
                     </div>
                   ))}
                 </div>
 
-                {/* Right Panel: Active Sub-Tools List mapped via hovered industry */}
-                <div className="flex-1 p-4 bg-white space-y-1 overflow-y-auto max-h-[400px]">
+                {/* Right Side: Respective 3 Micro-Tools Suite */}
+                <div className="flex-1 p-4 bg-white space-y-1 overflow-y-auto max-h-[450px]">
                   <div className="px-2 pb-2 text-[10px] font-bold text-[#7c7b77] uppercase tracking-wider border-b border-[#f1f0ee] mb-2">
                     {industriesMap[hoveredIndustry].label} Suite
                   </div>
@@ -150,37 +186,37 @@ export default function SolopreneurMasterMegaMenu() {
         </div>
 
         <div className="text-xs text-[#7c7b77] border border-[#edece9] px-3 py-1 rounded-full bg-[#fbfbfa]">
-          Deployment: <b>14 Active Utilities</b>
+          Ecosystem Status: <b>30 Tools Configured</b>
         </div>
       </header>
 
-      {/* DISMISSER PLANE LAYER */}
+      {/* DISMISSER LAYER */}
       {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
 
-      {/* CONTAINER HUB FOR SYSTEM INTERFACES */}
+      {/* WORKSPACE MATRIX MAIN GRAPH */}
       <main className="max-w-[800px] mx-auto px-6 pt-16 pb-32">
         <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-12 min-h-[460px]">
           
           {activeTool === 'dashboard' ? (
             <div className="text-center pt-12">
               <h1 className="text-4xl font-bold tracking-tight text-[#37352f] mb-3">Master Platform Core Grid</h1>
-              <p className="text-[#7c7b77] text-base max-w-lg mx-auto mb-8">All industry segments from your structural matrix file are successfully wired. Open the <b>Solutions mega menu</b> dropdown above to toggle between distinct nodes.</p>
+              <p className="text-[#7c7b77] text-base max-w-lg mx-auto mb-8">All 10 industry segments with their respective 3-tool setups are mapped perfectly. Open the <b>Solutions mega menu</b> dropdown above to view the grid.</p>
               <div className="inline-flex items-center space-x-2 text-xs bg-[#fbfbfa] border px-3 py-1.5 rounded-md text-[#5a5750]">
-                <span>💡 Protocol Tip: Hover across industries to see internal tool matrices instantly</span>
+                <span>💡 Protocol Tip: Hover across all 10 industries to load their corresponding tools list</span>
               </div>
             </div>
           ) : (
             <div>
               <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-[#7c7b77] mb-1">
-                <span>Operational Node Sandbox</span>
+                <span>Active Sandbox Workspace Node</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-[#37352f] mb-6">
+              <h1 className="text-2xl font-bold tracking-tight text-[#37352f] mb-6">
                 {selectedToolMeta?.name}
               </h1>
 
-              {/* Core Pain Point Grid */}
+              {/* Core Pain Point UI card block */}
               <div className="bg-[#fdebec] border border-[#f5c2c2] p-4 rounded-xl mb-4">
-                <span className="text-[11px] font-bold text-[#601a1a] uppercase tracking-wider block mb-1">Core System Pain Point</span>
+                <span className="text-[11px] font-bold text-[#601a1a] uppercase tracking-wider block mb-1">Core Pain Point</span>
                 <p className="text-sm text-[#601a1a] leading-relaxed">{selectedToolMeta?.painPoint}</p>
               </div>
 
@@ -197,7 +233,7 @@ export default function SolopreneurMasterMegaMenu() {
                 </div>
               )}
 
-              {/* Interaction Drop Point Container Box */}
+              {/* Interaction drop simulation grid */}
               <div 
                 onClick={() => triggerToolSimulation(activeTool, activeTool === 'ecom_img' ? imageCount : null)} 
                 className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-xl p-16 text-center cursor-pointer mb-8 transition-all bg-[#fbfbfa]"
@@ -205,22 +241,22 @@ export default function SolopreneurMasterMegaMenu() {
                 {isProcessing ? (
                   <span className="text-sm font-medium text-[#7c7b77] animate-pulse">Analyzing system database matrix parameters...</span>
                 ) : (
-                  <span className="text-sm font-medium text-[#37352f]">📄 Click to simulate dragging & dropping industry transaction logs dump</span>
+                  <span className="text-sm font-medium text-[#37352f]">📄 Click to simulate dragging & dropping industry data logs</span>
                 )}
               </div>
 
-              {/* Output Generation Render Panels */}
+              {/* Output parameters view panel */}
               {currentOutput && (
-                <div className="space-y-4 border-t border-[#edece9] pt-6 animate-in fade-in duration-200">
+                <div className="space-y-4 border-t border-[#edece9] pt-6 transition-all">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Variable A</span><b className="text-base text-[#37352f]">{currentOutput.metricA}</b></div>
-                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Variable B</span><b className="text-base text-red-600">{currentOutput.metricB}</b></div>
+                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Output A</span><b className="text-base text-[#37352f]">{currentOutput.metricA}</b></div>
+                    <div className="p-4 bg-[#fbfbfa] border rounded-lg"><span className="text-xs text-[#7c7b77] uppercase font-bold tracking-wider block mb-1">Telemetry Output B</span><b className="text-base text-red-600">{currentOutput.metricB}</b></div>
                   </div>
 
                   {currentOutput.isLocked && (
                     <div className="bg-[#fbfbfa] border border-[#edece9] rounded-xl p-6 text-center">
                       <p className="text-sm text-[#37352f] mb-4 font-medium">{selectedToolMeta?.unlockHook}</p>
-                      <button onClick={() => alert("Stripe Interface active.")} className="bg-[#37352f] text-white text-xs font-semibold py-2 px-5 rounded-lg hover:bg-[#2c2a27] transition-all">
+                      <button onClick={() => alert("Premium access node triggered.")} className="bg-[#37352f] text-white text-xs font-semibold py-2 px-5 rounded-lg hover:bg-[#2c2a27] transition-all">
                         Unlock Full Sheet Integration Export Tier ($10)
                       </button>
                     </div>
