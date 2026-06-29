@@ -106,46 +106,44 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
     tools: [
       { id: 'hotel_overbook', shortName: "🗓️ Overbooking Prevention Sync Matrix", tagline: "Lightweight central clearing hub for channel managers." },
       { id: 'hotel_compendium', shortName: "📖 Guest Digital Compendium Builder", tagline: "Compiles mobile room guides behind custom QR links." },
-      { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Upsell Automator", tagline: "Deploys departure extension upsell strings to guest chats." }
+      { id: 'hotel_checkout', shortName: "⏰ Late-Checkout Automator", tagline: "Sends departure upsell nodes directly to guest pipelines." }
     ]
   }
 };
 
-interface BillableLogNode {
+interface PopulatedDocNode {
   id: string;
-  clientName: string;
-  activityType: string;
-  hoursLogged: number;
-  hourlyRate: number;
-  grossAmount: number;
-  billingStatus: 'UNBILLED_HOLD' | 'INVOICED_PENDING';
+  templateType: string;
+  partyAName: string;
+  partyBName: string;
+  compiledContent: string;
+  generatedDate: string;
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('legal_hours'); // Switched strictly to legal tool node
+  const [activeTool, setActiveTool] = useState<string>('legal_doc'); // View locked to variable doc filler tool node
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('legal');
 
-  // Shared Core Payments handshakes
+  // Shared Core Payments handshakes 
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // Legal Hour Tracker Dashboard States
-  const [clientTitle, setClientTitle] = useState<string>('');
-  const [lawActivity, setLawActivity] = useState<string>('Client Consultation');
-  const [timeDuration, setTimeDuration] = useState<number>(1.5);
-  const [standardRate, setStandardRate] = useState<number>(3500);
-  const [legalPremiumLock, setLegalPremiumLock] = useState<boolean>(false);
+  // Variable Document Filler Dashboard States
+  const [templateType, setTemplateType] = useState<string>('Non-Disclosure Agreement (NDA)');
+  const [partyA, setPartyA] = useState<string>('');
+  const [partyB, setPartyB] = useState<string>('');
+  const [governingLaw, setGoverningLaw] = useState<string>('Delhi Jurisdiction');
+  const [docPremiumLock, setDocPremiumLock] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [billingLogs, setBillingLogs] = useState<BillableLogNode[]>([
+  const [populatedDocs, setPopulatedDocs] = useState<PopulatedDocNode[]>([
     {
       id: "1",
-      clientName: "NEXL Tech Solutions Pvt Ltd",
-      activityType: "Trademark IP Audit",
-      hoursLogged: 4.5,
-      hourlyRate: 4000,
-      grossAmount: 18000,
-      billingStatus: "UNBILLED_HOLD"
+      templateType: "Non-Disclosure Agreement (NDA)",
+      partyAName: "Vantage Print Co.",
+      partyBName: "Sonali Technical Institutes",
+      compiledContent: "This Non-Disclosure Agreement is executed between Vantage Print Co. (Party A) and Sonali Technical Institutes (Party B). Both entities agree that proprietary computational designs and structural frameworks shared shall remain highly confidential under the absolute jurisdiction of Delhi Courts.",
+      generatedDate: "2026-06-29"
     }
   ]);
 
@@ -158,34 +156,34 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Verification Gateway: Connecting nested multi-attorney account sync arrays.");
+      alert("Stripe Verification Gateway: Unlocking infinite document templates metadata parsing vaults token.");
     }, 1100);
   };
 
-  // Billing time ledger math calculations node
-  const executeCompileTimeLog = () => {
-    if (!clientTitle.trim() || timeDuration <= 0 || standardRate <= 0) return;
+  // Variable replacement script generation execution node
+  const executeCompileDocumentFiller = () => {
+    if (!partyA.trim() || !partyB.trim()) return;
 
-    // Free sandbox cap ceiling limits rule check
-    if (billingLogs.length >= 2) {
-      setLegalPremiumLock(true);
+    // Simulation cap threshold checking for free users
+    if (populatedDocs.length >= 2) {
+      setDocPremiumLock(true);
       return;
     }
 
-    const calculatedGross = parseFloat((timeDuration * standardRate).toFixed(2));
+    const compiledTemplate = `This legal instrument (${templateType}) establishes an absolute bounding covenant between ${partyA.trim()} (designated as Party A) and ${partyB.trim()} (designated as Party B). All proprietary configurations, core telemetry systems, and data logs transferred between the signature windows shall be strictly protected. This relationship is strictly governed under the laws of ${governingLaw}.`;
 
-    const newLog: BillableLogNode = {
+    const newNode: PopulatedDocNode = {
       id: Date.now().toString(),
-      clientName: clientTitle.trim(),
-      activityType: lawActivity,
-      hoursLogged: timeDuration,
-      hourlyRate: standardRate,
-      grossAmount: calculatedGross,
-      billingStatus: 'UNBILLED_HOLD'
+      templateType,
+      partyAName: partyA.trim(),
+      partyBName: partyB.trim(),
+      compiledContent: compiledTemplate,
+      generatedDate: new Date().toISOString().split('T')[0]
     };
 
-    setBillingLogs([newLog, ...billingLogs]);
-    setClientTitle('');
+    setPopulatedDocs([newNode, ...populatedDocs]);
+    setPartyA('');
+    setPartyB('');
   };
 
   return (
@@ -246,153 +244,165 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* DYNAMIC SCREEN CONFIG MATRIX SHIFT */}
-      {activeTool === 'legal_hours' ? (
+      {/* COMPONENT SWITCH LOG VIEW CODES */}
+      {activeTool === 'legal_doc' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* SEARCH ATTRIBUTION ENGINES METADATA DEEP TRACK SEO */}
+          {/* SEARCH ATTRIBUTION BOT TRACK METADATA DEEP SEO */}
           <div className="hidden">
-            <h1>Billable Hour Tracker & Activity Logger Ledger | Legal Billing Systems</h1>
-            <h2>Automated timesheet trackers and audit trail builders for boutique legal firms.</h2>
-            <p>Log client consultation minutes natively, structure legal research invoice cost points, audit litigation casework values, and stop billable asset leaks during daily task rotations.</p>
+            <h1>Boilerplate Legal Document Filler & Variable Replacer Engine | Attorney Automation</h1>
+            <h2>Automated legal agreement template managers and contract placeholder replacements builders.</h2>
+            <p>Inject personalized client details natively, replace contract boilerplate variable parameters, populate liability waivers data, and compile compliant corporate agreements under ten seconds.</p>
           </div>
 
-          {/* DYNAMIC SALES BRAND HERO HEADER */}
+          {/* SaaS BRAND Sales HERO HEADER */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-800 border border-blue-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>⏳</span> <span>Leak-Proof Legal Payout Diagnostics</span>
+              <span className="inline-flex items-center space-x-1.5 bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>📄</span> <span>Error-Proof Agreement Metadata Auto-Population</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Capture Every Single Billable Minute. <br />
-                <span className="text-blue-600">Eradicate Time Leakage in Legal Operations.</span>
+                Stop Re-Typing Legal Templates. <br />
+                <span className="text-indigo-600">Populate Boilerplate Variables Instantly.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Forgetting to log short client check-ins, case study reviews, or contract drafting hours drains high-value attorney realization pools. Enforce continuous transparent itemized tracking natively inside seconds.
+                Manually searching through contract rows to replace client names, company details, or court jurisdictions invites massive liability exposure. Drop raw parameters here to generate clean, finalized drafting stacks.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#logger-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Open Activity Logger Terminal ↓
+                <a href="#filler-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Open Contract Filler Terminal ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Activate Live Invoicing Multi-User Webhooks ($10)
+                  Unlock Infinite Bulk Document Templates ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* APPLICATION INTERACTIVE TELEMETRY WORKSPACE */}
-          <section id="logger-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* INTERACTIVE COMPONENT WORKSPACE APPLICATION CONSOLE */}
+          <section id="filler-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* ATTOURNEY INPUT WIDGET PANEL COMPONENT */}
+              {/* VARIABLE METADATA INJECTION PANEL FORM CARD */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Telemetry Dispatch</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Variable Parameters</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Client Reference Name</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Contract Type Model</label>
+                    <select
+                      value={templateType}
+                      onChange={(e) => setTemplateType(e.target.value)}
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700"
+                    >
+                      <option value="Non-Disclosure Agreement (NDA)">Non-Disclosure Agreement (NDA)</option>
+                      <option value="Commercial Lease Deed">Commercial Lease Deed</option>
+                      <option value="Freelancer Retainer Agreement">Freelancer Retainer Contract</option>
+                      <option value="Mutual Settlement Deed">Mutual Settlement Deed</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Party A Name (Discloser / Lessor)</label>
                     <input 
                       type="text" 
-                      value={clientTitle}
-                      onChange={(e) => setClientTitle(e.target.value)}
-                      placeholder="e.g. Sonali Education Foundations"
+                      value={partyA}
+                      onChange={(e) => setPartyA(e.target.value)}
+                      placeholder="e.g. Acme Corporations Inc"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Casework Scope</label>
-                    <select
-                      value={lawActivity}
-                      onChange={(e) => setLawActivity(e.target.value)}
-                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700 focus:outline-none"
-                    >
-                      <option value="Client Consultation">Client Advisory Consultation</option>
-                      <option value="Contract Drafting">Contract Review & Drafting</option>
-                      <option value="Legal Research Case Study">Precedent Legal Research</option>
-                      <option value="Court Room Advocacy">Litigation & Court Room Advocacy</option>
-                    </select>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Party B Name (Recipient / Lessee)</label>
+                    <input 
+                      type="text" 
+                      value={partyB}
+                      onChange={(e) => setPartyB(e.target.value)}
+                      placeholder="e.g. John Doe Consulting"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
+                    />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Hours Applied</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        value={timeDuration}
-                        onChange={(e) => setTimeDuration(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Hourly Rate (₹)</label>
-                      <input 
-                        type="number" 
-                        value={standardRate}
-                        onChange={(e) => setStandardRate(Number(e.target.value))}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Governing Jurisdiction / Law</label>
+                    <input 
+                      type="text" 
+                      value={governingLaw}
+                      onChange={(e) => setGoverningLaw(e.target.value)}
+                      placeholder="e.g. Mumbai High Court Limits"
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
+                    />
                   </div>
                 </div>
 
                 <button
-                  onClick={executeCompileTimeLog}
-                  disabled={!clientTitle.trim() || timeDuration <= 0}
-                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileDocumentFiller}
+                  disabled={!partyA.trim() || !partyB.trim()}
+                  className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Commit Activity Block
+                  Populate Template Fields
                 </button>
               </div>
 
-              {/* TIMEPAGE ACTIVE LOG PIPELINES CONTAINER FEED */}
+              {/* STREAMS LIST DIGITAL OUTPUT GENERATOR PIPELINES */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {/* RIGID STRIPE GATING TRIGGER PROTECTION CEILING */}
-                {legalPremiumLock && (
+                {/* STRICT DAILY ACCOUNT ALLOCATION CEILING LIMIT BARRIERS */}
+                {docPremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Multi-Attorney Billing Cloud Vault Engaged</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free execution sandboxes retain 2 tracking logs concurrently to control memory loops. Pay $10 tokens to unlock infinite client databases and export itemized whitelabel time vouchers.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 Free Document Template Allocation Cap Hit</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free local configurations generate up to 2 customized document logs concurrently. Remit $10 to fully unlock persistent cloud saving, multi-user presets, and native PDF extraction downloads.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-blue-700 transition-colors">
-                      Unlock Account Cloud
+                    <button onClick={triggerSecureStripeCheckout} className="bg-indigo-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-indigo-700 transition-colors">
+                      Bypass Drafting Cap
                     </button>
                   </div>
                 )}
 
                 <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
                   <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Timesheet Audit Log</span>
-                    <span className="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">Billing Grid Enabled</span>
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Compiled Document Registry</span>
+                    <span className="text-[10px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">Metadata Synthesizer Active</span>
                   </div>
 
                   <div className="divide-y divide-[#f3f2ee]">
-                    {billingLogs.map((node) => (
-                      <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
-                        <div className="space-y-1">
-                          <span className="font-bold text-xs sm:text-sm text-[#1e1e1c] block">{node.clientName}</span>
-                          <div className="text-[12px] text-gray-500">
-                            casework: <b className="text-gray-700">{node.activityType}</b> | Logged: <span className="font-mono font-bold text-gray-900">{node.hoursLogged} hrs</span> @ ₹{node.hourlyRate}/hr
+                    {populatedDocs.map((node) => (
+                      <div key={node.id} className="p-6 space-y-3.5 hover:bg-[#faf9f6] transition-colors">
+                        
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                          <div>
+                            <span className="text-xs font-black text-gray-900 block leading-tight">{node.templateType}</span>
+                            <span className="text-[11px] text-gray-400 font-mono mt-0.5 block">Generated Date Stamp: {node.generatedDate}</span>
                           </div>
+                          <span className="text-[10px] font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200">
+                            Party A: {node.partyAName} | Party B: {node.partyBName}
+                          </span>
                         </div>
 
-                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
-                          <span className="text-[10px] px-2 py-0.5 rounded font-bold tracking-tight block border bg-amber-50 text-amber-700 border-amber-100">
-                            UNBILLED ACCRUAL
-                          </span>
-                          <span className="font-mono text-xs font-black text-gray-900 mt-1.5 block">
-                            ₹{node.grossAmount.toLocaleString('en-IN')}
-                          </span>
+                        <p className="text-xs text-gray-600 leading-relaxed bg-[#fcfbfa] p-3 border border-[#edece9] rounded-xl font-sans italic">
+                          "{node.compiledContent}"
+                        </p>
+
+                        <div className="pt-1 flex justify-end">
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(node.compiledContent);
+                              alert("Populated legal agreement content string copied securely to active device memory stack!");
+                            }}
+                            className="bg-white border text-indigo-600 hover:text-indigo-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors"
+                          >
+                            Copy Draft Agreement
+                          </button>
                         </div>
+
                       </div>
                     ))}
                   </div>
@@ -402,58 +412,58 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* VALUE PROPOSITION DIAGRAM BLUEPRINT ON-PAGE SEO MARGINS */}
+          {/* PROGRAMMATIC SEO INFOGRAPHIC VALUE COMPONENT PIPELINES */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Programmatic Allocation Workflows</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The 3-Tier Leak Mitigation Pipeline</h2>
-                <p className="text-xs text-gray-500 mt-2">How our edge log matrix records minute details to stop billing compression leaks completely.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">Automated Document Workflows</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Variable Replacement Framework</h2>
+                <p className="text-xs text-gray-500 mt-2">How our edge text worker injects client parameters across boilerplate contract rows instantly.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">On-The-Fly Injection</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Attorneys record client advisory blocks or sudden phone loops directly while completing tasks inside the responsive layout interface.</p>
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Parameter Definition</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">The drafting user inputs raw company names, signatory parameters, and local governing jurisdiction nodes cleanly inside the interface panel.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
                   <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Accrual Multiplication</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">System parameters execute raw fraction hours directly against set contract billing levels, avoiding human rounding computation discrepancies.</p>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Placeholder Swap Loop</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Internal algorithm functions traverse boilerplate matrix strings, swapping out system delimiters natively to eliminate typing omissions.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
                   <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Unbilled Audit Assurance</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Locks down unbilled logs in itemized vectors, ready for quick whitelabel generation loops, minimizing billing disputes entirely.</p>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Final Draft Deployment</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Outputs error-free, legally synchronized document blocks instantly ready for active client signature execution loops or storage stacks.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* HIGH CONVERTING UNIQUE SELLING PROPOSITIONS (USPs) GRIDS */}
-          <section className="border-t border-[#edece9] bg-fbfbfa py-16 px-6">
+          {/* BRAND VALUE CORE PLATFORM UNIQUE SELLING PROPOSITIONS (USPs) */}
+          <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Maximum Revenue Realization Core</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Ditch Bloated Legal CRM software.<br />Log Billable Realizations in Real-Time.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Rugged Operational Contract Security</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Mitigate Legal Compliance Hazards <br />In Under Ten Seconds.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Heavy enterprise management ecosystems require tiresome manual tracking steps, long account setups, and steep monthly commitments. <b>extrct.app</b> strips software bloat to bring pristine operational metrics right to your desk.
+                    Heavy, traditional document management softwares demand manual field tagging, clunky workspace integrations, and high multi-seat subscription barriers. <b>extrct.app</b> provides a blazing fast alternative for solo practitioners.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">⏳</span>
-                    <span className="font-bold text-xs text-gray-900 block">Eradicate Lost Minutes</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Logs sudden case changes or calls instantly before they slip from your mind.</p>
+                    <span className="text-xl block mb-1">🛡️</span>
+                    <span className="font-bold text-xs text-gray-900 block">Compliance Defense</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Ensures critical details are swapped uniformly across all paragraphs to avoid leakage gaps.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">📊</span>
-                    <span className="font-bold text-xs text-gray-900 block">Total Client Transparency</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Itemized cost points reduce billing friction and build permanent client relationship trust.</p>
+                    <span className="text-xl block mb-1">⚡</span>
+                    <span className="font-bold text-xs text-gray-900 block">High Production Splits</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Ditch manual templates copying fatigue; deploy polished contract outputs instantly on demand.</p>
                   </div>
                 </div>
 
@@ -461,23 +471,23 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DYNAMIC HIGH-CONVERTING FAQ ACCORDION ENGINE BLOCK */}
+          {/* DYNAMIC ACCORDION FAQS SYSTEM CARD MODULE */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Asked Questions</h3>
-                <p className="text-xs text-gray-400 mt-1">Everything you need to master about maintaining pristine billable legal records.</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Legal Mappings</h3>
+                <p className="text-xs text-gray-400 mt-1">Answers to common structural tracking queries about boilerplate macro document systems.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "How does fraction-based legal hour allocation prevent net revenue leaks?",
-                    a: "Traditional billing often rounds down short legal efforts like ten-minute emails or brief phone checks to zero. Tracking tasks down to exact decimal configurations ensures your firm captures and secures full compensation for all application labor."
+                    q: "Why is a template variable replacement engine superior to manual 'Find and Replace' methods?",
+                    a: "Standard text application 'Find & Replace' workflows frequently fail to detect placeholder variations due to formatting discrepancies, hidden character splits, or syntax caps. A tokenized replacement matrix completely prevents accidental text omissions."
                   },
                   {
-                    q: "What properties execute inside the premium $10 invoicing webhook upgrade?",
-                    a: "The baseline terminal operates a clean localized matrix stack. Moving onto our premium layer connects dynamic webhook routers that map timesheets directly to automated bookkeeping apps for rapid invoicing."
+                    q: "What functions activate inside the $10 persistent cloud template upgrade package?",
+                    a: "The starter terminal sandbox manages text generations within local states. Upgrading locks in a permanent repository framework to store custom template blueprints, multi-user clauses, and downloadable PDF assets."
                   }
                 ].map((faq, index) => (
                   <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
@@ -503,7 +513,7 @@ export default function AppCoreArchitecture() {
         </div>
       ) : null}
 
-      {/* FOOTER BLOCK CONTAINER */}
+      {/* FOOTER BLOCK CONTAINER ANCHOR */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
         <span>© 2026 extrct.app SaaS Global Operations Terminal. All system frameworks verified.</span>
       </footer>
