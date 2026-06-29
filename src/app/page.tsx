@@ -111,36 +111,41 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-interface MenuItemNode {
+interface BillableLogNode {
   id: string;
-  itemName: string;
-  category: string;
-  price: number;
-  isAvailable: boolean;
+  clientName: string;
+  activityType: string;
+  hoursLogged: number;
+  hourlyRate: number;
+  grossAmount: number;
+  billingStatus: 'UNBILLED_HOLD' | 'INVOICED_PENDING';
 }
 
 export default function AppCoreArchitecture() {
-  const [activeTool, setActiveTool] = useState<string>('cafe_qr'); // Active view locked to dynamic QR menu setup
+  const [activeTool, setActiveTool] = useState<string>('legal_hours'); // Switched strictly to legal tool node
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
-  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('cafe');
+  const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('legal');
 
-  // Shared Core Billing Handshake States
+  // Shared Core Payments handshakes
   const [isStripeProcessing, setIsStripeProcessing] = useState<boolean>(false);
 
-  // QR Presenter Dashboard States
-  const [dishName, setDishName] = useState<string>('');
-  const [dishCategory, setDishCategory] = useState<string>('Main Course');
-  const [dishPrice, setDishPrice] = useState<number>(250);
-  const [qrPremiumLock, setQrPremiumLock] = useState<boolean>(false);
+  // Legal Hour Tracker Dashboard States
+  const [clientTitle, setClientTitle] = useState<string>('');
+  const [lawActivity, setLawActivity] = useState<string>('Client Consultation');
+  const [timeDuration, setTimeDuration] = useState<number>(1.5);
+  const [standardRate, setStandardRate] = useState<number>(3500);
+  const [legalPremiumLock, setLegalPremiumLock] = useState<boolean>(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const [menuItems, setMenuItems] = useState<MenuItemNode[]>([
+  const [billingLogs, setBillingLogs] = useState<BillableLogNode[]>([
     {
       id: "1",
-      itemName: "Spicy Paneer Tikka Wrap",
-      category: "Quick Bites",
-      price: 180,
-      isAvailable: true
+      clientName: "NEXL Tech Solutions Pvt Ltd",
+      activityType: "Trademark IP Audit",
+      hoursLogged: 4.5,
+      hourlyRate: 4000,
+      grossAmount: 18000,
+      billingStatus: "UNBILLED_HOLD"
     }
   ]);
 
@@ -153,30 +158,34 @@ export default function AppCoreArchitecture() {
     setIsStripeProcessing(true);
     setTimeout(() => {
       setIsStripeProcessing(false);
-      alert("Stripe Checkout Framework: Initializing persistent standalone hosting server node tokens for custom domains.");
+      alert("Stripe Verification Gateway: Connecting nested multi-attorney account sync arrays.");
     }, 1100);
   };
 
-  // Menu layout deployment compiler block
-  const executeCompileMenuItem = () => {
-    if (!dishName.trim() || dishPrice <= 0) return;
+  // Billing time ledger math calculations node
+  const executeCompileTimeLog = () => {
+    if (!clientTitle.trim() || timeDuration <= 0 || standardRate <= 0) return;
 
-    // Simulation cap threshold checking for free accounts
-    if (menuItems.length >= 3) {
-      setQrPremiumLock(true);
+    // Free sandbox cap ceiling limits rule check
+    if (billingLogs.length >= 2) {
+      setLegalPremiumLock(true);
       return;
     }
 
-    const newItem: MenuItemNode = {
+    const calculatedGross = parseFloat((timeDuration * standardRate).toFixed(2));
+
+    const newLog: BillableLogNode = {
       id: Date.now().toString(),
-      itemName: dishName.trim(),
-      category: dishCategory,
-      price: dishPrice,
-      isAvailable: true
+      clientName: clientTitle.trim(),
+      activityType: lawActivity,
+      hoursLogged: timeDuration,
+      hourlyRate: standardRate,
+      grossAmount: calculatedGross,
+      billingStatus: 'UNBILLED_HOLD'
     };
 
-    setMenuItems([...menuItems, newItem]);
-    setDishName('');
+    setBillingLogs([newLog, ...billingLogs]);
+    setClientTitle('');
   };
 
   return (
@@ -237,87 +246,98 @@ export default function AppCoreArchitecture() {
         </div>
       </header>
 
-      {/* COMPONENT LAYER ROUTER VIEW CONTROL */}
-      {activeTool === 'cafe_qr' ? (
+      {/* DYNAMIC SCREEN CONFIG MATRIX SHIFT */}
+      {activeTool === 'legal_hours' ? (
         
         <div className="bg-[#fafafa]">
           
-          {/* SEARCH ATTRIBUTION DATA ENGINE ON-PAGE SEO SPEC */}
+          {/* SEARCH ATTRIBUTION ENGINES METADATA DEEP TRACK SEO */}
           <div className="hidden">
-            <h1>Dynamic QR Code Digital Menu Presenter Engine | Restaurant Tech SaaS</h1>
-            <h2>Instant standalone mobile digital menu template configs and reprinting cost mitigators.</h2>
-            <p>Deploy responsive online restaurant menus, alter platter card item valuations instantly, arrange custom ingredient category splits, and distribute clean mobile scans for dining tables natively.</p>
+            <h1>Billable Hour Tracker & Activity Logger Ledger | Legal Billing Systems</h1>
+            <h2>Automated timesheet trackers and audit trail builders for boutique legal firms.</h2>
+            <p>Log client consultation minutes natively, structure legal research invoice cost points, audit litigation casework values, and stop billable asset leaks during daily task rotations.</p>
           </div>
 
-          {/* SaaS UNIQUE HERO SALES WORKSPACE SECTION */}
+          {/* DYNAMIC SALES BRAND HERO HEADER */}
           <section className="bg-white border-b border-[#e9e8e4] pt-20 pb-16 text-center px-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(#e3e2de_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
             
             <div className="max-w-[860px] mx-auto relative z-10">
-              <span className="inline-flex items-center space-x-1.5 bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
-                <span>📱</span> <span>Zero-Reprint Digital Menu Architect</span>
+              <span className="inline-flex items-center space-x-1.5 bg-blue-50 text-blue-800 border border-blue-200 font-bold px-3 py-1 rounded-full text-xs mb-4 shadow-sm">
+                <span>⏳</span> <span>Leak-Proof Legal Payout Diagnostics</span>
               </span>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-[#1e1e1c] leading-[1.12] mb-6">
-                Stop Re-Printing Paper Menus. <br />
-                <span className="text-indigo-600">Update Platter Card Prices Instantly.</span>
+                Capture Every Single Billable Minute. <br />
+                <span className="text-blue-600">Eradicate Time Leakage in Legal Operations.</span>
               </h1>
               
               <p className="text-base sm:text-lg text-[#5c5952] max-w-2xl mx-auto leading-relaxed mb-8">
-                Wasting thousands on print shops whenever ingredient rates fluctuate burns away valuable cafe cash flows. Build your clean, standalone digital menu link and let diners browse items seamlessly from table scans.
+                Forgetting to log short client check-ins, case study reviews, or contract drafting hours drains high-value attorney realization pools. Enforce continuous transparent itemized tracking natively inside seconds.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="#menu-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
-                  Launch Menu Setup Terminal ↓
+                <a href="#logger-terminal" className="w-full sm:w-auto bg-[#1e1e1c] text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-black transition-all shadow-md">
+                  Open Activity Logger Terminal ↓
                 </a>
                 <button onClick={triggerSecureStripeCheckout} className="w-full sm:w-auto bg-white border border-[#e9e8e4] text-gray-800 font-bold text-xs px-6 py-3.5 rounded-xl hover:bg-[#faf9f6] shadow-sm transition-all">
-                  Unlock Custom Brand Domain Hosting ($10)
+                  Activate Live Invoicing Multi-User Webhooks ($10)
                 </button>
               </div>
             </div>
           </section>
 
-          {/* APPLICATION INTERACTIVE TELEMETRY CONTAINER */}
-          <section id="menu-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
+          {/* APPLICATION INTERACTIVE TELEMETRY WORKSPACE */}
+          <section id="logger-terminal" className="max-w-[1040px] mx-auto px-6 py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               
-              {/* ENTRY FORMS COMPONENT WIDGET PANEL */}
+              {/* ATTOURNEY INPUT WIDGET PANEL COMPONENT */}
               <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm p-6 space-y-4">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Menu Item Constructor</h3>
+                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-2 border-b border-[#f3f2ee]">Telemetry Dispatch</h3>
                 
                 <div className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Item Title on Card</label>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Client Reference Name</label>
                     <input 
                       type="text" 
-                      value={dishName}
-                      onChange={(e) => setDishName(e.target.value)}
-                      placeholder="e.g. Double Cheese Margherita Pizza"
+                      value={clientTitle}
+                      onChange={(e) => setClientTitle(e.target.value)}
+                      placeholder="e.g. Sonali Education Foundations"
                       className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6]"
                     />
                   </div>
 
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-500 block mb-1">Casework Scope</label>
+                    <select
+                      value={lawActivity}
+                      onChange={(e) => setLawActivity(e.target.value)}
+                      className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700 focus:outline-none"
+                    >
+                      <option value="Client Consultation">Client Advisory Consultation</option>
+                      <option value="Contract Drafting">Contract Review & Drafting</option>
+                      <option value="Legal Research Case Study">Precedent Legal Research</option>
+                      <option value="Court Room Advocacy">Litigation & Court Room Advocacy</option>
+                    </select>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Category Slice</label>
-                      <select
-                        value={dishCategory}
-                        onChange={(e) => setDishCategory(e.target.value)}
-                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-bold text-gray-700"
-                      >
-                        <option value="Quick Bites">Quick Bites</option>
-                        <option value="Main Course">Main Course</option>
-                        <option value="Mocktails/Beverages">Beverages</option>
-                        <option value="Desserts">Desserts</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Customer Price (₹)</label>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Hours Applied</label>
                       <input 
                         type="number" 
-                        value={dishPrice}
-                        onChange={(e) => setDishPrice(Number(e.target.value))}
+                        step="0.1"
+                        value={timeDuration}
+                        onChange={(e) => setTimeDuration(Number(e.target.value))}
+                        className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-gray-500 block mb-1">Hourly Rate (₹)</label>
+                      <input 
+                        type="number" 
+                        value={standardRate}
+                        onChange={(e) => setStandardRate(Number(e.target.value))}
                         className="w-full p-2.5 border border-[#e9e8e4] rounded-lg text-xs bg-[#faf9f6] font-mono focus:outline-none"
                       />
                     </div>
@@ -325,118 +345,115 @@ export default function AppCoreArchitecture() {
                 </div>
 
                 <button
-                  onClick={executeCompileMenuItem}
-                  disabled={!dishName.trim() || dishPrice <= 0}
-                  className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
+                  onClick={executeCompileTimeLog}
+                  disabled={!clientTitle.trim() || timeDuration <= 0}
+                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-100 disabled:text-gray-400 font-bold text-xs py-3 rounded-lg uppercase tracking-wider transition-all"
                 >
-                  Deploy Item to Live Feed
+                  Commit Activity Block
                 </button>
               </div>
 
-              {/* MOBILES DEMO SIMULATOR RESPONSE CELL SCREEN */}
+              {/* TIMEPAGE ACTIVE LOG PIPELINES CONTAINER FEED */}
               <div className="lg:col-span-2 space-y-4">
                 
-                {/* RIGID STRIPE GATING TRIGGER CONTAINER BARRIER */}
-                {qrPremiumLock && (
+                {/* RIGID STRIPE GATING TRIGGER PROTECTION CEILING */}
+                {legalPremiumLock && (
                   <div className="border border-amber-300 bg-amber-50 p-4 rounded-xl flex items-center justify-between animate-in fade-in">
                     <div className="max-w-md">
-                      <span className="text-xs font-bold text-amber-950 block">🔒 Menu Capacity Gating Active (Free Tier)</span>
-                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free local configurations map up to 3 item cards to manage memory slots. Upgrade to our $10 premium standalone layer to secure unlimited platter items and hosted custom domain setups.</p>
+                      <span className="text-xs font-bold text-amber-950 block">🔒 Multi-Attorney Billing Cloud Vault Engaged</span>
+                      <p className="text-[11.5px] text-amber-800 mt-0.5">Free execution sandboxes retain 2 tracking logs concurrently to control memory loops. Pay $10 tokens to unlock infinite client databases and export itemized whitelabel time vouchers.</p>
                     </div>
-                    <button onClick={triggerSecureStripeCheckout} className="bg-indigo-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-indigo-700 transition-colors">
-                      Unlock Full Menu
+                    <button onClick={triggerSecureStripeCheckout} className="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-lg shrink-0 hover:bg-blue-700 transition-colors">
+                      Unlock Account Cloud
                     </button>
                   </div>
                 )}
 
-                {/* VISUAL DEVICE LOOK MENU DISPLAY CONTAINER */}
-                <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-md overflow-hidden max-w-sm mx-auto border-t-[12px] border-t-black rounded-b-2xl">
-                  <div className="px-5 py-4 bg-gray-50 border-b border-[#e9e8e4] text-center">
-                    <span className="text-xs font-black tracking-widest uppercase text-gray-900 block">✨ THE LOCAL BISTRO ✨</span>
-                    <span className="text-[9px] font-mono text-gray-400 uppercase tracking-tight block mt-0.5">Scan Table Vector Connection: Live</span>
+                <div className="bg-white border border-[#e9e8e4] rounded-xl shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-[#fcfbfa] border-b border-[#e9e8e4] flex justify-between items-center">
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Active Timesheet Audit Log</span>
+                    <span className="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">Billing Grid Enabled</span>
                   </div>
 
-                  <div className="p-4 space-y-3 min-h-[280px] bg-white divide-y divide-gray-100">
-                    {menuItems.map((item) => (
-                      <div key={item.id} className="pt-3 flex justify-between items-center first:pt-0">
-                        <div>
-                          <span className="text-xs font-bold text-gray-800 block">{item.itemName}</span>
-                          <span className="text-[10px] bg-gray-100 font-mono text-gray-500 px-1.5 py-0.2 rounded border border-gray-100 inline-block mt-0.5">
-                            {item.category}
+                  <div className="divide-y divide-[#f3f2ee]">
+                    {billingLogs.map((node) => (
+                      <div key={node.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[#faf9f6] transition-colors">
+                        <div className="space-y-1">
+                          <span className="font-bold text-xs sm:text-sm text-[#1e1e1c] block">{node.clientName}</span>
+                          <div className="text-[12px] text-gray-500">
+                            casework: <b className="text-gray-700">{node.activityType}</b> | Logged: <span className="font-mono font-bold text-gray-900">{node.hoursLogged} hrs</span> @ ₹{node.hourlyRate}/hr
+                          </div>
+                        </div>
+
+                        <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto border-t sm:border-0 pt-2 sm:pt-0 border-gray-100">
+                          <span className="text-[10px] px-2 py-0.5 rounded font-bold tracking-tight block border bg-amber-50 text-amber-700 border-amber-100">
+                            UNBILLED ACCRUAL
+                          </span>
+                          <span className="font-mono text-xs font-black text-gray-900 mt-1.5 block">
+                            ₹{node.grossAmount.toLocaleString('en-IN')}
                           </span>
                         </div>
-                        <span className="font-mono text-xs font-black text-indigo-600">
-                          ₹{item.price}
-                        </span>
                       </div>
                     ))}
                   </div>
-
-                  <div className="p-4 bg-gray-50 text-center border-t border-[#edece9]">
-                    <div className="w-16 h-16 bg-white border border-gray-200 mx-auto rounded flex items-center justify-center shadow-sm">
-                      <span className="text-2xl">📱</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-400 mt-1.5 block">Standalone QR Target Link Active</span>
-                  </div>
                 </div>
-
               </div>
 
             </div>
           </section>
 
-          {/* PROGRAMMATIC SEO INFOGRAPHICS MAPS SECTION */}
+          {/* VALUE PROPOSITION DIAGRAM BLUEPRINT ON-PAGE SEO MARGINS */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="text-center max-w-xl mx-auto mb-12">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">Automated Menu Architecture</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The Instant Digital Deployment Loop</h2>
-                <p className="text-xs text-gray-500 mt-2">How raw pricing updates reflect instantly onto diners' smartphones without print-shop delays.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">Programmatic Allocation Workflows</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">The 3-Tier Leak Mitigation Pipeline</h2>
+                <p className="text-xs text-gray-500 mt-2">How our edge log matrix records minute details to stop billing compression leaks completely.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Card Injection</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Manager changes specific platter items, price boundaries, or availability parameters straight inside the central interface terminal dashboard.</p>
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">01</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">On-The-Fly Injection</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Attorneys record client advisory blocks or sudden phone loops directly while completing tasks inside the responsive layout interface.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Live Matrix Refresh</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">The internal dynamic cloud framework compiles parameters natively, updating the live menu page view across all dining table endpoints simultaneously.</p>
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 font-bold flex items-center justify-center text-xs mb-4">02</div>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Accrual Multiplication</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">System parameters execute raw fraction hours directly against set contract billing levels, avoiding human rounding computation discrepancies.</p>
                 </div>
                 <div className="p-6 bg-[#fafafa] border border-[#e9e8e4] rounded-2xl">
                   <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs mb-4">03</div>
-                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Frictionless Browsing</h4>
-                  <p className="text-xs text-gray-500 leading-relaxed">Guests scan the fixed tabletop vector tags to pull up clean, responsive card schemas, maximizing speed of order entry routines.</p>
+                  <h4 className="font-bold text-sm text-[#1e1e1c] mb-1.5">Unbilled Audit Assurance</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">Locks down unbilled logs in itemized vectors, ready for quick whitelabel generation loops, minimizing billing disputes entirely.</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* SaaS VALUE DRIVING REVENUE USPs CARD GRIDS */}
-          <section className="border-t border-[#edece9] bg-[#fbfbfa] py-16 px-6">
+          {/* HIGH CONVERTING UNIQUE SELLING PROPOSITIONS (USPs) GRIDS */}
+          <section className="border-t border-[#edece9] bg-fbfbfa py-16 px-6">
             <div className="max-w-[1040px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">High Speed Modern Restaurant Utilities</span>
-                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Intercept Material Cost Volatility <br />With Agile Menu Pricing.</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">Maximum Revenue Realization Core</span>
+                  <h3 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">Ditch Bloated Legal CRM software.<br />Log Billable Realizations in Real-Time.</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Heavy point-of-sale restaurant software ecosystems lock digital menus behind massive setup rules, complicated dashboard clicks, and expensive monthly fees. <b>extrct.app</b> gives you complete, independent pricing freedom.
+                    Heavy enterprise management ecosystems require tiresome manual tracking steps, long account setups, and steep monthly commitments. <b>extrct.app</b> strips software bloat to bring pristine operational metrics right to your desk.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">🛑</span>
-                    <span className="font-bold text-xs text-gray-900 block">Zero Re-Printing Costs</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Change item parameters inside 5 seconds without spending a rupee on paper setups.</p>
+                    <span className="text-xl block mb-1">⏳</span>
+                    <span className="font-bold text-xs text-gray-900 block">Eradicate Lost Minutes</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Logs sudden case changes or calls instantly before they slip from your mind.</p>
                   </div>
                   <div className="p-5 bg-white border border-[#e9e8e4] rounded-xl shadow-sm">
-                    <span className="text-xl block mb-1">📱</span>
-                    <span className="font-bold text-xs text-gray-900 block">Ultra-Responsive Speed</span>
-                    <p className="text-[11px] text-gray-400 mt-1">Lightweight design parameters render instantly on any basic mobile layout or device screen.</p>
+                    <span className="text-xl block mb-1">📊</span>
+                    <span className="font-bold text-xs text-gray-900 block">Total Client Transparency</span>
+                    <p className="text-[11px] text-gray-400 mt-1">Itemized cost points reduce billing friction and build permanent client relationship trust.</p>
                   </div>
                 </div>
 
@@ -444,23 +461,23 @@ export default function AppCoreArchitecture() {
             </div>
           </section>
 
-          {/* DYNAMIC ON-PAGE HIGH-CONVERTING FAQ ACCORDION PATTERNS */}
+          {/* DYNAMIC HIGH-CONVERTING FAQ ACCORDION ENGINE BLOCK */}
           <section className="border-t border-[#edece9] bg-white py-16 px-6">
             <div className="max-w-[760px] mx-auto">
               <div className="text-center mb-10">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Answered Queries</h3>
-                <p className="text-xs text-gray-400 mt-1">Everything you need to master about configuring tabletop digital menu vectors.</p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">Frequently Asked Questions</h3>
+                <p className="text-xs text-gray-400 mt-1">Everything you need to master about maintaining pristine billable legal records.</p>
               </div>
 
               <div className="space-y-3.5">
                 {[
                   {
-                    q: "Do restaurant guests need a separate device application to pull up the digital menu?",
-                    a: "Not at all. The standalone presentation engine compiles a highly compressed standard responsive web route. Guests simply scan the table QR sticker with their device's built-in native camera to read menu cards instantly."
+                    q: "How does fraction-based legal hour allocation prevent net revenue leaks?",
+                    a: "Traditional billing often rounds down short legal efforts like ten-minute emails or brief phone checks to zero. Tracking tasks down to exact decimal configurations ensures your firm captures and secures full compensation for all application labor."
                   },
                   {
-                    q: "What properties execute inside the premium custom domain upgrade tier?",
-                    a: "The standard trial layer hosts your layout config vectors under an extrct.app sub-route. Upgrading to our premium setup allows you to map your own corporate custom domain (e.g. menu.yourcafe.com) to reinforce brand presence."
+                    q: "What properties execute inside the premium $10 invoicing webhook upgrade?",
+                    a: "The baseline terminal operates a clean localized matrix stack. Moving onto our premium layer connects dynamic webhook routers that map timesheets directly to automated bookkeeping apps for rapid invoicing."
                   }
                 ].map((faq, index) => (
                   <div key={index} className="border border-[#e9e8e4] rounded-xl bg-white overflow-hidden transition-all">
@@ -486,7 +503,7 @@ export default function AppCoreArchitecture() {
         </div>
       ) : null}
 
-      {/* FOOTER BLOCK ANCHOR */}
+      {/* FOOTER BLOCK CONTAINER */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] py-8 text-center text-xs text-[#7c7b77]">
         <span>© 2026 extrct.app SaaS Global Operations Terminal. All system frameworks verified.</span>
       </footer>
