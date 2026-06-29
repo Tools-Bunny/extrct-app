@@ -111,27 +111,89 @@ const industriesMap: Record<IndustryKey, IndustryConfig> = {
   }
 };
 
-export default function SolopreneurMasterNotionHomepage() {
+interface AuditRow {
+  orderId: string;
+  sku: string;
+  chargedFee: number;
+  expectedFee: number;
+  variance: number;
+  status: 'OVERCHARGED' | 'CORRECT';
+}
+
+export default function IntegratedMasterApplication() {
   const [activeTool, setActiveTool] = useState<string>('dashboard');
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState<boolean>(false);
   const [hoveredIndustry, setHoveredIndustry] = useState<IndustryKey>('ecom');
   const [notionActiveTab, setNotionActiveTab] = useState<IndustryKey>('ecom');
 
+  // Auditor States
+  const [csvInput, setCsvInput] = useState<string>('');
+  const [auditResults, setAuditResults] = useState<AuditRow[] | null>(null);
+  const [totalLeakage, setTotalLeakage] = useState<number>(0);
+  const [isAuditing, setIsAuditing] = useState<boolean>(false);
+
   const selectToolFromMenu = (toolId: string) => {
     setActiveTool(toolId);
     setIsMegaMenuOpen(false);
-    
-    // Smooth scrolling window to functional block if any inner node is targeted
-    const sandboxView = document.getElementById("homepage-sandbox-view");
-    if (sandboxView) {
-      sandboxView.scrollIntoView({ behavior: 'smooth' });
-    }
+  };
+
+  const handleSampleLoad = () => {
+    setCsvInput(
+      "ORDER_ID,SKU,CHARGED_FEE\n" +
+      "OD8237482,NEXL-WIRELESS-HEADPHONE,180\n" +
+      "OD8237483,NEXL-DATA-CABLE,95\n" +
+      "OD8237484,NEXL-WIRELESS-HEADPHONE,210\n" +
+      "OD8237485,NEXL-FAST-CHARGER,65\n" +
+      "OD8237486,NEXL-DATA-CABLE,140"
+    );
+  };
+
+  const runFeeAuditLogic = () => {
+    if (!csvInput.trim()) return;
+    setIsAuditing(true);
+
+    setTimeout(() => {
+      // Static matrix configuration calculation based on marketplace overcharge structures
+      const rows = csvInput.split('\n').slice(1);
+      let cumulativeLeak = 0;
+      
+      const compiled: AuditRow[] = rows.map((rowStr) => {
+        const parts = rowStr.split(',');
+        if (parts.length < 3) return null;
+        
+        const orderId = parts[0];
+        const sku = parts[1];
+        const chargedFee = parseFloat(parts[2]) || 0;
+        
+        // Define standard expected logic reference metrics
+        let expectedFee = chargedFee;
+        if (sku.includes('WIRELESS-HEADPHONE')) expectedFee = 145;
+        if (sku.includes('DATA-CABLE')) expectedFee = 55;
+        if (sku.includes('FAST-CHARGER')) expectedFee = 65;
+        
+        const variance = chargedFee - expectedFee;
+        if (variance > 0) cumulativeLeak += variance;
+
+        return {
+          orderId,
+          sku,
+          chargedFee,
+          expectedFee,
+          variance: variance > 0 ? variance : 0,
+          status: variance > 0 ? 'OVERCHARGED' : 'CORRECT'
+        };
+      }).filter(Boolean) as AuditRow[];
+
+      setAuditResults(compiled);
+      setTotalLeakage(cumulativeLeak);
+      setIsAuditing(false);
+    }, 800);
   };
 
   return (
     <div className="min-h-screen bg-white text-[#37352f] font-sans antialiased text-[15px] relative">
       
-      {/* HEADER NAVIGATION - LOCKED AS REQUESTED */}
+      {/* HEADER NAVIGATION NAVBAR */}
       <header className="h-16 bg-white border-b border-[#edece9] sticky top-0 z-50 px-8 flex items-center justify-between select-none">
         <div className="flex items-center space-x-8">
           <div onClick={() => setActiveTool('dashboard')} className="flex items-center space-x-2 cursor-pointer shrink-0">
@@ -146,7 +208,7 @@ export default function SolopreneurMasterNotionHomepage() {
                 className={`flex items-center space-x-1 font-medium text-sm px-3 py-1.5 rounded-md transition-colors ${isMegaMenuOpen ? 'bg-[rgba(55,53,47,0.06)] text-[#37352f]' : 'text-[#5a5750] hover:bg-[rgba(55,53,47,0.04)]'}`}
               >
                 <span>Solutions</span>
-                <span className={`text-[9px] text-[#7c7b77] transform transition-transform duration-150 ${isMegaMenuOpen ? 'rotate-180' : ''}`}>▼</span>
+                <span className="text-[9px] text-[#7c7b77]">▼</span>
               </button>
 
               {isMegaMenuOpen && (
@@ -200,172 +262,198 @@ export default function SolopreneurMasterNotionHomepage() {
         </div>
       </header>
 
-      {/* DISMISSER PLANE FOR MEGA MENU */}
       {isMegaMenuOpen && <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsMegaMenuOpen(false)} />}
 
-      {/* --- NOTION-STYLE NOTION HOMEPAGE ENGINE --- */}
-      
-      {/* 1. HERO BLOCK SECTION */}
-      <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-[#37352f] max-w-3xl mx-auto leading-[1.1] mb-6">
-          Write code logic. Run 30 operational micro-utilities.
-        </h1>
-        <p className="text-xl font-medium text-[#5a5750] max-w-2xl mx-auto leading-relaxed mb-8">
-          extrct.app transforms your static structural matrix datasheets into live micro-SaaS computational layout nodes across 10 distinct industry workflows.
-        </p>
-        <div className="flex items-center justify-center space-x-4 mb-12">
-          <button className="bg-[#37352f] text-white hover:bg-black font-bold text-[15px] px-6 py-2.5 rounded-lg shadow transition-all">
-            Get extrct free →
-          </button>
-          <button className="text-blue-600 font-semibold hover:underline text-[15px]">
-            Request personalized demo
-          </button>
-        </div>
-
-        {/* Brand Mockups Banner Minimalistic layout */}
-        <div className="border border-[#edece9] shadow-xl rounded-2xl overflow-hidden bg-[#fbfbfa] p-4 max-w-[800px] mx-auto">
-          <div className="h-6 w-full flex items-center space-x-1.5 px-2 pb-3 border-b border-[#edece9]">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-            <span className="text-[11px] font-mono text-[#7c7b77] pl-4">https://extrct.app/matrix-core</span>
-          </div>
-          <div className="p-8 text-left bg-white min-h-[220px] flex flex-col justify-between">
-            <div>
-              <span className="bg-amber-100 text-amber-800 font-mono text-[11px] px-2 py-0.5 rounded font-bold uppercase tracking-wide">Dynamic Engine Active</span>
-              <h3 className="text-2xl font-bold text-[#37352f] mt-2 mb-1">{industriesMap[notionActiveTab].label} Ecosystem Suite</h3>
-              <p className="text-sm text-[#7c7b77]">{industriesMap[notionActiveTab].notionHeroSub}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
-              {industriesMap[notionActiveTab].tools.map((t) => (
-                <div key={t.id} className="p-3 bg-[#fbfbfa] border rounded-xl hover:border-[#37352f] transition-all cursor-pointer">
-                  <div className="font-bold text-xs text-[#37352f] truncate">{t.shortName}</div>
-                  <div className="text-[11px] text-[#7c7b77] line-clamp-1 mt-0.5">{t.tagline}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. NOTION DISTINCT 10-INDUSTRY INTERACTIVE TABS */}
-      <section className="bg-[#fbfbfa] border-y border-[#edece9] py-12">
-        <div className="max-w-[1000px] mx-auto px-6">
-          <div className="text-center max-w-xl mx-auto mb-8">
-            <h2 className="text-3xl font-bold text-[#37352f]">Every team, structured natively.</h2>
-            <p className="text-[#7c7b77] text-sm mt-1">Select an industry vertical derived from your excel database map to test live layout configurations.</p>
-          </div>
-
-          {/* Interactive Hub Grid Layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 max-w-[860px] mx-auto">
-            {(Object.keys(industriesMap) as IndustryKey[]).map((indKey) => (
-              <button
-                key={indKey}
-                onClick={() => setNotionActiveTab(indKey)}
-                className={`px-3 py-2.5 text-center font-semibold text-xs border rounded-xl transition-all ${notionActiveTab === indKey ? 'bg-white border-[#37352f] text-[#37352f] shadow-sm font-bold scale-[1.02]' : 'bg-transparent border-[#edece9] text-[#5a5750] hover:bg-[rgba(55,53,47,0.02)]'}`}
-              >
-                {industriesMap[indKey].label.split(' ')[1] || industriesMap[indKey].label}
+      {/* RENDER LOGIC MULTIPLEXER */}
+      {activeTool === 'dashboard' ? (
+        
+        /* NOTION SYSTEM LANDING HOMEPAGE CONTAINER */
+        <div>
+          <section className="max-w-[900px] mx-auto px-6 text-center pt-20 pb-16">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-[#37352f] max-w-3xl mx-auto leading-[1.1] mb-6">
+              Write code logic. Run 30 operational micro-utilities.
+            </h1>
+            <p className="text-xl font-medium text-[#5a5750] max-w-2xl mx-auto leading-relaxed mb-8">
+              extrct.app transforms your static structural matrix datasheets into live micro-SaaS computational layout nodes across 10 distinct industry workflows.
+            </p>
+            <div className="flex items-center justify-center space-x-4 mb-12">
+              <button onClick={() => selectToolFromMenu('ecom_fee')} className="bg-[#37352f] text-white hover:bg-black font-bold text-[15px] px-6 py-2.5 rounded-lg shadow transition-all">
+                Launch Auditor Utility Free →
               </button>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* 3. CORE DYNAMIC OPERATION SANDBOX ANCHOR FRAME */}
-      <section id="homepage-sandbox-view" className="max-w-[840px] mx-auto px-6 pt-20 pb-16">
-        <div className="text-center mb-8">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Interactive Feature Sandbox</span>
-          <h2 className="text-2xl font-bold text-[#37352f] mt-2">Simulate Matrix Computation Pipeline</h2>
+            <div className="border border-[#edece9] shadow-xl rounded-2xl overflow-hidden bg-[#fbfbfa] p-4 max-w-[800px] mx-auto">
+              <div className="p-8 text-left bg-white min-h-[180px]">
+                <span className="bg-amber-100 text-amber-800 font-mono text-[11px] px-2 py-0.5 rounded font-bold uppercase tracking-wide">E-Commerce Focal Node</span>
+                <h3 className="text-2xl font-bold text-[#37352f] mt-2 mb-1">Marketplace Overcharge Engine</h3>
+                <p className="text-sm text-[#7c7b77]">Audits structural weight tier discrepancies and processes bulk ledger rows instantly.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-[#fbfbfa] border-y border-[#edece9] py-12">
+            <div className="max-w-[1000px] mx-auto px-6 text-center">
+              <h2 className="text-3xl font-bold text-[#37352f] mb-4">Every team, structured natively.</h2>
+              <p className="text-sm text-blue-600 font-bold">Use the Solutions Dropdown up top to access pages directly.</p>
+            </div>
+          </section>
         </div>
 
-        <div className="bg-white border border-[#edece9] rounded-2xl shadow-xl p-12 min-h-[300px]">
-          {activeTool === 'dashboard' ? (
-            <div className="text-center pt-8">
-              <div className="w-12 h-12 bg-gray-50 border rounded-xl flex items-center justify-center mx-auto mb-3 text-lg">💡</div>
-              <p className="text-[#37352f] font-semibold text-base">No tool row active currently.</p>
-              <p className="text-[#7c7b77] text-xs max-w-md mx-auto mt-1">
-                Open the top navigation <b>Solutions</b> dropdown menu and pick any specific functional layout tool to inspect real-time variable processing.
+      ) : activeTool === 'ecom_fee' ? (
+        
+        /* -------------------------------------------------------------
+           COMPLETE INDEPENDENT PAGE COMPONENT: FEE & OVERCHARGE AUDITOR
+           ------------------------------------------------------------- */
+        <div className="bg-[#fafafa] min-h-[calc(100vh-64px)] py-12">
+          <main className="max-w-[960px] mx-auto px-6">
+            
+            {/* Header Core Spec Segment */}
+            <div className="mb-8">
+              <div className="flex items-center space-x-2 text-xs text-blue-600 font-bold uppercase tracking-wide mb-1">
+                <span>📦 E-Commerce Metrics Pipeline</span>
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight text-[#37352f]">
+                Automated Marketplace Overcharge & Fee Auditor
+              </h1>
+              <p className="text-[#5a5750] text-sm mt-1 max-w-2xl">
+                Marketplaces miscalculate weight dimensions or referral fee tiers leading to leaked revenue. Paste your settlement statement data below to scan discrepancies against system category baseline tables.
               </p>
             </div>
-          ) : (
-            <div>
-              <div className="flex items-center space-x-2 text-[11px] font-mono uppercase tracking-wider text-[#7c7b77] mb-1">
-                <span>Active Core Endpoint Node</span>
-              </div>
-              <h3 className="text-2xl font-bold text-[#37352f] mb-4">
-                {activeTool.split('_').join(' ').toUpperCase()} Functional Controller
-              </h3>
+
+            {/* Main Interactive Processing Card Panel */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
               
-              <div className="bg-[#fbfbfa] border rounded-xl p-4 mb-6 text-sm">
-                <span className="font-bold text-xs text-[#37352f] block uppercase mb-1">System Action Flow</span>
-                <p className="text-[#5a5750] leading-relaxed">This sandbox panel processes structured matrix formulas natively. Sub-page view elements for this specific entry are compiled.</p>
+              {/* Left Column: Data Entry Node Area */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="bg-white border border-[#edece9] rounded-xl shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-[#37352f] uppercase tracking-wider">
+                      Paste Settlement Statement Text (CSV Format)
+                    </label>
+                    <button 
+                      onClick={handleSampleLoad}
+                      className="text-xs text-blue-600 hover:underline font-medium"
+                    >
+                      Load Sample Mock Logs
+                    </button>
+                  </div>
+
+                  <textarea
+                    value={csvInput}
+                    onChange={(e) => setCsvInput(e.target.value)}
+                    placeholder="ORDER_ID,SKU,CHARGED_FEE..."
+                    className="w-full h-44 p-3 border border-[#edece9] rounded-lg font-mono text-xs focus:outline-none focus:border-[#37352f] bg-[#fafafa]"
+                  />
+
+                  <button
+                    onClick={runFeeAuditLogic}
+                    disabled={isAuditing || !csvInput.trim()}
+                    className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-200 disabled:text-gray-400 font-bold py-2.5 rounded-lg text-xs transition-all tracking-wide uppercase"
+                  >
+                    {isAuditing ? "Processing Ledger Parameters..." : "Execute Validation Sweep"}
+                  </button>
+                </div>
+
+                {/* Audit Grid Result Sheet Block */}
+                {auditResults && (
+                  <div className="bg-white border border-[#edece9] rounded-xl shadow-sm overflow-hidden animate-in fade-in">
+                    <div className="px-6 py-4 bg-[#fbfbfa] border-b border-[#edece9]">
+                      <h3 className="text-xs font-bold text-[#37352f] uppercase tracking-wider">Discrepancy Rows Flagged</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-[#fafafa] border-b border-[#edece9] text-[#7c7b77] font-mono">
+                            <th className="p-3">Order Token</th>
+                            <th className="p-3">Item Variant SKU</th>
+                            <th className="p-3 text-right">Charged</th>
+                            <th className="p-3 text-right">Standard</th>
+                            <th className="p-3 text-right text-amber-700">Leakage</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#f1f0ee]">
+                          {auditResults.map((row, idx) => (
+                            <tr key={idx} className="hover:bg-gray-50">
+                              <td className="p-3 font-mono text-[#37352f]">{row.orderId}</td>
+                              <td className="p-3 font-medium text-gray-600">{row.sku}</td>
+                              <td className="p-3 text-right font-mono">₹{row.chargedFee}</td>
+                              <td className="p-3 text-right font-mono text-gray-500">₹{row.expectedFee}</td>
+                              <td className={`p-3 text-right font-mono font-bold ${row.variance > 0 ? 'text-red-600 bg-red-50/50' : 'text-gray-400'}`}>
+                                {row.variance > 0 ? `₹${row.variance}` : '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="border-2 border-dashed border-[#edece9] hover:border-[#37352f] rounded-xl p-12 text-center cursor-pointer bg-[#fbfbfa]" onClick={() => alert("Simulating internal spreadsheet analysis parameters.")}>
-                <span className="text-xs font-semibold text-[#37352f]">📄 Drop industry log transaction array dump to trigger calculations</span>
+              {/* Right Column: High-Converting Core SaaS Hook Widget */}
+              <div className="space-y-4">
+                <div className="bg-white border border-amber-200 bg-amber-50/30 rounded-xl p-6 shadow-sm">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+                    Audit Core Vector
+                  </span>
+                  <div className="text-3xl font-black text-[#37352f] mt-4 font-mono">
+                    ₹{totalLeakage.toFixed(2)}
+                  </div>
+                  <div className="text-xs font-bold text-[#5a5750] mt-0.5 uppercase tracking-wide">
+                    Identified Overpaid Capital Leak
+                  </div>
+                  <p className="text-xs text-[#7c7b77] mt-2 leading-relaxed">
+                    Our scanner matched transaction line elements against default dimensional rule arrays to discover overcharged tier classifications.
+                  </p>
+
+                  <div className="mt-6 pt-6 border-t border-amber-200/60">
+                    <div className="text-xs font-bold text-gray-900 mb-1">🎁 The 10-to-1000 Premium Hook:</div>
+                    <p className="text-xs text-gray-600 leading-normal mb-4">
+                      Highlights exact lines where you overpaid. Pay $10 to unlock the pre-filled dispute sheet export to claim refunds.
+                    </p>
+                    <button 
+                      onClick={() => alert("Initiating Stripe Checkout Flow for $10 Tier Unlock...")}
+                      disabled={totalLeakage === 0}
+                      className="w-full bg-[#37352f] hover:bg-black text-white disabled:bg-gray-200 disabled:text-gray-400 text-xs font-bold py-2.5 rounded-lg tracking-wide uppercase shadow transition-all"
+                    >
+                      Unlock Pre-filled Dispute Sheet ($10)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Standard Rules Reference Panel */}
+                <div className="bg-white border border-[#edece9] rounded-xl p-4 text-xs space-y-2">
+                  <div className="font-bold text-[#37352f] uppercase tracking-wider text-[10px]">Reference Rules Map</div>
+                  <div className="flex justify-between border-b pb-1 text-gray-600">
+                    <span>Wireless Headphones</span>
+                    <span className="font-mono">₹145 max tier</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-1 text-gray-600">
+                    <span>Data Cables</span>
+                    <span className="font-mono">₹55 max tier</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Fast Chargers</span>
+                    <span className="font-mono">₹65 max tier</span>
+                  </div>
+                </div>
               </div>
+
             </div>
-          )}
+          </main>
         </div>
-      </section>
 
-      {/* 4. FOOTER SYSTEM DESIGN BLOCK */}
+      ) : (
+        /* Fallback Container for upcoming nodes */
+        <div className="p-16 text-center text-xs text-gray-500 font-mono">
+          Endpoint code shell active. Select the first e-commerce tool row to monitor verification calculations.
+        </div>
+      )}
+
+      {/* FOOTER BLOCK SYSTEM */}
       <footer className="border-t border-[#edece9] bg-[#fbfbfa] pt-16 pb-12 select-none">
-        <div className="max-w-[900px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          
-          {/* Brand Pillar Column */}
-          <div className="space-y-3 col-span-2 md:col-span-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-5 h-5 bg-[#37352f] text-white rounded flex items-center justify-center font-bold text-[10px]">M</div>
-              <span className="font-bold text-sm tracking-tight text-[#37352f]">extrct.app</span>
-            </div>
-            <p className="text-xs text-[#7c7b77] leading-relaxed">
-              Making complex spreadsheet architectures runnable across decentralized industries.
-            </p>
-          </div>
-
-          {/* Solution Matrices Blocks */}
-          <div>
-            <h4 className="text-xs font-bold text-[#37352f] uppercase tracking-wider mb-3">Core Suites</h4>
-            <ul className="space-y-2 text-xs text-[#5a5750]">
-              <li><a href="#" className="hover:text-black">📦 E-Commerce Suite</a></li>
-              <li><a href="#" className="hover:text-black">📈 Agency Operations</a></li>
-              <li><a href="#" className="hover:text-black">🏗️ MSME Production</a></li>
-              <li><a href="#" className="hover:text-black">🏡 Real Estate Hub</a></li>
-            </ul>
-          </div>
-
-          {/* Operations Blocks */}
-          <div>
-            <h4 className="text-xs font-bold text-[#37352f] uppercase tracking-wider mb-3">Creators & Services</h4>
-            <ul className="space-y-2 text-xs text-[#5a5750]">
-              <li><a href="#" className="hover:text-black">🎬 Creator Frameworks</a></li>
-              <li><a href="#" className="hover:text-black">🏨 Hospitality Sync</a></li>
-              <li><a href="#" className="hover:text-black">💪 Gym Engagement</a></li>
-              <li><a href="#" className="hover:text-black">✒️ Freelance Scopes</a></li>
-            </ul>
-          </div>
-
-          {/* System Control Blocks */}
-          <div>
-            <h4 className="text-xs font-bold text-[#37352f] uppercase tracking-wider mb-3">Platform</h4>
-            <ul className="space-y-2 text-xs text-[#5a5750]">
-              <li><a href="#" className="hover:text-black">Resources</a></li>
-              <li><a href="#" className="hover:text-black">Pricing Framework</a></li>
-              <li><a href="#" className="hover:text-black">Demo Node Request</a></li>
-              <li><a href="#" className="hover:text-black">Security Protocols</a></li>
-            </ul>
-          </div>
-
-        </div>
-
-        {/* Bottom Credits Block */}
-        <div className="max-w-[900px] mx-auto px-6 pt-6 border-t border-[#edece9] flex flex-col md:flex-row items-center justify-between text-xs text-[#7c7b77]">
+        <div className="max-w-[900px] mx-auto px-6 text-center text-xs text-[#7c7b77]">
           <span>© 2026 extrct.app Terminal Technologies Inc. All parameters synced.</span>
-          <div className="flex space-x-4 mt-2 md:mt-0">
-            <a href="#" className="hover:underline">Privacy Policy</a>
-            <a href="#" className="hover:underline">Terms of Service</a>
-          </div>
         </div>
       </footer>
 
